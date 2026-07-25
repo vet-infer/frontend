@@ -5,14 +5,10 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { OwnerForm } from "../../components/owners/OwnerForm";
 import { ownerService } from "../../services/owner.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible guardar el propietario.";
-  }
-
-  return "No fue posible guardar el propietario.";
+  return getResponseErrorMessage(error, "No fue posible guardar el propietario.");
 }
 
 export function OwnerFormPage() {

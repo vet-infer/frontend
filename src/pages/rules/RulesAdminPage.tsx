@@ -12,6 +12,7 @@ import { evaluationService } from "../../services/evaluation.service";
 import { knowledgeService } from "../../services/knowledge.service";
 import type { FactDefinition } from "../../types/evaluation";
 import type { Disease, RiskLevel, Rule, RuleConditionPayload, RulePayload } from "../../types/knowledge";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 const operators = ["==", "!=", ">", ">=", "<", "<=", "contains"];
 
@@ -60,12 +61,7 @@ function speciesName(speciesId?: number | null) {
   return "General";
 }
 function errorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible completar la operacion.";
-  }
-
-  return "No fue posible completar la operacion.";
+  return getResponseErrorMessage(error, "No fue posible completar la operacion.");
 }
 
 function toForm(rule: Rule): RuleFormState {

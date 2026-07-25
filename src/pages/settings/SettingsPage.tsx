@@ -29,6 +29,7 @@ import { authService } from "../../services/auth.service";
 import { userService } from "../../services/user.service";
 import type { User, UserFormValues } from "../../types/user";
 import { cn } from "../../utils/cn";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type SettingsTab = "general" | "preferences" | "security" | "users";
 
@@ -65,12 +66,7 @@ const tabs: { id: SettingsTab; label: string; adminOnly?: boolean }[] = [
 ];
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible completar la accion.";
-  }
-
-  return "No fue posible completar la accion.";
+  return getResponseErrorMessage(error, "No fue posible completar la accion.");
 }
 
 function validateUserForm(values: UserFormValues): FormErrors {

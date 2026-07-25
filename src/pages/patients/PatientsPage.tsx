@@ -12,6 +12,7 @@ import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
 import { cn } from "../../utils/cn";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type FilterMode = "all" | "dogs" | "cats";
 
@@ -79,12 +80,7 @@ function formatDate(value?: string | null) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar los pacientes.";
-  }
-
-  return "No fue posible cargar los pacientes.";
+  return getResponseErrorMessage(error, "No fue posible cargar los pacientes.");
 }
 
 export function PatientsPage() {

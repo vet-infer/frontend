@@ -26,6 +26,7 @@ import { patientService } from "../../services/patient.service";
 import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../../types/evaluation";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -73,12 +74,7 @@ function getInitial(patient: Patient) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar el paciente.";
-  }
-
-  return "No fue posible cargar el paciente.";
+  return getResponseErrorMessage(error, "No fue posible cargar el paciente.");
 }
 
 function getEvaluationDate(evaluation: Evaluation) {

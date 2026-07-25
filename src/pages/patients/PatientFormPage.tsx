@@ -7,14 +7,10 @@ import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible guardar el paciente.";
-  }
-
-  return "No fue posible guardar el paciente.";
+  return getResponseErrorMessage(error, "No fue posible guardar el paciente.");
 }
 
 export function PatientFormPage() {

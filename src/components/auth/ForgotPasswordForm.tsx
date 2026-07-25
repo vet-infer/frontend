@@ -5,6 +5,7 @@ import { AlertMessage } from "../common/AlertMessage";
 import { Button } from "../common/Button";
 import { authService } from "../../services/auth.service";
 import { emailJsService } from "../../services/emailjs.service";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type ForgotPasswordFormProps = {
   onBack: () => void;
@@ -14,8 +15,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getErrorMessage(error: unknown) {
   if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible enviar el codigo de recuperacion.";
+    return getResponseErrorMessage(error, "No fue posible enviar el codigo de recuperacion.");
   }
 
   if (error instanceof Error) {

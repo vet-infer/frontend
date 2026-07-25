@@ -13,6 +13,7 @@ import { patientService } from "../../services/patient.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
 import { cn } from "../../utils/cn";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type FilterMode = "all" | "with-pets" | "without-pets";
 
@@ -52,12 +53,7 @@ function getOwnerIdFromPatient(patient: Patient) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible completar la accion.";
-  }
-
-  return "No fue posible completar la accion.";
+  return getResponseErrorMessage(error, "No fue posible completar la accion.");
 }
 
 export function OwnersPage() {

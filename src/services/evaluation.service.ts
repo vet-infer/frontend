@@ -70,9 +70,4 @@ export const evaluationService = {
     });
     return data;
   },
-
-  async listActivatedRules(resultId: number) {
-    const { data } = await api.get(`/api/v1/results/${resultId}/activated-rules`);
-    return data;
-  },
 };

@@ -5,6 +5,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ForgotPasswordForm } from "../../components/auth/ForgotPasswordForm";
 import { Button } from "../../components/common/Button";
 import { useAuth } from "../../hooks/useAuth";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type LocationState = {
   from?: {
@@ -21,8 +22,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getErrorMessage(error: unknown) {
   if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible iniciar sesion. Revisa tus credenciales.";
+    return getResponseErrorMessage(error, "No fue posible iniciar sesion. Revisa tus credenciales.");
   }
 
   return "No fue posible iniciar sesion. Intenta nuevamente.";
