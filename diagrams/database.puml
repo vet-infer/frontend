@@ -1,0 +1,361 @@
+@startuml
+title Diagrama normalizado
+' =============================================
+' Sistema de Inferencia Clínica Veterinaria
+' Motor: PostgreSQL 16 | ORM: SQLAlchemy 2.0
+' Diagrama normalizado (cumple 1FN/2FN/3FN, PK/FK explícitas)
+' =============================================
+
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  FontColor #111111
+}
+
+entity "roles" as roles {
+  * id : integer <<PK, increment>>
+  --
+  * name : varchar(40) <<not null, unique, INDEX>>
+  description : varchar(255)
+}
+
+entity "users" as users {
+  * id : integer <<PK, increment>>
+  --
+  * full_name : varchar(120) <<not null>>
+  * email : varchar(160) <<not null, unique, INDEX>>
+  * password_hash : varchar(255) <<not null>>
+  * role_id : integer <<FK, not null>>
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "password_reset_tokens" as password_reset_tokens {
+  * id : integer <<PK, increment>>
+  --
+  * user_id : integer <<FK, not null, INDEX>>
+  * token_hash : varchar(64) <<not null, unique, INDEX>>
+  * expires_at : timestamptz <<not null, INDEX>>
+  used_at : timestamptz
+  * created_at : timestamptz <<not null, default now()>>
+}
+
+entity "species" as species {
+  * id : integer <<PK, increment>>
+  --
+  * name : varchar(40) <<not null, unique, INDEX>>
+}
+
+entity "breeds" as breeds {
+  * id : integer <<PK, increment>>
+  --
+  * species_id : integer <<FK, not null, CASCADE DELETE>>
+  * name : varchar(80) <<not null>>
+  --
+  ' UNIQUE INDEX uix_species_breed_name (species_id, name)
+}
+
+entity "ubigeo_locations" as ubigeo_locations {
+  * ubigeo : varchar(6) <<PK, código INEI>>
+  --
+  * department : varchar(80) <<not null>>
+  * province : varchar(80) <<not null>>
+  * district : varchar(80) <<not null>>
+}
+
+note right of ubigeo_locations
+Catálogo de ubicación.
+department/province/district dependen funcionalmente
+de ubigeo — extraído de owners para cumplir 3FN.
+end note
+
+entity "owners" as owners {
+  * id : integer <<PK, increment>>
+  --
+  * first_name : varchar(120) <<not null>>
+  last_name : varchar(120)
+  phone : varchar(20)
+  email : varchar(160) <<unique, INDEX>>
+  address : varchar(255)
+  ubigeo : varchar(6) <<FK, INDEX>>
+  * is_active : boolean <<not null, default true>>
+  * created_at : timestamptz <<not null, default now()>>
+}
+
+entity "patients" as patients {
+  * id : integer <<PK, increment>>
+  --
+  * owner_id : integer <<FK, not null>>
+  * name : varchar(80) <<not null, INDEX>>
+  * species_id : integer <<FK, not null>>
+  breed_id : integer <<FK>>
+  * sex : varchar(20) <<not null>>
+  birth_date : date
+  weight : float
+  * created_by : integer <<FK, not null>>
+  * is_active : boolean <<not null, default true>>
+  * created_at : timestamptz <<not null, default now()>>
+}
+
+entity "evaluations" as evaluations {
+  * id : integer <<PK, increment>>
+  --
+  * patient_id : integer <<FK, not null>>
+  * veterinarian_id : integer <<FK, not null>>
+  reason : varchar(255)
+  observations : text
+  * created_at : timestamptz <<not null, default now()>>
+}
+
+entity "evaluation_facts" as evaluation_facts {
+  * id : integer <<PK, increment>>
+  --
+  * evaluation_id : integer <<FK, not null, INDEX>>
+  * fact_key : varchar(100) <<not null, INDEX>>
+  * value : json <<not null>>
+  * source_type : varchar(40) <<not null, default clinical_input>>
+  --
+  ' UNIQUE INDEX uix_evaluation_fact_key (evaluation_id, fact_key)
+}
+
+note right of evaluation_facts
+patient_id eliminado: es derivable vía
+evaluation_id -> evaluations.patient_id.
+Era redundancia, violaba 3FN.
+end note
+
+entity "clinical_history" as clinical_history {
+  * id : integer <<PK, increment>>
+  --
+  * patient_id : integer <<FK, not null>>
+  evaluation_id : integer <<FK>>
+  * event_type : varchar(60) <<not null>>
+  * summary : text <<not null>>
+  * created_at : timestamptz <<not null, default now()>>
+}
+
+entity "symptoms" as symptoms {
+  * id : integer <<PK, increment>>
+  --
+  * name : varchar(120) <<not null, INDEX>>
+  description : text
+  * species_id : integer <<FK, not null>>
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "clinical_variables" as clinical_variables {
+  * id : integer <<PK, increment>>
+  --
+  * key : varchar(80) <<not null, INDEX>>
+  * name : varchar(120) <<not null>>
+  * data_type : varchar(30) <<not null>>
+  unit : varchar(30)
+  normal_min : float
+  normal_max : float
+  species_id : integer <<FK>>
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "diseases" as diseases {
+  * id : integer <<PK, increment>>
+  --
+  * name : varchar(120) <<not null, INDEX>>
+  * species_id : integer <<FK, not null>>
+  description : text
+  base_probability : float <<default 0.20, P(E) prior bayesiano>>
+  * is_degenerative : boolean <<not null, default true>>
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "risk_levels" as risk_levels {
+  * id : integer <<PK, increment>>
+  --
+  * code : varchar(20) <<not null, unique, INDEX: bajo|moderado|alto>>
+  * name : varchar(40) <<not null>>
+  description : text
+  min_probability : float
+  max_probability : float
+  * sort_order : integer <<not null, default 1>>
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "inference_rules" as inference_rules {
+  * id : integer <<PK, increment>>
+  --
+  * code : varchar(50) <<not null, unique, INDEX>>
+  * name : varchar(150) <<not null>>
+  * disease_id : integer <<FK, not null>>
+  * risk_level_id : integer <<FK, not null>>
+  * weight : float <<not null, default 1.0>>
+  * priority : integer <<not null, default 1>>
+  * version : integer <<not null, default 1>>
+  * is_active : boolean <<not null, default true>>
+}
+
+note right of inference_rules
+Columna risk_level varchar eliminada:
+duplicaba risk_level_id, violaba 3FN.
+end note
+
+entity "rule_conditions" as rule_conditions {
+  * id : integer <<PK, increment>>
+  --
+  * rule_id : integer <<FK, not null>>
+  * variable_key : varchar(100) <<not null, INDEX>>
+  * operator : varchar(30) <<not null>>
+  * expected_value : json <<not null>>
+  * logical_group : integer <<not null, default 1>>
+}
+
+entity "knowledge_sources" as knowledge_sources {
+  * id : integer <<PK, increment>>
+  --
+  * title : varchar(300) <<not null>>
+  * citation : text <<not null>>
+  url : varchar(500)
+  doi : varchar(200)
+  publication_year : integer
+  * is_active : boolean <<not null, default true>>
+}
+
+entity "rule_references" as rule_references {
+  * id : integer <<PK, increment>>
+  --
+  * rule_id : integer <<FK, not null, CASCADE DELETE>>
+  * source_id : integer <<FK, not null, CASCADE DELETE>>
+  rationale : text
+  locator : varchar(100)
+  --
+  ' UNIQUE INDEX uix_rule_reference (rule_id, source_id)
+}
+
+entity "inference_results" as inference_results {
+  * id : integer <<PK, increment>>
+  --
+  * evaluation_id : integer <<FK, not null>>
+  * disease_id : integer <<FK, not null>>
+  * risk_level_id : integer <<FK, not null>>
+  * suggested_diagnosis : varchar(255) <<not null>>
+  * score : float <<not null>>
+  probability : float <<P(E|síntomas) bayesiano>>
+  inference_method : varchar(50) <<rules|bayesian|hybrid>>
+  explanation : text
+  * created_at : timestamptz <<not null, default now()>>
+  --
+  ' UNIQUE INDEX uix_result_evaluation_disease (evaluation_id, disease_id)
+}
+
+note right of inference_results
+suggested_diagnosis es snapshot histórico de diseases.name
+al momento de inferencia — denormalización intencional
+para auditoría, no viola normalización.
+
+Columna risk_level varchar eliminada:
+duplicaba risk_level_id, violaba 3FN.
+end note
+
+entity "activated_rules" as activated_rules {
+  * id : integer <<PK, increment>>
+  --
+  * result_id : integer <<FK, not null>>
+  * rule_id : integer <<FK, not null>>
+  * fulfilled_conditions : json <<not null>>
+  * justification : text <<not null>>
+  rule_code : varchar(50) <<snapshot histórico de inference_rules.code>>
+  rule_version : integer <<snapshot histórico de inference_rules.version>>
+  --
+  ' UNIQUE INDEX uix_activated_result_rule (result_id, rule_id)
+}
+
+entity "clinical_probabilities" as clinical_probabilities {
+  * id : integer <<PK, increment>>
+  --
+  * disease_id : integer <<FK, not null, CASCADE DELETE>>
+  symptom_id : integer <<FK, CASCADE DELETE, exclusivo con variable_id>>
+  variable_id : integer <<FK, CASCADE DELETE, exclusivo con symptom_id>>
+  expected_value : varchar(100)
+  * probability_given_disease : float <<not null, P(síntoma|enfermedad)>>
+  * general_probability : float <<not null, P(síntoma)>>
+  * is_active : boolean <<not null, default true>>
+}
+
+note right of clinical_probabilities
+CHECK (symptom_id IS NULL) <> (variable_id IS NULL)
+Exclusividad.
+
+Recomendado:
+- UNIQUE parcial (disease_id, symptom_id)
+- UNIQUE parcial (disease_id, variable_id)
+para evitar duplicados.
+end note
+
+entity "fact_definitions" as fact_definitions {
+  * id : integer <<PK, increment>>
+  --
+  * fact_key : varchar(100) <<not null, INDEX>>
+  * display_name : varchar(150) <<not null>>
+  * source_type : varchar(30) <<not null>>
+  * data_type : varchar(30) <<not null>>
+  unit : varchar(40)
+  allowed_values : json
+  species_id : integer <<FK>>
+  symptom_id : integer <<FK>>
+  clinical_variable_id : integer <<FK>>
+  * is_active : boolean <<not null, default true>>
+  --
+  ' UNIQUE INDEX uq_fact_definition_key_species (fact_key, species_id)
+}
+
+' =============================================
+' Relaciones FK
+' =============================================
+
+roles ||--o{ users : role_id
+
+users ||--o{ password_reset_tokens : user_id
+users ||--o{ patients : created_by
+users ||--o{ evaluations : veterinarian_id
+
+species ||--o{ breeds : species_id
+species ||--o{ patients : species_id
+species ||--o{ symptoms : species_id
+species ||--o{ clinical_variables : species_id
+species ||--o{ diseases : species_id
+species ||--o{ fact_definitions : species_id
+
+ubigeo_locations ||--o{ owners : ubigeo
+
+owners ||--o{ patients : owner_id
+
+breeds ||--o{ patients : breed_id
+
+patients ||--o{ evaluations : patient_id
+patients ||--o{ clinical_history : patient_id
+
+evaluations ||--o{ evaluation_facts : evaluation_id
+evaluations ||--o{ clinical_history : evaluation_id
+evaluations ||--o{ inference_results : evaluation_id
+
+diseases ||--o{ inference_rules : disease_id
+diseases ||--o{ inference_results : disease_id
+diseases ||--o{ clinical_probabilities : disease_id
+
+risk_levels ||--o{ inference_rules : risk_level_id
+risk_levels ||--o{ inference_results : risk_level_id
+
+inference_rules ||--o{ rule_conditions : rule_id
+inference_rules ||--o{ rule_references : rule_id
+inference_rules ||--o{ activated_rules : rule_id
+
+knowledge_sources ||--o{ rule_references : source_id
+
+inference_results ||--o{ activated_rules : result_id
+
+symptoms ||--o{ clinical_probabilities : symptom_id
+symptoms ||--o{ fact_definitions : symptom_id
+
+clinical_variables ||--o{ clinical_probabilities : variable_id
+clinical_variables ||--o{ fact_definitions : clinical_variable_id
+
+@enduml

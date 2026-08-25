@@ -29,6 +29,7 @@ import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../.
 import type { Patient } from "../../types/patient";
 import { cn } from "../../utils/cn";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -115,12 +116,7 @@ function riskRangeLabel(riskLevel?: string | null) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar los resultados.";
-  }
-
-  return "No fue posible cargar los resultados.";
+  return getResponseErrorMessage(error, "No fue posible cargar los resultados.");
 }
 
 function factLabel(fact: ClinicalFactOut) {

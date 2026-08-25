@@ -23,6 +23,7 @@ import { useAuth } from "../../hooks/useAuth";
 import type { ClinicalVariable, CatalogItem } from "../../types/evaluation";
 import type { Disease, KnowledgeBaseData, KnowledgeTab, RiskLevel, Rule } from "../../types/knowledge";
 import { cn } from "../../utils/cn";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type SpeciesFilter = "all" | "dog" | "cat";
 
@@ -35,12 +36,7 @@ const tabs: { id: KnowledgeTab; label: string }[] = [
 ];
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar la base de conocimiento.";
-  }
-
-  return "No fue posible cargar la base de conocimiento.";
+  return getResponseErrorMessage(error, "No fue posible cargar la base de conocimiento.");
 }
 
 function speciesName(speciesId?: number | null) {
@@ -356,7 +352,7 @@ export function KnowledgeBasePage() {
                       <span className="min-w-0 flex-1">
                         <span className="block font-extrabold text-[#172554]">{variable.name}</span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
-                          {variable.data_type} Â· {speciesName(variable.species_id)} Â· {variableRange(variable)}
+                          {variable.data_type} · {speciesName(variable.species_id)} · {variableRange(variable)}
                         </span>
                       </span>
                     </ListButton>
@@ -383,7 +379,7 @@ export function KnowledgeBasePage() {
                           {rule.code} - {rule.name}
                         </span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
-                          {rule.conditions.length} condiciones Â· {rule.is_active ? "Activa" : "Inactiva"}
+                          {rule.conditions.length} condiciones · {rule.is_active ? "Activa" : "Inactiva"}
                         </span>
                       </span>
                     </ListButton>

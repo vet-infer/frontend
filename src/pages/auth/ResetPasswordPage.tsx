@@ -6,6 +6,7 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { FormField } from "../../components/common/FormField";
 import { authService } from "../../services/auth.service";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type FormValues = {
   resetToken: string;
@@ -14,12 +15,7 @@ type FormValues = {
 };
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible restablecer la contraseña.";
-  }
-
-  return "No fue posible restablecer la contraseña.";
+  return getResponseErrorMessage(error, "No fue posible restablecer la contraseña.");
 }
 
 export function ResetPasswordPage() {

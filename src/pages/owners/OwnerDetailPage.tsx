@@ -12,6 +12,7 @@ import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getFullName(owner: Owner) {
   return [owner.first_name, owner.last_name].filter(Boolean).join(" ") || "Sin nombre";
@@ -35,12 +36,7 @@ function getSpeciesBreed(patient: Patient) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible completar la accion.";
-  }
-
-  return "No fue posible completar la accion.";
+  return getResponseErrorMessage(error, "No fue posible completar la accion.");
 }
 
 export function OwnerDetailPage() {

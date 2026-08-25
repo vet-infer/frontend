@@ -42,13 +42,3 @@ export type ChangePasswordRequest = {
 export type ChangePasswordResponse = {
   message: string;
 };
-
-export type AuthState = {
-  isAuthenticated: boolean;
-  token: string | null;
-};
-
-export type AuthUser = {
-  id: number | null;
-  role: string | null;
-};

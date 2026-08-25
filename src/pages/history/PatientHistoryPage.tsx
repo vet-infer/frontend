@@ -23,14 +23,10 @@ import {
   riskClasses,
   riskLabel,
 } from "../../utils/clinical";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar el historial del paciente.";
-  }
-
-  return "No fue posible cargar el historial del paciente.";
+  return getResponseErrorMessage(error, "No fue posible cargar el historial del paciente.");
 }
 
 export function PatientHistoryPage() {

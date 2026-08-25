@@ -10,13 +10,6 @@ export type SummaryCard = {
   icon: LucideIcon;
 };
 
-export type QuickAction = {
-  title: string;
-  description: string;
-  to: string;
-  icon: LucideIcon;
-};
-
 export type WeekRange = {
   start: Date;
   end: Date;

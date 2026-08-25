@@ -10,6 +10,7 @@ import { evaluationService } from "../../services/evaluation.service";
 import { patientService } from "../../services/patient.service";
 import type { ClinicalFactIn, Evaluation, FactDefinition, PersistedInferenceResult } from "../../types/evaluation";
 import type { Patient } from "../../types/patient";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 const tabs = ["Datos de evaluacion", "Sintomas", "Variables clinicas", "Variables complementarias"] as const;
 
@@ -383,7 +384,5 @@ function patientOrReasonValid(patient: Patient | null, reason: string) {
 }
 
 function message(error: unknown) {
-  return error && typeof error === "object" && "response" in error
-    ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail ?? "No fue posible completar la operacion clinica."
-    : "No fue posible completar la operacion clinica.";
+  return getResponseErrorMessage(error, "No fue posible completar la operacion clinica.");
 }

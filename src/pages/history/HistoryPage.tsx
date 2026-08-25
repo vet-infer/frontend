@@ -7,6 +7,7 @@ import { Card } from "../../components/common/Card";
 import { FormSelect } from "../../components/common/FormSelect";
 import { historyService, type PatientHistorySummary } from "../../services/history.service";
 import { calculateAge, formatDate, getOwnerName, primaryResult, riskClasses, riskLabel } from "../../utils/clinical";
+import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 type HistoryRow = PatientHistorySummary & {
   latestDate: string | null;
@@ -16,12 +17,7 @@ type HistoryRow = PatientHistorySummary & {
 };
 
 function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible cargar el historial clinico.";
-  }
-
-  return "No fue posible cargar el historial clinico.";
+  return getResponseErrorMessage(error, "No fue posible cargar el historial clinico.");
 }
 
 function toHistoryRow(history: PatientHistorySummary): HistoryRow {
