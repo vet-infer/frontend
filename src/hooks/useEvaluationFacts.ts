@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { evaluationService } from "../services/evaluation.service";
 import type { FactDefinition } from "../types/evaluation";
+import { getErrorMessage } from "../utils/errors";
 
 type EvaluationFactGroups = {
   symptoms: FactDefinition[];
@@ -43,7 +44,7 @@ export function useEvaluationFacts(speciesId?: number) {
       .catch((cause: unknown) => {
         if (!active) return;
         setGroups(emptyGroups);
-        setError(getErrorMessage(cause));
+        setError(getErrorMessage(cause, "No fue posible cargar los facts clinicos."));
         setFailedSpeciesId(speciesId);
       });
 
@@ -62,12 +63,4 @@ export function useEvaluationFacts(speciesId?: number) {
     error: speciesId && speciesId === failedSpeciesId ? error : "",
     isLoading: Boolean(speciesId) && !isCurrent && speciesId !== failedSpeciesId,
   };
-}
-
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const detail = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail;
-    if (detail) return detail;
-  }
-  return "No fue posible cargar los facts clinicos.";
 }

@@ -51,7 +51,7 @@ export function Topbar({ currentUser, onNextWeek, onOpenSidebar, onPreviousWeek,
     <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex items-start gap-4">
         <button
-          className="mt-1 rounded-lg border border-slate-200 bg-white p-2 text-[#3026A6] shadow-sm lg:hidden"
+          className="mt-1 rounded-lg border border-slate-200 bg-white p-2 text-brand-700 shadow-sm lg:hidden"
           onClick={onOpenSidebar}
           aria-label="Abrir menu"
         >
@@ -65,7 +65,7 @@ export function Topbar({ currentUser, onNextWeek, onOpenSidebar, onPreviousWeek,
       <div className="flex flex-wrap items-center gap-2">
         <button
           aria-label="Semana anterior"
-          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-brand-700 shadow-sm transition hover:bg-violet-50"
           onClick={onPreviousWeek}
           type="button"
         >
@@ -77,7 +77,7 @@ export function Topbar({ currentUser, onNextWeek, onOpenSidebar, onPreviousWeek,
         </div>
         <button
           aria-label="Semana siguiente"
-          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-brand-700 shadow-sm transition hover:bg-violet-50"
           onClick={onNextWeek}
           type="button"
         >

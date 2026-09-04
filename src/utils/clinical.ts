@@ -30,14 +30,14 @@ export function calculateAge(birthDate?: string | null) {
   return `${years} ${years === 1 ? "año" : "años"}`;
 }
 
-export function formatDate(value?: string | null, withTime = false) {
+export function formatDate(value?: string | null, withTime = false, monthFormat: "2-digit" | "short" = "2-digit") {
   if (!value) {
     return "Sin registrar";
   }
 
   return new Intl.DateTimeFormat("es-CO", {
     day: "2-digit",
-    month: "2-digit",
+    month: monthFormat,
     year: "numeric",
     ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
   }).format(new Date(value.includes("T") ? value : `${value}T00:00:00`));

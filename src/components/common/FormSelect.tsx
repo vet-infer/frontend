@@ -20,7 +20,7 @@ export function FormSelect({ label, error, helpText, className, required, childr
         aria-describedby={error ? errorId : undefined}
         aria-invalid={Boolean(error)}
         className={cn(
-          "h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10 disabled:bg-slate-50 disabled:text-slate-400",
+          "h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 disabled:bg-slate-50 disabled:text-slate-400",
           error ? "border-red-300" : "border-slate-200",
           className
         )}

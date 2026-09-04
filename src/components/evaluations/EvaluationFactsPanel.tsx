@@ -1,4 +1,5 @@
 import type { ChangeEvent } from "react";
+import { Skeleton } from "../common/Skeleton";
 import type { FactDefinition } from "../../types/evaluation";
 
 type Props = {
@@ -25,7 +26,7 @@ const numericExamples: Record<string, string> = {
 };
 
 export function EvaluationFactsPanel({ facts, values, onChange, isLoading, error, emptyMessage = "No hay facts activos para esta especie." }: Props) {
-  if (isLoading) return <div className="h-52 animate-pulse rounded-lg bg-slate-100" />;
+  if (isLoading) return <Skeleton className="h-52" />;
   if (error) return <p className="rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>;
   if (facts.length === 0) return <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">{emptyMessage}</p>;
 

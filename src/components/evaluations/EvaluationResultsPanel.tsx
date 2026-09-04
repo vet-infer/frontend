@@ -22,13 +22,13 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
   return (
     <div className="space-y-5">
       <section className="rounded-lg border border-violet-100 bg-violet-50 p-5">
-        <p className="text-sm font-extrabold text-[#4635D3]">Paso 3 · Resultado de la inferencia</p>
+        <p className="text-sm font-extrabold text-brand-500">Paso 3 · Resultado de la inferencia</p>
         <h2 className="mt-1 text-lg font-extrabold text-[#172554]">Revisa la sugerencia y su evidencia clínica</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           El motor ya procesó los facts registrados y guardó {results.length === 1 ? "una sugerencia" : `${results.length} sugerencias`} para esta evaluación. El resultado sugerido orienta la priorización; revisa el riesgo, la probabilidad y las reglas que explican por qué se generó antes de tomar una decisión clínica.
         </p>
         {evaluationId ? (
-          <Link className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#3526AD]" to={`/results?evaluationId=${evaluationId}`}>
+          <Link className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-600" to={`/results?evaluationId=${evaluationId}`}>
             Abrir detalle trazable del resultado
           </Link>
         ) : null}
