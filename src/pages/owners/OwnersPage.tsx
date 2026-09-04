@@ -5,7 +5,9 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import { EmptyState } from "../../components/common/EmptyState";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { OwnerForm } from "../../components/owners/OwnerForm";
 import { PatientForm } from "../../components/patients/PatientForm";
 import { ownerService } from "../../services/owner.service";
@@ -13,7 +15,7 @@ import { patientService } from "../../services/patient.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
 import { cn } from "../../utils/cn";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type FilterMode = "all" | "with-pets" | "without-pets";
 
@@ -52,9 +54,6 @@ function getOwnerIdFromPatient(patient: Patient) {
   return patient.owner?.id;
 }
 
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible completar la accion.");
-}
 
 export function OwnersPage() {
   const location = useLocation();
@@ -100,7 +99,7 @@ export function OwnersPage() {
       setOwners(ownerData.map((owner) => ({ ...owner, petCount: petCounts[owner.id] ?? 0 })));
       setSpecies(speciesData);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +162,7 @@ export function OwnersPage() {
       setSuccess(`Propietario ${getFullName(ownerToDelete)} eliminado correctamente.`);
       setOwnerToDelete(null);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsDeleting(false);
     }
@@ -179,7 +178,7 @@ export function OwnersPage() {
       setSuccess("Propietario registrado correctamente.");
       setIsCreateOpen(false);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsSaving(false);
     }
@@ -201,7 +200,7 @@ export function OwnersPage() {
       setSuccess("Propietario actualizado correctamente.");
       setOwnerToEdit(null);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsSaving(false);
     }
@@ -227,7 +226,7 @@ export function OwnersPage() {
       setSuccess(`Paciente ${patient.name} registrado correctamente.`);
       setOwnerForPatient(null);
     } catch (caughtError) {
-      setPatientFormError(getErrorMessage(caughtError));
+      setPatientFormError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsPatientSaving(false);
     }
@@ -260,7 +259,7 @@ export function OwnersPage() {
           <label className="relative block flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por nombre, apellido, telefono o correo..."
               value={query}
@@ -272,7 +271,7 @@ export function OwnersPage() {
                 className={cn(
                   "h-12 rounded-full px-7 text-sm font-bold transition",
                   filter === item.value
-                    ? "bg-[#4635D3] text-white shadow-sm"
+                    ? "bg-brand-500 text-white shadow-sm"
                     : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-violet-50"
                 )}
                 key={item.value}
@@ -289,26 +288,24 @@ export function OwnersPage() {
 
         {!isLoading && filteredOwners.length === 0 ? (
           <div className="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-            <div>
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                <UsersRound size={30} />
-              </span>
-              <h2 className="mt-5 text-xl font-extrabold text-[#172554]">No hay propietarios para mostrar</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Registra el primer propietario o ajusta los filtros de busqueda para ver resultados.
-              </p>
-              <Button
-                className="mt-5"
-                icon={<UserPlus size={18} />}
-                onClick={() => {
-                  setFormError("");
-                  setIsCreateOpen(true);
-                }}
-                type="button"
-        >
-                Registrar propietario
-              </Button>
-            </div>
+            <EmptyState
+              action={
+                <Button
+                  className="mt-5"
+                  icon={<UserPlus size={18} />}
+                  onClick={() => {
+                    setFormError("");
+                    setIsCreateOpen(true);
+                  }}
+                  type="button"
+                >
+                  Registrar propietario
+                </Button>
+              }
+              description="Registra el primer propietario o ajusta los filtros de busqueda para ver resultados."
+              icon={UsersRound}
+              title="No hay propietarios para mostrar"
+            />
           </div>
         ) : null}
 
@@ -329,7 +326,7 @@ export function OwnersPage() {
                   <tr key={owner.id}>
                     <td className="px-3 py-5">
                       <div className="flex items-center gap-4">
-                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-[#3026A6]">
+                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-brand-700">
                           {getInitials(owner)}
                         </span>
                         <span className="font-extrabold text-slate-700">{getFullName(owner)}</span>
@@ -363,7 +360,7 @@ export function OwnersPage() {
                     <td className="px-3 py-5">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                           to={`/owners/${owner.id}`}
         >
                           <Eye size={17} />
@@ -418,7 +415,7 @@ export function OwnersPage() {
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
                   &lt;
                 </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-[#4635D3] font-extrabold text-white" type="button">
+                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-extrabold text-white" type="button">
                   1
                 </button>
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
@@ -502,7 +499,7 @@ function OwnersLoadingState() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div className="h-20 animate-pulse rounded-lg bg-slate-100" key={index} />
+        <Skeleton className="h-20" key={index} />
       ))}
     </div>
   );

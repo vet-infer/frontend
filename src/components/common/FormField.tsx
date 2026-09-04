@@ -20,7 +20,7 @@ export function FormField({ label, error, helpText, className, required, ...prop
         aria-describedby={error ? errorId : undefined}
         aria-invalid={Boolean(error)}
         className={cn(
-          "h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10",
+          "h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10",
           error ? "border-red-300" : "border-slate-200",
           className
         )}

@@ -7,7 +7,9 @@ import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { DataTable } from "../../components/common/DataTable";
 import { FormField } from "../../components/common/FormField";
 import { FormSelect } from "../../components/common/FormSelect";
+import { IconBadge } from "../../components/common/IconBadge";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { evaluationService } from "../../services/evaluation.service";
 import { knowledgeService } from "../../services/knowledge.service";
 import type { FactDefinition } from "../../types/evaluation";
@@ -289,7 +291,7 @@ export function RulesAdminPage() {
 
       <Card className="p-5">
         {isLoading ? (
-          <div className="h-72 animate-pulse rounded-lg bg-slate-100" />
+          <Skeleton className="h-72" />
         ) : (
           <DataTable
             columns={["Codigo", "Nombre", "Enfermedad", "Riesgo", "Condiciones", "Estado", "Acciones"]}
@@ -416,7 +418,7 @@ export function RulesAdminPage() {
         {viewRule ? (
           <div className="space-y-5">
             <div className="flex items-center gap-4">
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-violet-50 text-[#4635D3]"><Network size={26} /></span>
+              <IconBadge className="h-14 w-14" icon={Network} iconSize={26} />
               <div>
                 <h2 className="text-xl font-extrabold text-[#172554]">{viewRule.code} - {viewRule.name}</h2>
                 <p className="mt-1 text-sm font-semibold text-slate-500">THEN enfermedad ID {viewRule.disease_id}, riesgo {viewRule.risk_level}</p>

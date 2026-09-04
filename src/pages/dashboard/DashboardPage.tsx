@@ -5,6 +5,7 @@ import { Cell, Legend, Bar, BarChart, Pie, PieChart, ResponsiveContainer, Toolti
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
+import { IconBadge } from "../../components/common/IconBadge";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { dashboardService } from "../../services/dashboard.service";
 import type { DashboardData, DashboardScope, RecentEvaluation, RecentPatient, SummaryCard, WeekRange } from "../../types/dashboard";
@@ -133,18 +134,16 @@ export function DashboardPage() {
           return (
             <Card className="p-4" key={item.label}>
               <div className="flex items-center gap-4">
-                <span
-                  className={
-                    isDanger
-                      ? "grid h-14 w-14 shrink-0 place-items-center rounded-full bg-red-50 text-red-600"
-                      : "grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]"
-                  }
-                >
-                  <Icon size={24} strokeWidth={1.9} />
-                </span>
+                <IconBadge
+                  className="h-14 w-14 shrink-0"
+                  icon={Icon}
+                  iconSize={24}
+                  iconStrokeWidth={1.9}
+                  tone={isDanger ? "danger" : "brand"}
+                />
                 <div className="min-w-0">
                   <h3 className="text-sm font-extrabold leading-5 text-[#172554]">{item.label}</h3>
-                  <p className="mt-1 text-2xl font-extrabold leading-none text-[#4635D3]">{item.value}</p>
+                  <p className="mt-1 text-2xl font-extrabold leading-none text-brand-500">{item.value}</p>
                   <p className={isDanger ? "mt-1 text-xs font-semibold text-red-500" : "mt-1 text-xs font-semibold text-emerald-600"}>
                     {item.change}
                   </p>
@@ -286,7 +285,7 @@ function PanelHeader({ title, to }: { title: string; to: string }) {
   return (
     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
       <h2 className="text-base font-extrabold text-[#172554]">{title}</h2>
-      <Link className="text-sm font-extrabold text-[#4635D3] hover:text-[#3026A6]" to={to}>
+      <Link className="text-sm font-extrabold text-brand-500 hover:text-brand-700" to={to}>
         Ver todas
       </Link>
     </div>

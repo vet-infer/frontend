@@ -5,14 +5,17 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import { EmptyState } from "../../components/common/EmptyState";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { PatientForm } from "../../components/patients/PatientForm";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { calculateAge, formatDate } from "../../utils/clinical";
 import { cn } from "../../utils/cn";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type FilterMode = "all" | "dogs" | "cats";
 
@@ -42,46 +45,7 @@ function getInitial(patient: Patient) {
   return patient.name.charAt(0).toUpperCase();
 }
 
-function calculateAge(birthDate?: string | null) {
-  if (!birthDate) {
-    return "Sin fecha";
-  }
 
-  const birth = new Date(`${birthDate}T00:00:00`);
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    years -= 1;
-  }
-
-  if (years <= 0) {
-    const months = Math.max(
-      0,
-      (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth()
-    );
-    return `${months || 1} ${months === 1 ? "mes" : "meses"}`;
-  }
-
-  return `${years} ${years === 1 ? "año" : "años"}`;
-}
-
-function formatDate(value?: string | null) {
-  if (!value) {
-    return "Sin registrar";
-  }
-
-  return new Intl.DateTimeFormat("es-CO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
-}
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar los pacientes.");
-}
 
 export function PatientsPage() {
   const location = useLocation();
@@ -122,7 +86,7 @@ export function PatientsPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
         }
       } finally {
         if (isMounted) {
@@ -174,7 +138,7 @@ export function PatientsPage() {
       setSuccess("Paciente registrado correctamente.");
       setIsCreateOpen(false);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsSaving(false);
     }
@@ -194,7 +158,7 @@ export function PatientsPage() {
       setSuccess("Paciente actualizado correctamente.");
       setPatientToEdit(null);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsSaving(false);
     }
@@ -214,7 +178,7 @@ export function PatientsPage() {
       setSuccess(`Paciente ${patientToDelete.name} eliminado correctamente.`);
       setPatientToDelete(null);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsDeleting(false);
     }
@@ -265,7 +229,7 @@ export function PatientsPage() {
           <label className="relative block flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por paciente, propietario, especie o raza..."
               value={query}
@@ -280,7 +244,7 @@ export function PatientsPage() {
                   className={cn(
                     "inline-flex h-12 items-center gap-2 rounded-lg px-7 text-sm font-bold transition",
                     filter === item.value
-                      ? "bg-[#4635D3] text-white shadow-sm"
+                      ? "bg-brand-500 text-white shadow-sm"
                       : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
                   )}
                   key={item.value}
@@ -299,23 +263,16 @@ export function PatientsPage() {
 
         {!isLoading && filteredPatients.length === 0 ? (
           <div className="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-            <div>
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                <PawPrint size={30} />
-              </span>
-              <h2 className="mt-5 text-xl font-extrabold text-[#172554]">No hay pacientes para mostrar</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Registra un paciente o ajusta los filtros para encontrar resultados.
-              </p>
-              <Button
-                className="mt-5"
-                icon={<PawPrint size={18} />}
-                onClick={openCreateModal}
-                type="button"
-              >
-                Registrar paciente
-              </Button>
-            </div>
+            <EmptyState
+              action={
+                <Button className="mt-5" icon={<PawPrint size={18} />} onClick={openCreateModal} type="button">
+                  Registrar paciente
+                </Button>
+              }
+              description="Registra un paciente o ajusta los filtros para encontrar resultados."
+              icon={PawPrint}
+              title="No hay pacientes para mostrar"
+            />
           </div>
         ) : null}
 
@@ -337,7 +294,7 @@ export function PatientsPage() {
                   <tr key={patient.id}>
                     <td className="px-5 py-5">
                       <div className="flex items-center gap-4">
-                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-violet-50 text-lg font-extrabold text-[#3026A6]">
+                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-violet-50 text-lg font-extrabold text-brand-700">
                           {getInitial(patient)}
                         </span>
                         <span className="font-extrabold text-slate-800">{patient.name}</span>
@@ -363,7 +320,7 @@ export function PatientsPage() {
                     <td className="px-5 py-5">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                           to={`/patients/${patient.id}`}
                         >
                           <Eye size={17} />
@@ -379,7 +336,7 @@ export function PatientsPage() {
                           Editar
                         </Button>
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                           to={`/evaluations?patientId=${patient.id}`}
                         >
                           <CalendarPlus size={17} />
@@ -408,7 +365,7 @@ export function PatientsPage() {
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
                   ‹
                 </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-[#4635D3] font-extrabold text-white" type="button">
+                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-extrabold text-white" type="button">
                   1
                 </button>
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
@@ -472,7 +429,7 @@ function PatientsLoadingState() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div className="h-20 animate-pulse rounded-lg bg-slate-100" key={index} />
+        <Skeleton className="h-20" key={index} />
       ))}
     </div>
   );

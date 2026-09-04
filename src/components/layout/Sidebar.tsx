@@ -51,13 +51,13 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-gradient-to-b from-[#3026A6] to-[#281C91] text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-gradient-to-b from-brand-700 to-brand-800 text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex items-center justify-between px-8 py-8">
           <div className="flex items-center gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-[#3026A6]">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-brand-700">
               <PawPrint size={29} fill="currentColor" />
             </span>
             <span className="text-2xl font-extrabold tracking-tight">VetClinic</span>
@@ -99,7 +99,7 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
             onClick={() => setIsUserMenuOpen((current) => !current)}
             type="button"
           >
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-sm font-extrabold text-[#3026A6]">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-sm font-extrabold text-brand-700">
               {getInitials(fullName)}
             </span>
             <span className="min-w-0 flex-1">

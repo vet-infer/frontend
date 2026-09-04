@@ -18,12 +18,14 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
+import { IconBadge } from "../../components/common/IconBadge";
+import { Skeleton } from "../../components/common/Skeleton";
 import { knowledgeService } from "../../services/knowledge.service";
 import { useAuth } from "../../hooks/useAuth";
 import type { ClinicalVariable, CatalogItem } from "../../types/evaluation";
 import type { Disease, KnowledgeBaseData, KnowledgeTab, RiskLevel, Rule } from "../../types/knowledge";
 import { cn } from "../../utils/cn";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type SpeciesFilter = "all" | "dog" | "cat";
 
@@ -34,10 +36,6 @@ const tabs: { id: KnowledgeTab; label: string }[] = [
   { id: "rules", label: "Reglas IF-THEN" },
   { id: "risk", label: "Niveles de riesgo" },
 ];
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar la base de conocimiento.");
-}
 
 function speciesName(speciesId?: number | null) {
   if (speciesId === 1) {
@@ -143,7 +141,7 @@ export function KnowledgeBasePage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar la base de conocimiento."));
         }
       } finally {
         if (isMounted) {
@@ -244,7 +242,7 @@ export function KnowledgeBasePage() {
             <label className="relative block flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={21} />
               <input
-                className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+                className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar por enfermedad, regla o variable clinica..."
                 value={query}
@@ -273,8 +271,8 @@ export function KnowledgeBasePage() {
               className={cn(
                 "min-h-14 border-b-2 px-4 text-sm font-extrabold transition",
                 activeTab === tab.id
-                  ? "border-[#4635D3] text-[#4635D3]"
-                  : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-[#3026A6]"
+                  ? "border-brand-500 text-brand-500"
+                  : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-brand-700"
               )}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -287,7 +285,7 @@ export function KnowledgeBasePage() {
       </Card>
 
       {isLoading ? (
-        <div className="h-96 animate-pulse rounded-lg bg-slate-100" />
+        <Skeleton className="h-96" />
       ) : (
         <>
           {activeTab === "diseases" ? (
@@ -298,9 +296,7 @@ export function KnowledgeBasePage() {
                 <>
                   {filteredDiseases.map((disease, index) => (
                     <ListButton active={index === selectedIndex} key={disease.id} onClick={() => setSelectedIndex(index)}>
-                      <span className="grid h-14 w-14 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                        <Stethoscope size={27} />
-                      </span>
+                      <IconBadge className="h-14 w-14" icon={Stethoscope} iconSize={27} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-extrabold text-[#172554]">{disease.name}</span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
@@ -346,9 +342,7 @@ export function KnowledgeBasePage() {
                 <>
                   {filteredVariables.map((variable, index) => (
                     <ListButton active={index === selectedIndex} key={variable.id} onClick={() => setSelectedIndex(index)}>
-                      <span className="grid h-14 w-14 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                        <FlaskConical size={27} />
-                      </span>
+                      <IconBadge className="h-14 w-14" icon={FlaskConical} iconSize={27} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-extrabold text-[#172554]">{variable.name}</span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
@@ -371,9 +365,7 @@ export function KnowledgeBasePage() {
                 <>
                   {filteredRules.map((rule, index) => (
                     <ListButton active={index === selectedIndex} key={rule.id} onClick={() => setSelectedIndex(index)}>
-                      <span className="grid h-14 w-14 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                        <Network size={27} />
-                      </span>
+                      <IconBadge className="h-14 w-14" icon={Network} iconSize={27} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-extrabold text-[#172554]">
                           {rule.code} - {rule.name}
@@ -414,7 +406,7 @@ function SpeciesButton({
     <button
       className={cn(
         "inline-flex h-12 items-center justify-center gap-2 rounded-lg px-5 text-sm font-extrabold transition",
-        active ? "bg-[#4635D3] text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
+        active ? "bg-brand-500 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
       )}
       onClick={onClick}
       type="button"
@@ -437,7 +429,7 @@ function StatCard({
   tone?: "violet" | "green" | "orange";
 }) {
   const tones = {
-    violet: "bg-violet-50 text-[#4635D3]",
+    violet: "bg-violet-50 text-brand-500",
     green: "bg-emerald-50 text-emerald-600",
     orange: "bg-orange-50 text-orange-600",
   };
@@ -472,7 +464,7 @@ function KnowledgeSplit({
     return (
       <Card className="grid min-h-72 place-items-center p-8 text-center">
         <div>
-          <BookOpen className="mx-auto text-[#4635D3]" size={34} />
+          <BookOpen className="mx-auto text-brand-500" size={34} />
           <h2 className="mt-4 text-xl font-extrabold text-[#172554]">Sin informacion para mostrar</h2>
           <p className="mt-2 text-sm text-slate-500">Ajusta la busqueda o el filtro de especie.</p>
         </div>
@@ -609,7 +601,7 @@ function RuleDetail({ rule, diseases }: { rule: Rule; diseases: Disease[] }) {
           <p className="mt-2 text-lg font-extrabold text-emerald-800">Compatible con {disease?.name ?? "enfermedad relacionada"}</p>
         </div>
         <div className="rounded-lg border border-violet-100 bg-violet-50 p-5">
-          <p className="text-sm font-bold text-[#4635D3]">Enfermedad relacionada</p>
+          <p className="text-sm font-bold text-brand-500">Enfermedad relacionada</p>
           <p className="mt-2 text-lg font-extrabold text-[#172554]">{disease?.name ?? "Sin enfermedad asociada"}</p>
         </div>
       </div>
@@ -725,14 +717,12 @@ function DetailHeader({
 }) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-      <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-        <Icon size={36} />
-      </span>
+      <IconBadge className="h-20 w-20 shrink-0" icon={Icon} iconSize={36} />
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-3xl font-extrabold text-[#172554]">{title}</h2>
           {badges.map((badge) => (
-            <span className="rounded-md bg-violet-50 px-3 py-1 text-sm font-extrabold text-[#4635D3]" key={badge}>
+            <span className="rounded-md bg-violet-50 px-3 py-1 text-sm font-extrabold text-brand-500" key={badge}>
               {badge}
             </span>
           ))}
