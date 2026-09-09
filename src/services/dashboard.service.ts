@@ -131,7 +131,7 @@ function getPatientActivityDate(patient: Patient, evaluationsByPatient: Map<numb
 export const dashboardService = {
   async getDashboard(week?: WeekRange): Promise<DashboardData> {
     try {
-      const [patients, evaluations] = await Promise.all([patientService.list(), evaluationService.list()]);
+      const [patients, evaluations] = await Promise.all([patientService.listAll(), evaluationService.list()]);
       const weeklyEvaluations = evaluations.filter((evaluation) => isWithinWeek(readEvaluationDate(evaluation), week));
       const evaluationsByPatient = buildEvaluationsByPatient(evaluations);
       const weeklyEvaluationsByPatient = buildEvaluationsByPatient(weeklyEvaluations);
@@ -170,8 +170,8 @@ export const dashboardService = {
   async getSummary(week?: WeekRange): Promise<SummaryCard[]> {
     try {
       const [owners, patients, evaluations] = await Promise.all([
-        ownerService.list(),
-        patientService.list(),
+        ownerService.listAll(),
+        patientService.listAll(),
         evaluationService.list(),
       ]);
       const weeklyEvaluations = evaluations.filter((evaluation) => isWithinWeek(readEvaluationDate(evaluation), week));

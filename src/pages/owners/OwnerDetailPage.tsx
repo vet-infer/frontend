@@ -69,7 +69,7 @@ export function OwnerDetailPage() {
       try {
         const [ownerData, patientData, speciesData] = await Promise.all([
           ownerService.getById(parsedOwnerId),
-          patientService.list().catch(() => [] as Patient[]),
+          patientService.listAll().catch(() => [] as Patient[]),
           patientService.listSpecies(),
         ]);
 

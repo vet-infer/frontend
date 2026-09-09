@@ -72,7 +72,7 @@ export function ClinicalEvaluationPage() {
 
   useEffect(() => {
     patientService
-      .list()
+      .listAll()
       .then(setPatients)
       .catch((cause: unknown) => setError(message(cause)))
       .finally(() => setIsLoadingPatients(false));
