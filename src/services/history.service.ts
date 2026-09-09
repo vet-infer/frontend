@@ -42,7 +42,7 @@ export const historyService = {
   },
 
   async getAllHistories(): Promise<PatientHistorySummary[]> {
-    const patients = await patientService.list();
+    const patients = await patientService.listAll();
     const histories = await Promise.all(patients.map((patient) => this.getPatientHistory(patient.id)));
     return histories;
   },

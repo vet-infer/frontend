@@ -23,6 +23,8 @@ type LocationState = {
   message?: string;
 };
 
+const PAGE_SIZE = 20;
+
 const filters: { label: string; value: FilterMode; icon?: typeof Dog }[] = [
   { label: "Todos", value: "all" },
   { label: "Perros", value: "dogs", icon: Dog },
@@ -50,11 +52,14 @@ function getInitial(patient: Patient) {
 export function PatientsPage() {
   const location = useLocation();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [owners, setOwners] = useState<Owner[]>([]);
   const [species, setSpecies] = useState<Species[]>([]);
   const [breeds, setBreeds] = useState<Breed[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const isBrowsing = query.trim() === "" && filter === "all";
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -73,14 +78,17 @@ export function PatientsPage() {
       setError("");
 
       try {
-        const [patientData, ownerData, speciesData] = await Promise.all([
-          patientService.list(),
-          ownerService.list(),
+        const [patientResult, ownerData, speciesData] = await Promise.all([
+          isBrowsing
+            ? patientService.list({ skip: page * PAGE_SIZE, limit: PAGE_SIZE })
+            : patientService.listAll().then((items) => ({ items, total: items.length })),
+          ownerService.listAll(),
           patientService.listSpecies(),
         ]);
 
         if (isMounted) {
-          setPatients(patientData);
+          setPatients(patientResult.items);
+          setTotal(patientResult.total);
           setOwners(ownerData);
           setSpecies(speciesData);
         }
@@ -100,7 +108,7 @@ export function PatientsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isBrowsing, page]);
 
   const handleSpeciesChange = useCallback(async (speciesId: number | null) => {
     if (!speciesId) {
@@ -358,20 +366,38 @@ export function PatientsPage() {
               </tbody>
             </table>
             <div className="flex flex-col gap-4 border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-              <span>
-                Mostrando 1 a {filteredPatients.length} de {filteredPatients.length} pacientes
-              </span>
-              <div className="flex items-center gap-2">
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  ‹
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
-                  1
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  ›
-                </button>
-              </div>
+              {isBrowsing ? (
+                <>
+                  <span>
+                    Mostrando {total === 0 ? 0 : page * PAGE_SIZE + 1} a {Math.min((page + 1) * PAGE_SIZE, total)} de {total} pacientes
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={page === 0}
+                      onClick={() => setPage((current) => Math.max(0, current - 1))}
+                      type="button"
+                    >
+                      ‹
+                    </button>
+                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
+                      {page + 1}
+                    </button>
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={(page + 1) * PAGE_SIZE >= total}
+                      onClick={() => setPage((current) => current + 1)}
+                      type="button"
+                    >
+                      ›
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <span>
+                  Mostrando 1 a {filteredPatients.length} de {filteredPatients.length} pacientes
+                </span>
+              )}
             </div>
           </div>
         ) : null}

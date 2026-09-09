@@ -27,6 +27,8 @@ type OwnerRow = Owner & {
   petCount: number;
 };
 
+const PAGE_SIZE = 20;
+
 const filters: { label: string; value: FilterMode }[] = [
   { label: "Todos", value: "all" },
   { label: "Con pacientes", value: "with-pets" },
@@ -58,8 +60,11 @@ function getOwnerIdFromPatient(patient: Patient) {
 export function OwnersPage() {
   const location = useLocation();
   const [owners, setOwners] = useState<OwnerRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const isBrowsing = query.trim() === "" && filter === "all";
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState((location.state as LocationState | null)?.message ?? "");
@@ -75,39 +80,42 @@ export function OwnersPage() {
   const [formError, setFormError] = useState("");
   const [patientFormError, setPatientFormError] = useState("");
 
-  async function loadOwners() {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const [ownerData, patientData, speciesData] = await Promise.all([
-        ownerService.list(),
-        patientService.list().catch(() => [] as Patient[]),
-        patientService.listSpecies(),
-      ]);
-
-      const petCounts = patientData.reduce<Record<number, number>>((accumulator, patient) => {
-        const ownerId = getOwnerIdFromPatient(patient);
-
-        if (ownerId) {
-          accumulator[ownerId] = (accumulator[ownerId] ?? 0) + 1;
-        }
-
-        return accumulator;
-      }, {});
-
-      setOwners(ownerData.map((owner) => ({ ...owner, petCount: petCounts[owner.id] ?? 0 })));
-      setSpecies(speciesData);
-    } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function loadOwners() {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const [ownerResult, patientData, speciesData] = await Promise.all([
+          isBrowsing
+            ? ownerService.list({ skip: page * PAGE_SIZE, limit: PAGE_SIZE })
+            : ownerService.listAll().then((items) => ({ items, total: items.length })),
+          patientService.listAll().catch(() => [] as Patient[]),
+          patientService.listSpecies(),
+        ]);
+
+        const petCounts = patientData.reduce<Record<number, number>>((accumulator, patient) => {
+          const ownerId = getOwnerIdFromPatient(patient);
+
+          if (ownerId) {
+            accumulator[ownerId] = (accumulator[ownerId] ?? 0) + 1;
+          }
+
+          return accumulator;
+        }, {});
+
+        setOwners(ownerResult.items.map((owner) => ({ ...owner, petCount: petCounts[owner.id] ?? 0 })));
+        setTotal(ownerResult.total);
+        setSpecies(speciesData);
+      } catch (caughtError) {
+        setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     loadOwners();
-  }, []);
+  }, [isBrowsing, page]);
 
   const handleSpeciesChange = useCallback(async (speciesId: number | null) => {
     if (!speciesId) {
@@ -408,20 +416,38 @@ export function OwnersPage() {
               </tbody>
             </table>
             <div className="flex flex-col gap-4 border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-              <span>
-                Mostrando 1 a {filteredOwners.length} de {filteredOwners.length} propietarios
-              </span>
-              <div className="flex items-center gap-2">
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  &lt;
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
-                  1
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  {">"}
-                </button>
-              </div>
+              {isBrowsing ? (
+                <>
+                  <span>
+                    Mostrando {total === 0 ? 0 : page * PAGE_SIZE + 1} a {Math.min((page + 1) * PAGE_SIZE, total)} de {total} propietarios
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={page === 0}
+                      onClick={() => setPage((current) => Math.max(0, current - 1))}
+                      type="button"
+                    >
+                      &lt;
+                    </button>
+                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
+                      {page + 1}
+                    </button>
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={(page + 1) * PAGE_SIZE >= total}
+                      onClick={() => setPage((current) => current + 1)}
+                      type="button"
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <span>
+                  Mostrando 1 a {filteredOwners.length} de {filteredOwners.length} propietarios
+                </span>
+              )}
             </div>
           </div>
         ) : null}
