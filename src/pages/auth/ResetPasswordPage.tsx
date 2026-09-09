@@ -101,7 +101,7 @@ export function ResetPasswordPage() {
           </form>
         ) : null}
 
-        <Link className="mt-5 block text-center text-sm font-extrabold text-brand-500" to="/login">
+        <Link className="mt-5 block text-center text-sm font-bold text-brand-500" to="/login">
           Volver al inicio de sesion
         </Link>
       </section>

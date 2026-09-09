@@ -2,6 +2,33 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Este proyecto no sigue un esquema de versionado formal todavía; las entradas se agrupan por fecha y, cuando aplica, por el change de OpenSpec que las originó (`openspec/changes/archive/`).
 
+## [2026-09-08] — Interacción de overlays y jerarquía tipográfica (Fase 2)
+
+Change de OpenSpec: [`archive/2026-09-08-frontend-fase2-motion-interaccion`](../openspec/changes/archive/2026-09-08-frontend-fase2-motion-interaccion/). Spec nueva: [`frontend/overlay-interaction`](../openspec/specs/frontend/overlay-interaction/spec.md).
+
+### Added
+
+- `src/hooks/useDialogBehavior.ts`: Escape cierra el diálogo, focus trap (Tab/Shift+Tab cicla dentro del diálogo) y devolución de foco al elemento disparador al cerrar. Usado por `Modal` y `ConfirmDialog`.
+- `src/hooks/useOverlayTransition.ts`: anima entrada/salida (fade + scale) de overlays que antes desmontaban abruptamente con `if (!isOpen) return null`. Usado por `Modal`, `ConfirmDialog` y el menú de usuario del `Sidebar`.
+- `Modal.tsx`, `ConfirmDialog.tsx`: cierre al hacer click en el backdrop (un click que empieza y termina dentro del panel no cierra).
+- Menú de usuario del `Sidebar`: cierre con Escape y con click fuera del menú (antes solo cerraba al elegir una opción).
+
+### Changed
+
+- Jerarquía tipográfica: `font-extrabold` queda reservado para títulos (`text-lg` en adelante) y cifras destacadas; se migraron 88 apariciones en `text-xs`/`text-sm`/`text-base` (labels, links, celdas de tabla, badges) a `font-bold` en 27 archivos (172 → 84 apariciones de `font-extrabold`).
+
+### Fixed
+
+- (Detectado durante la implementación, no visible en producción) Primer borrador de `useDialogBehavior` dependía de `onClose` en su `useEffect`; como todos los call-sites de `Modal` pasan `onClose={() => setX(false)}` inline, cada re-render del formulario dentro del modal (cada tecla escrita) habría reiniciado el efecto y robado el foco de vuelta al primer campo. Corregido con un `onCloseRef` que no fuerza el reinicio del efecto.
+
+### Known issues
+
+- 6 errores preexistentes de `npm run lint` (`react-hooks/set-state-in-effect` en `PatientForm.tsx`, `HistoryPage.tsx`, `KnowledgeBasePage.tsx`, `OwnersPage.tsx`, `OwnerForm.tsx`; `preserve-caught-error` en `emailjs.service.ts`) siguen presentes, sin relación con este change (documentados también en Fase 0/1).
+
+---
+
+**Verificación:** `tsc -b`, `vite build` y `npm run lint` limpios tras cada grupo de tareas (32/32). Verificación manual de teclado (Tab/Shift+Tab/Escape/click-backdrop/click-fuera) en `Modal`, `ConfirmDialog` y el menú de usuario, realizada por el usuario sobre `npm run dev`. **Archivos nuevos:** `src/hooks/useDialogBehavior.ts`, `src/hooks/useOverlayTransition.ts`. **Archivos modificados:** `src/components/common/Modal.tsx`, `src/components/common/ConfirmDialog.tsx`, `src/components/layout/Sidebar.tsx`, y 27 archivos adicionales para la migración tipográfica.
+
 ## [2026-09-03] — Consolidación de componentes compartidos (Fase 1)
 
 Change de OpenSpec: [`archive/2026-09-03-frontend-fase1-consolidacion-componentes`](../openspec/changes/archive/2026-09-03-frontend-fase1-consolidacion-componentes/). Refactor puro sin cambios de comportamiento observable (`skip_specs: true`, sin specs modificadas).

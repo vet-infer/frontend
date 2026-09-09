@@ -313,7 +313,7 @@ export function OwnersPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-sm font-extrabold text-slate-600">
+                <tr className="border-b border-slate-100 text-sm font-bold text-slate-600">
                   <th className="px-3 py-4">Propietario</th>
                   <th className="px-3 py-4">Contacto</th>
                   <th className="px-3 py-4">Ubicacion</th>
@@ -329,7 +329,7 @@ export function OwnersPage() {
                         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-brand-700">
                           {getInitials(owner)}
                         </span>
-                        <span className="font-extrabold text-slate-700">{getFullName(owner)}</span>
+                        <span className="font-bold text-slate-700">{getFullName(owner)}</span>
                       </div>
                     </td>
                     <td className="px-3 py-5">
@@ -348,7 +348,7 @@ export function OwnersPage() {
                     <td className="px-3 py-5">
                       <span
                         className={cn(
-                          "inline-flex rounded-md px-4 py-2 text-xs font-extrabold",
+                          "inline-flex rounded-md px-4 py-2 text-xs font-bold",
                           owner.petCount > 0 ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
                         )}
         >
@@ -415,7 +415,7 @@ export function OwnersPage() {
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
                   &lt;
                 </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-extrabold text-white" type="button">
+                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
                   1
                 </button>
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">

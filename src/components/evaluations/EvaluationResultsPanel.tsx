@@ -22,7 +22,7 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
   return (
     <div className="space-y-5">
       <section className="rounded-lg border border-violet-100 bg-violet-50 p-5">
-        <p className="text-sm font-extrabold text-brand-500">Paso 3 · Resultado de la inferencia</p>
+        <p className="text-sm font-bold text-brand-500">Paso 3 · Resultado de la inferencia</p>
         <h2 className="mt-1 text-lg font-extrabold text-[#172554]">Revisa la sugerencia y su evidencia clínica</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           El motor ya procesó los facts registrados y guardó {results.length === 1 ? "una sugerencia" : `${results.length} sugerencias`} para esta evaluación. El resultado sugerido orienta la priorización; revisa el riesgo, la probabilidad y las reglas que explican por qué se generó antes de tomar una decisión clínica.
@@ -35,9 +35,9 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
       </section>
 
       <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-5 text-sm sm:grid-cols-3">
-        <div><p className="font-extrabold text-slate-700">1. Sugerencia y riesgo</p><p className="mt-1 leading-5 text-slate-500">Identifican el hallazgo priorizado por el motor.</p></div>
-        <div><p className="font-extrabold text-slate-700">2. Probabilidad y método</p><p className="mt-1 leading-5 text-slate-500">Muestran el peso del cálculo y cómo se obtuvo.</p></div>
-        <div><p className="font-extrabold text-slate-700">3. Reglas activadas</p><p className="mt-1 leading-5 text-slate-500">Relacionan la conclusión con las condiciones clínicas cumplidas.</p></div>
+        <div><p className="font-bold text-slate-700">1. Sugerencia y riesgo</p><p className="mt-1 leading-5 text-slate-500">Identifican el hallazgo priorizado por el motor.</p></div>
+        <div><p className="font-bold text-slate-700">2. Probabilidad y método</p><p className="mt-1 leading-5 text-slate-500">Muestran el peso del cálculo y cómo se obtuvo.</p></div>
+        <div><p className="font-bold text-slate-700">3. Reglas activadas</p><p className="mt-1 leading-5 text-slate-500">Relacionan la conclusión con las condiciones clínicas cumplidas.</p></div>
       </section>
 
       {[...results].sort((a, b) => (b.probability ?? -1) - (a.probability ?? -1) || b.score - a.score).map((result) => (

@@ -169,7 +169,7 @@ export function OwnerDetailPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-slate-500 hover:text-brand-700" to="/owners">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-700" to="/owners">
             <ArrowLeft size={18} />
             Volver a Propietarios
           </Link>
@@ -235,7 +235,7 @@ export function OwnerDetailPage() {
 
         {patients.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="font-extrabold text-[#172554]">No hay paciente registrado aun.</p>
+            <p className="font-bold text-[#172554]">No hay paciente registrado aun.</p>
             <p className="mt-2 text-sm text-slate-500">Crea un paciente para asociarlo a este propietario.</p>
           </div>
         ) : (
@@ -244,7 +244,7 @@ export function OwnerDetailPage() {
             rows={patients}
             renderRow={(patient) => (
               <tr key={patient.id}>
-                <td className="px-5 py-4 font-extrabold text-slate-700">{patient.name}</td>
+                <td className="px-5 py-4 font-bold text-slate-700">{patient.name}</td>
                 <td className="px-5 py-4 font-semibold">{getSpeciesBreed(patient)}</td>
                 <td className="px-5 py-4 font-semibold">{patient.sex || "Sin registrar"}</td>
                 <td className="px-5 py-4">
@@ -301,7 +301,7 @@ function InfoCard({ icon: Icon, label, value }: InfoCardProps) {
       <Icon className="shrink-0 text-brand-500" size={25} />
       <div className="min-w-0">
         <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <p className="mt-1 break-words font-extrabold text-slate-800">{value}</p>
+        <p className="mt-1 break-words font-bold text-slate-800">{value}</p>
       </div>
     </div>
   );

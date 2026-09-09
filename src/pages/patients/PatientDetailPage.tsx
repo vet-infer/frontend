@@ -200,7 +200,7 @@ export function PatientDetailPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-slate-500 hover:text-brand-700" to="/patients">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-700" to="/patients">
             <ArrowLeft size={18} />
             Volver a Pacientes
           </Link>
@@ -341,7 +341,7 @@ export function PatientDetailPage() {
 
         {evaluations.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="font-extrabold text-[#172554]">Sin evaluaciones registradas</p>
+            <p className="font-bold text-[#172554]">Sin evaluaciones registradas</p>
             <p className="mt-2 text-sm text-slate-500">Cuando se cree una evaluacion clinica, aparecera en este historial.</p>
           </div>
         ) : (
@@ -401,7 +401,7 @@ function InfoCard({ icon: Icon, label, value }: InfoCardProps) {
       <Icon className="shrink-0 text-brand-500" size={25} />
       <div>
         <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <p className="mt-1 font-extrabold text-slate-800">{value}</p>
+        <p className="mt-1 font-bold text-slate-800">{value}</p>
       </div>
     </div>
   );

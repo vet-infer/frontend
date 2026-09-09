@@ -326,7 +326,7 @@ export function ResultsPage() {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard icon={ClipboardPlus} label="Resultado sugerido" value={result.suggested_diagnosis} />
         <SummaryCard icon={AlertTriangle} iconClassName={riskTone.iconClassName} label="Nivel de riesgo">
-          <span className={cn("inline-flex rounded-md px-3 py-1 text-sm font-extrabold", riskTone.className)}>
+          <span className={cn("inline-flex rounded-md px-3 py-1 text-sm font-bold", riskTone.className)}>
             {riskTone.label}
           </span>
         </SummaryCard>
@@ -364,7 +364,7 @@ export function ResultsPage() {
               rows={result.activated_rules}
               renderRow={(rule) => (
                 <tr key={rule.id}>
-                  <td className="whitespace-nowrap px-5 py-3 font-extrabold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
+                  <td className="whitespace-nowrap px-5 py-3 font-bold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
                   <td className="px-5 py-3">{Array.isArray(rule.fulfilled_conditions) ? rule.fulfilled_conditions.map(String).join(" · ") : String(rule.fulfilled_conditions ?? "Condiciones registradas")}</td>
                   <td className="px-5 py-3">{rule.justification || "Regla activada por condiciones cumplidas."}</td>
                 </tr>
@@ -499,7 +499,7 @@ function ResultsListView({
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-extrabold text-[#172554]">Resultados encontrados</h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
               {filteredRows.length} registros
             </span>
           </div>
@@ -530,7 +530,7 @@ function ResultsListView({
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-sm font-extrabold text-slate-600">
+                <tr className="border-b border-slate-100 text-sm font-bold text-slate-600">
                   <th className="px-4 py-4">Paciente</th>
                   <th className="px-4 py-4">Propietario</th>
                   <th className="px-4 py-4">Fecha</th>
@@ -552,7 +552,7 @@ function ResultsListView({
                             {getInitial(row.patient)}
                           </span>
                           <div>
-                            <p className="font-extrabold text-slate-800">{row.patient.name}</p>
+                            <p className="font-bold text-slate-800">{row.patient.name}</p>
                             <p className="text-xs font-semibold text-slate-500">
                               {row.patient.species.name} · {row.patient.breed?.name ?? "Sin raza"}
                             </p>
@@ -563,7 +563,7 @@ function ResultsListView({
                       <td className="whitespace-nowrap px-4 py-5 font-semibold">{formatDate(row.evaluation.created_at)}</td>
                       <td className="max-w-[260px] px-4 py-5 font-semibold">{row.result.suggested_diagnosis}</td>
                       <td className="px-4 py-5">
-                        <span className={cn("inline-flex rounded-md px-3 py-1 text-xs font-extrabold", tone.className)}>
+                        <span className={cn("inline-flex rounded-md px-3 py-1 text-xs font-bold", tone.className)}>
                           {tone.label}
                         </span>
                       </td>
@@ -598,7 +598,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
   return (
     <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
       <div>
-        <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+        <div className="mb-3 flex items-center gap-2 text-sm font-bold">
           <Link className="text-brand-500 hover:text-brand-700" to="/results">
             Resultados
           </Link>
@@ -648,7 +648,7 @@ function InfoTile({ icon: Icon, label, value }: { icon: typeof Calendar; label: 
       <Icon className="shrink-0 text-brand-500" size={25} />
       <div>
         <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <p className="mt-1 font-extrabold text-slate-800">{value}</p>
+        <p className="mt-1 font-bold text-slate-800">{value}</p>
       </div>
     </div>
   );
@@ -672,7 +672,7 @@ function SummaryCard({
       <div className="flex items-center gap-4">
         <IconBadge className={cn("h-16 w-16 shrink-0", iconClassName)} icon={Icon} iconSize={29} />
         <div>
-          <p className="text-sm font-extrabold text-slate-500">{label}</p>
+          <p className="text-sm font-bold text-slate-500">{label}</p>
           {children ?? <p className="mt-2 text-xl font-extrabold text-brand-700">{value}</p>}
         </div>
       </div>
@@ -683,7 +683,7 @@ function SummaryCard({
 function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: string; tone: "green" | "violet" }) {
   return (
     <div className="mb-5 last:mb-0">
-      <h3 className="mb-3 text-sm font-extrabold text-slate-600">{title}</h3>
+      <h3 className="mb-3 text-sm font-bold text-slate-600">{title}</h3>
       {facts.length === 0 ? (
         <p className="text-sm font-semibold text-slate-400">Sin datos registrados.</p>
       ) : (
@@ -691,7 +691,7 @@ function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: st
           {facts.map((fact) => (
             <span
               className={cn(
-                "rounded-md px-4 py-2 text-sm font-extrabold",
+                "rounded-md px-4 py-2 text-sm font-bold",
                 tone === "green" ? "bg-emerald-50 text-emerald-700" : "bg-violet-50 text-brand-500"
               )}
               key={fact.id}
