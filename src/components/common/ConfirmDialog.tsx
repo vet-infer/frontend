@@ -1,4 +1,9 @@
 import { AlertTriangle } from "lucide-react";
+import type { MouseEvent } from "react";
+import { useRef } from "react";
+import { useDialogBehavior } from "../../hooks/useDialogBehavior";
+import { useOverlayTransition } from "../../hooks/useOverlayTransition";
+import { cn } from "../../utils/cn";
 import { Button } from "./Button";
 import { IconBadge } from "./IconBadge";
 
@@ -21,13 +26,38 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
-  if (!isOpen) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { shouldRender, isVisible } = useOverlayTransition(isOpen);
+  useDialogBehavior({ isOpen, onClose: onCancel, containerRef: sectionRef });
+
+  if (!shouldRender) {
     return null;
   }
 
+  function handleBackdropClick(event: MouseEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget) {
+      onCancel();
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 px-4">
-      <section className="w-full max-w-md rounded-lg border border-slate-100 bg-white p-6 shadow-2xl">
+    <div
+      className={cn(
+        "fixed inset-0 z-50 grid place-items-center bg-slate-950/40 px-4 transition-opacity duration-150",
+        isVisible ? "opacity-100" : "opacity-0"
+      )}
+      onClick={handleBackdropClick}
+    >
+      <section
+        aria-modal="true"
+        className={cn(
+          "w-full max-w-md rounded-lg border border-slate-100 bg-white p-6 shadow-2xl transition duration-150",
+          isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        )}
+        ref={sectionRef}
+        role="dialog"
+        tabIndex={-1}
+      >
         <div className="flex gap-4">
           <IconBadge className="h-12 w-12 shrink-0" icon={AlertTriangle} iconSize={24} tone="danger" />
           <div>

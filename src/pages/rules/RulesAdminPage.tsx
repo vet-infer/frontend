@@ -300,13 +300,13 @@ export function RulesAdminPage() {
               const disease = diseases.find((item) => item.id === rule.disease_id);
               return (
                 <tr key={rule.id}>
-                  <td className="px-5 py-4 font-extrabold text-slate-700">{rule.code}</td>
+                  <td className="px-5 py-4 font-bold text-slate-700">{rule.code}</td>
                   <td className="px-5 py-4">{rule.name}</td>
                   <td className="px-5 py-4">{disease?.name ?? `ID ${rule.disease_id}`}</td>
                   <td className="px-5 py-4">{rule.risk_level}</td>
                   <td className="px-5 py-4">{rule.conditions.length}</td>
                   <td className="px-5 py-4">
-                    <span className={rule.is_active ? "rounded-md bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700" : "rounded-md bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500"}>
+                    <span className={rule.is_active ? "rounded-md bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700" : "rounded-md bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500"}>
                       {rule.is_active ? "Activa" : "Inactiva"}
                     </span>
                   </td>
@@ -429,7 +429,7 @@ export function RulesAdminPage() {
               rows={viewRule.conditions}
               renderRow={(condition) => (
                 <tr key={condition.id}>
-                  <td className="px-5 py-4 font-extrabold text-slate-700">{condition.variable_key}</td>
+                  <td className="px-5 py-4 font-bold text-slate-700">{condition.variable_key}</td>
                   <td className="px-5 py-4">{condition.operator}</td>
                   <td className="px-5 py-4">{String(condition.expected_value)}</td>
                   <td className="px-5 py-4">{condition.logical_group ?? 1}</td>

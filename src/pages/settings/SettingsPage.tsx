@@ -422,7 +422,7 @@ export function SettingsPage() {
             .map((tab) => (
               <button
                 className={cn(
-                  "min-h-14 border-b-2 px-4 text-sm font-extrabold transition",
+                  "min-h-14 border-b-2 px-4 text-sm font-bold transition",
                   activeTab === tab.id
                     ? "border-brand-500 text-brand-500"
                     : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-brand-700"
@@ -613,7 +613,7 @@ export function SettingsPage() {
                 <Users size={24} />
                 Usuarios registrados
               </h2>
-              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-extrabold text-brand-500">
+              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-brand-500">
                 {users.length} usuarios
               </span>
             </div>
@@ -625,7 +625,7 @@ export function SettingsPage() {
               </div>
             ) : users.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                <p className="font-extrabold text-[#172554]">No hay usuarios registrados</p>
+                <p className="font-bold text-[#172554]">No hay usuarios registrados</p>
                 <p className="mt-2 text-sm text-slate-500">Crea el primer usuario clinico desde el formulario.</p>
               </div>
             ) : (
@@ -634,13 +634,13 @@ export function SettingsPage() {
                 rows={users}
                 renderRow={(item) => (
                   <tr key={item.id}>
-                    <td className="px-5 py-4 font-extrabold text-slate-700">{item.full_name}</td>
+                    <td className="px-5 py-4 font-bold text-slate-700">{item.full_name}</td>
                     <td className="px-5 py-4">{item.email}</td>
                     <td className="px-5 py-4">{roleLabel(item.role?.name)}</td>
                     <td className="px-5 py-4">
                       <span
                         className={cn(
-                          "rounded-md px-3 py-1 text-xs font-extrabold",
+                          "rounded-md px-3 py-1 text-xs font-bold",
                           item.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
                         )}
                       >
@@ -740,7 +740,7 @@ function InfoBox({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
       <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-2 break-words font-extrabold text-[#172554]">{value}</p>
+      <p className="mt-2 break-words font-bold text-[#172554]">{value}</p>
     </div>
   );
 }
@@ -761,7 +761,7 @@ function PreferenceButton({
   return (
     <button
       className={cn(
-        "flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border p-4 text-sm font-extrabold transition",
+        "flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border p-4 text-sm font-bold transition",
         active ? "border-brand-500 bg-violet-50 text-brand-500" : "border-slate-100 bg-white text-slate-500",
         disabled && "opacity-55"
       )}

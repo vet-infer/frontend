@@ -110,7 +110,7 @@ export function PatientHistoryPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-extrabold text-brand-500" to="/history">
+          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-brand-500" to="/history">
             <ArrowLeft size={18} />
             Historial clinico
           </Link>
@@ -189,7 +189,7 @@ export function PatientHistoryPage() {
 
           {filteredEvaluations.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-              <p className="font-extrabold text-[#172554]">Sin evaluaciones registradas</p>
+              <p className="font-bold text-[#172554]">Sin evaluaciones registradas</p>
               <p className="mt-2 text-sm text-slate-500">Cuando se registre una evaluacion, aparecera en esta linea de tiempo.</p>
             </div>
           ) : (
@@ -238,7 +238,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
   return (
     <div className="grid gap-4 sm:grid-cols-[44px_1fr]">
       <div className="flex flex-col items-center">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-500 text-sm font-extrabold text-white">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
           {index}
         </span>
         <span className="mt-2 h-full w-px bg-violet-100" />
@@ -246,7 +246,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
       <div className="rounded-lg border border-slate-100 bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
         <div className="grid gap-4 lg:grid-cols-[150px_1fr_1fr_170px_140px] lg:items-center">
           <div>
-            <p className="font-extrabold text-[#172554]">{formatDate(item.evaluation.created_at)}</p>
+            <p className="font-bold text-[#172554]">{formatDate(item.evaluation.created_at)}</p>
             <p className="mt-1 text-xs font-semibold text-slate-500">
               <Calendar className="mr-1 inline" size={14} />
               {formatDate(item.evaluation.created_at, true).split(",").at(-1)?.trim()}
@@ -254,7 +254,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Motivo de consulta</p>
-            <p className="mt-1 font-extrabold text-slate-700">{item.evaluation.reason || "Sin motivo registrado"}</p>
+            <p className="mt-1 font-bold text-slate-700">{item.evaluation.reason || "Sin motivo registrado"}</p>
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Sintomas observados</p>
@@ -262,17 +262,17 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Resultado sugerido</p>
-            <p className="mt-1 font-extrabold text-slate-700">{result?.suggested_diagnosis ?? "Sin resultado procesado"}</p>
+            <p className="mt-1 font-bold text-slate-700">{result?.suggested_diagnosis ?? "Sin resultado procesado"}</p>
             <p className="mt-2 text-xs font-semibold text-slate-500">
               Reglas activadas {result?.activated_rules.length ?? 0}
             </p>
           </div>
           <div className="space-y-3">
-            <span className={`inline-flex rounded-md px-3 py-1 text-xs font-extrabold ${riskClasses(result?.risk_level)}`}>
+            <span className={`inline-flex rounded-md px-3 py-1 text-xs font-bold ${riskClasses(result?.risk_level)}`}>
               Riesgo {riskLabel(result?.risk_level).toLowerCase()}
             </span>
             <Link
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-3 text-xs font-extrabold text-brand-500 transition hover:bg-violet-50"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-3 text-xs font-bold text-brand-500 transition hover:bg-violet-50"
               to={`/results?evaluationId=${item.evaluation.id}`}
             >
               <Eye size={15} />
@@ -289,7 +289,7 @@ function InfoMini({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-2 font-extrabold text-[#172554]">{value}</p>
+      <p className="mt-2 font-bold text-[#172554]">{value}</p>
     </div>
   );
 }
