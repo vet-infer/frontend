@@ -18,7 +18,7 @@ import {
   AlertTriangle,
   ChevronRight,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Card } from "../../components/common/Card";
@@ -34,6 +34,12 @@ import { cn } from "../../utils/cn";
 import { calculateAge, formatDate as formatDateWithTime } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
+
+const AnatomicalViewer3D = lazy(() =>
+  import("../../components/evaluations/AnatomicalViewer3D").then((module) => ({
+    default: module.AnatomicalViewer3D,
+  })),
+);
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -348,6 +354,16 @@ export function ResultsPage() {
             </div>
           </div>
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="mb-4 flex items-center gap-3 text-xl font-extrabold text-[#172554]">
+          <PawPrint size={24} />
+          Zona corporal afectada
+        </h2>
+        <Suspense fallback={<Skeleton className="h-72 w-full rounded-lg" />}>
+          <AnatomicalViewer3D species={patient.species.name} regions={result.regions ?? []} />
+        </Suspense>
       </Card>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_1.05fr]">
