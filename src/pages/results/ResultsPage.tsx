@@ -277,7 +277,7 @@ export function ResultsPage() {
           <EmptyState
             action={
               <Link
-                className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+                className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
                 to={`/evaluations?patientId=${patient.id}`}
               >
                 <ClipboardPlus size={18} />
@@ -304,7 +304,7 @@ export function ResultsPage() {
       <Card className="p-6 sm:p-8">
         <div className="grid gap-6 xl:grid-cols-[1.1fr_1.6fr]">
           <div className="flex items-center gap-5 border-b border-slate-100 pb-6 xl:border-b-0 xl:border-r xl:pb-0 xl:pr-8">
-            <span className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-violet-50 text-5xl font-extrabold text-brand-700">
+            <span className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-teal-50 text-5xl font-extrabold text-teal-700">
               {getInitial(patient)}
             </span>
             <div>
@@ -342,7 +342,7 @@ export function ResultsPage() {
 
       <Card className="p-6">
         <div className="flex gap-5">
-          <IconBadge className="h-14 w-14 shrink-0 text-brand-700" icon={Info} iconSize={30} />
+          <IconBadge className="h-14 w-14 shrink-0 text-teal-700" icon={Info} iconSize={30} />
           <div className="min-w-0 flex-1">
             <h2 className="text-xl font-extrabold text-[#172554]">Explicacion del resultado</h2>
             <p className="mt-3 leading-7 text-slate-600">
@@ -414,14 +414,14 @@ export function ResultsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to="/results"
         >
           <ArrowLeft size={18} />
           Volver a resultados
         </Link>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to={`/patients/${patient.id}/history`}
         >
           <FileClock size={18} />
@@ -466,7 +466,7 @@ function ResultsListView({
           </p>
         </div>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
           to="/evaluations"
         >
           <ClipboardPlus size={20} />
@@ -489,7 +489,7 @@ function ResultsListView({
             <span className="mb-2 block text-sm font-bold text-slate-700">Buscar resultado</span>
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="Paciente, propietario o diagnostico..."
               value={query}
@@ -498,7 +498,7 @@ function ResultsListView({
           <label className="block min-w-[210px]">
             <span className="mb-2 block text-sm font-bold text-slate-700">Nivel de riesgo</span>
             <select
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => onRiskFilterChange(event.target.value)}
               value={riskFilter}
             >
@@ -528,7 +528,7 @@ function ResultsListView({
             <EmptyState
               action={
                 <Link
-                  className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+                  className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
                   to="/evaluations"
                 >
                   <ClipboardPlus size={18} />
@@ -564,7 +564,7 @@ function ResultsListView({
                     <tr key={row.evaluation.id}>
                       <td className="px-4 py-5">
                         <div className="flex items-center gap-3">
-                          <span className="grid h-12 w-12 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-brand-700">
+                          <span className="grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-lg font-extrabold text-teal-700">
                             {getInitial(row.patient)}
                           </span>
                           <div>
@@ -588,7 +588,7 @@ function ResultsListView({
                       </td>
                       <td className="px-4 py-5">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 text-sm font-semibold text-brand-500 shadow-sm transition hover:bg-violet-50"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
                           to={`/results?evaluationId=${row.evaluation.id}`}
                         >
                           Ver resultado
@@ -615,7 +615,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
     <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
       <div>
         <div className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Link className="text-brand-500 hover:text-brand-700" to="/results">
+          <Link className="text-teal-500 hover:text-teal-700" to="/results">
             Resultados
           </Link>
           <span className="text-slate-300">/</span>
@@ -631,7 +631,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
       <div className="flex flex-wrap gap-3">
         {onDownloadPdf ? (
           <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
             onClick={onDownloadPdf}
             type="button"
           >
@@ -640,14 +640,14 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
           </button>
         ) : null}
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
           to={patientId ? `/evaluations?patientId=${patientId}` : "/evaluations"}
         >
           <ClipboardPlus size={20} />
           Nueva evaluacion
         </Link>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to={patientId ? `/patients/${patientId}/history` : "/history"}
         >
           <FileClock size={20} />
@@ -661,7 +661,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
 function InfoTile({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) {
   return (
     <div className="flex items-center gap-4 border-b border-slate-100 px-2 py-3">
-      <Icon className="shrink-0 text-brand-500" size={25} />
+      <Icon className="shrink-0 text-teal-500" size={25} />
       <div>
         <p className="text-sm font-semibold text-slate-500">{label}</p>
         <p className="mt-1 font-bold text-slate-800">{value}</p>
@@ -689,7 +689,7 @@ function SummaryCard({
         <IconBadge className={cn("h-16 w-16 shrink-0", iconClassName)} icon={Icon} iconSize={29} />
         <div>
           <p className="text-sm font-bold text-slate-500">{label}</p>
-          {children ?? <p className="mt-2 text-xl font-extrabold text-brand-700">{value}</p>}
+          {children ?? <p className="mt-2 text-xl font-extrabold text-teal-700">{value}</p>}
         </div>
       </div>
     </Card>
@@ -708,7 +708,7 @@ function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: st
             <span
               className={cn(
                 "rounded-md px-4 py-2 text-sm font-bold",
-                tone === "green" ? "bg-emerald-50 text-emerald-700" : "bg-violet-50 text-brand-500"
+                tone === "green" ? "bg-emerald-50 text-emerald-700" : "bg-teal-50 text-teal-500"
               )}
               key={fact.id}
             >

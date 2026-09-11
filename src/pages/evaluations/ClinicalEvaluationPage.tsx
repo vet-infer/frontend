@@ -171,7 +171,7 @@ export function ClinicalEvaluationPage() {
           <button
             aria-current={activeTab === index ? "step" : undefined}
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-bold ${
-              activeTab === index ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600"
+              activeTab === index ? "bg-teal-500 text-white" : "bg-slate-100 text-slate-600"
             }`}
             key={tab}
             onClick={() => goToTab(index)}
@@ -290,7 +290,7 @@ export function ClinicalEvaluationPage() {
       </Card>
 
       <div className="flex justify-between">
-        <Link className="text-sm font-bold text-brand-500" to="/patients">
+        <Link className="text-sm font-bold text-teal-500" to="/patients">
           Volver a pacientes
         </Link>
         <Button disabled={!evaluation || !results.length} onClick={() => navigate(`/results?evaluationId=${evaluation?.id}`)}>

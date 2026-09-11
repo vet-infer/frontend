@@ -143,7 +143,7 @@ export function DashboardPage() {
                 />
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-5 text-[#172554]">{item.label}</h3>
-                  <p className="mt-1 text-2xl font-extrabold leading-none text-brand-500">{item.value}</p>
+                  <p className="mt-1 text-2xl font-extrabold leading-none text-teal-500">{item.value}</p>
                   <p className={isDanger ? "mt-1 text-xs font-semibold text-red-500" : "mt-1 text-xs font-semibold text-emerald-600"}>
                     {item.change}
                   </p>
@@ -285,7 +285,7 @@ function PanelHeader({ title, to }: { title: string; to: string }) {
   return (
     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
       <h2 className="text-base font-bold text-[#172554]">{title}</h2>
-      <Link className="text-sm font-bold text-brand-500 hover:text-brand-700" to={to}>
+      <Link className="text-sm font-bold text-teal-500 hover:text-teal-700" to={to}>
         Ver todas
       </Link>
     </div>

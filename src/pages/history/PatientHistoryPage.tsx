@@ -110,7 +110,7 @@ export function PatientHistoryPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-brand-500" to="/history">
+          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-teal-500" to="/history">
             <ArrowLeft size={18} />
             Historial clinico
           </Link>
@@ -121,14 +121,14 @@ export function PatientHistoryPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
             to={`/evaluations?patientId=${history.patient.id}`}
           >
             <ClipboardPlus size={19} />
             Nueva evaluacion
           </Link>
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 py-2 text-sm font-semibold text-brand-500 shadow-sm transition hover:bg-violet-50"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 py-2 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
             to={latest ? `/results?evaluationId=${latest.evaluation.id}` : "/results"}
           >
             <LineChart size={19} />
@@ -140,7 +140,7 @@ export function PatientHistoryPage() {
       <Card className="p-6 sm:p-8">
         <div className="grid gap-6 xl:grid-cols-[1.2fr_2fr]">
           <div className="flex items-center gap-5">
-            <span className="grid h-24 w-24 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-brand-700">
+            <span className="grid h-24 w-24 place-items-center rounded-full bg-teal-50 text-4xl font-extrabold text-teal-700">
               {history.patient.name.charAt(0).toUpperCase()}
             </span>
             <div>
@@ -170,13 +170,13 @@ export function PatientHistoryPage() {
           </h2>
           <div className="mb-6 grid gap-3 md:grid-cols-[1fr_220px]">
             <input
-              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por motivo o resultado..."
               value={query}
             />
             <select
-              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setRiskFilter(event.target.value)}
               value={riskFilter}
             >
@@ -238,10 +238,10 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
   return (
     <div className="grid gap-4 sm:grid-cols-[44px_1fr]">
       <div className="flex flex-col items-center">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-teal-500 text-sm font-bold text-white">
           {index}
         </span>
-        <span className="mt-2 h-full w-px bg-violet-100" />
+        <span className="mt-2 h-full w-px bg-teal-100" />
       </div>
       <div className="rounded-lg border border-slate-100 bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
         <div className="grid gap-4 lg:grid-cols-[150px_1fr_1fr_170px_140px] lg:items-center">
@@ -272,7 +272,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
               Riesgo {riskLabel(result?.risk_level).toLowerCase()}
             </span>
             <Link
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-3 text-xs font-bold text-brand-500 transition hover:bg-violet-50"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-3 text-xs font-bold text-teal-500 transition hover:bg-teal-50"
               to={`/results?evaluationId=${item.evaluation.id}`}
             >
               <Eye size={15} />

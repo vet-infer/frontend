@@ -267,7 +267,7 @@ export function OwnersPage() {
           <label className="relative block flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por nombre, apellido, telefono o correo..."
               value={query}
@@ -279,8 +279,8 @@ export function OwnersPage() {
                 className={cn(
                   "h-12 rounded-full px-7 text-sm font-bold transition",
                   filter === item.value
-                    ? "bg-brand-500 text-white shadow-sm"
-                    : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-violet-50"
+                    ? "bg-teal-500 text-white shadow-sm"
+                    : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-teal-50"
                 )}
                 key={item.value}
                 onClick={() => setFilter(item.value)}
@@ -334,7 +334,7 @@ export function OwnersPage() {
                   <tr key={owner.id}>
                     <td className="px-3 py-5">
                       <div className="flex items-center gap-4">
-                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-brand-700">
+                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-teal-50 text-lg font-extrabold text-teal-700">
                           {getInitials(owner)}
                         </span>
                         <span className="font-bold text-slate-700">{getFullName(owner)}</span>
@@ -368,7 +368,7 @@ export function OwnersPage() {
                     <td className="px-3 py-5">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                           to={`/owners/${owner.id}`}
         >
                           <Eye size={17} />
@@ -430,7 +430,7 @@ export function OwnersPage() {
                     >
                       &lt;
                     </button>
-                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
+                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-teal-500 font-bold text-white" type="button">
                       {page + 1}
                     </button>
                     <button

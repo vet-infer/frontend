@@ -12,7 +12,7 @@ type IconBadgeProps = {
 };
 
 const tones: Record<IconTone, string> = {
-  brand: "bg-violet-50 text-brand-500",
+  brand: "bg-teal-50 text-teal-500",
   danger: "bg-red-50 text-red-600",
   info: "bg-blue-50 text-blue-600",
   warning: "bg-amber-50 text-amber-600",

@@ -95,17 +95,17 @@ export function LoginPage() {
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[36vw] min-w-[360px] overflow-hidden lg:block">
         <div className="absolute right-[-11rem] top-[-2rem] h-[42rem] w-[42rem] rounded-full bg-white/20" />
         <div className="absolute right-[-5rem] top-[9rem] h-[29rem] w-[35rem] rounded-full bg-[#EDE7FF]/45 blur-xl" />
-        <span className="absolute right-[6.2rem] top-[45%] text-[7rem] font-light leading-none text-brand-500/10">+</span>
+        <span className="absolute right-[6.2rem] top-[45%] text-[7rem] font-light leading-none text-teal-500/10">+</span>
         <div className="absolute bottom-[11rem] right-[6rem] grid grid-cols-5 gap-4">
           {Array.from({ length: 20 }).map((_, index) => (
-            <span className="h-2 w-2 rounded-full bg-brand-500/12" key={index} />
+            <span className="h-2 w-2 rounded-full bg-teal-500/12" key={index} />
           ))}
         </div>
       </div>
 
       <section className="relative w-full max-w-[460px] rounded-2xl border border-white/85 bg-white/94 px-6 py-7 shadow-[0_22px_58px_rgba(35,47,91,0.12)] backdrop-blur-md sm:px-9 sm:py-8">
         <div className="mb-7 text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-brand-500 text-brand-500 shadow-[0_10px_24px_rgba(70,53,211,0.11)]">
+          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-teal-500 text-teal-500 shadow-[0_10px_24px_rgba(70,53,211,0.11)]">
             <PawPrint size={34} fill="currentColor" />
           </span>
           <h1 className="mt-4 text-3xl font-extrabold tracking-normal text-[#0F2754] sm:text-[2.15rem]">VetClinic</h1>
@@ -136,7 +136,7 @@ export function LoginPage() {
                   <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
                   <input
                     aria-invalid={Boolean(errors.email)}
-                    className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                    className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                     onChange={(event) => {
                       setEmail(event.target.value);
                       setErrors((current) => ({ ...current, email: undefined }));
@@ -155,7 +155,7 @@ export function LoginPage() {
                   <Lock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
                   <input
                     aria-invalid={Boolean(errors.password)}
-                    className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-14 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                    className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-14 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                     onChange={(event) => {
                       setPassword(event.target.value);
                       setErrors((current) => ({ ...current, password: undefined }));
@@ -183,7 +183,7 @@ export function LoginPage() {
             </form>
 
             <button
-              className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-bold text-brand-500 transition hover:bg-violet-50"
+              className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-bold text-teal-500 transition hover:bg-teal-50"
               onClick={() => {
                 setMode("forgot");
                 setError("");

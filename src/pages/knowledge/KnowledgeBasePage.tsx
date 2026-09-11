@@ -242,7 +242,7 @@ export function KnowledgeBasePage() {
             <label className="relative block flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={21} />
               <input
-                className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar por enfermedad, regla o variable clinica..."
                 value={query}
@@ -271,8 +271,8 @@ export function KnowledgeBasePage() {
               className={cn(
                 "min-h-14 border-b-2 px-4 text-sm font-bold transition",
                 activeTab === tab.id
-                  ? "border-brand-500 text-brand-500"
-                  : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-brand-700"
+                  ? "border-teal-500 text-teal-500"
+                  : "border-transparent text-slate-500 hover:bg-teal-50 hover:text-teal-700"
               )}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -406,7 +406,7 @@ function SpeciesButton({
     <button
       className={cn(
         "inline-flex h-12 items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold transition",
-        active ? "bg-brand-500 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
+        active ? "bg-teal-500 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-teal-50"
       )}
       onClick={onClick}
       type="button"
@@ -429,7 +429,7 @@ function StatCard({
   tone?: "violet" | "green" | "orange";
 }) {
   const tones = {
-    violet: "bg-violet-50 text-brand-500",
+    violet: "bg-teal-50 text-teal-500",
     green: "bg-emerald-50 text-emerald-600",
     orange: "bg-orange-50 text-orange-600",
   };
@@ -464,7 +464,7 @@ function KnowledgeSplit({
     return (
       <Card className="grid min-h-72 place-items-center p-8 text-center">
         <div>
-          <BookOpen className="mx-auto text-brand-500" size={34} />
+          <BookOpen className="mx-auto text-teal-500" size={34} />
           <h2 className="mt-4 text-xl font-extrabold text-[#172554]">Sin informacion para mostrar</h2>
           <p className="mt-2 text-sm text-slate-500">Ajusta la busqueda o el filtro de especie.</p>
         </div>
@@ -498,7 +498,7 @@ function ListButton({
     <button
       className={cn(
         "flex w-full items-center gap-4 rounded-lg border p-4 text-left transition",
-        active ? "border-[#635BFF] bg-violet-50/40" : "border-slate-100 bg-white hover:bg-slate-50"
+        active ? "border-[#635BFF] bg-teal-50/40" : "border-slate-100 bg-white hover:bg-slate-50"
       )}
       onClick={onClick}
       type="button"
@@ -600,8 +600,8 @@ function RuleDetail({ rule, diseases }: { rule: Rule; diseases: Disease[] }) {
           <p className="text-sm font-bold text-emerald-700">Resultado THEN</p>
           <p className="mt-2 text-lg font-extrabold text-emerald-800">Compatible con {disease?.name ?? "enfermedad relacionada"}</p>
         </div>
-        <div className="rounded-lg border border-violet-100 bg-violet-50 p-5">
-          <p className="text-sm font-bold text-brand-500">Enfermedad relacionada</p>
+        <div className="rounded-lg border border-teal-100 bg-teal-50 p-5">
+          <p className="text-sm font-bold text-teal-500">Enfermedad relacionada</p>
           <p className="mt-2 text-lg font-extrabold text-[#172554]">{disease?.name ?? "Sin enfermedad asociada"}</p>
         </div>
       </div>
@@ -722,7 +722,7 @@ function DetailHeader({
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-3xl font-extrabold text-[#172554]">{title}</h2>
           {badges.map((badge) => (
-            <span className="rounded-md bg-violet-50 px-3 py-1 text-sm font-bold text-brand-500" key={badge}>
+            <span className="rounded-md bg-teal-50 px-3 py-1 text-sm font-bold text-teal-500" key={badge}>
               {badge}
             </span>
           ))}
