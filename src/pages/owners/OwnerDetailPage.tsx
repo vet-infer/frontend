@@ -169,7 +169,7 @@ export function OwnerDetailPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-700" to="/owners">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-teal-700" to="/owners">
             <ArrowLeft size={18} />
             Volver a Propietarios
           </Link>
@@ -195,7 +195,7 @@ export function OwnerDetailPage() {
 
       <Card className="p-6 sm:p-8">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-brand-700">
+          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-teal-50 text-4xl font-extrabold text-teal-700">
             {getInitials(owner)}
           </span>
           <div>
@@ -215,7 +215,7 @@ export function OwnerDetailPage() {
         </div>
       </Card>
 
-      <Card className={shouldFocusPatients ? "ring-2 ring-brand-500/30" : undefined}>
+      <Card className={shouldFocusPatients ? "ring-2 ring-teal-500/30" : undefined}>
         <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="flex items-center gap-3 text-xl font-extrabold text-[#172554]">
@@ -249,7 +249,7 @@ export function OwnerDetailPage() {
                 <td className="px-5 py-4 font-semibold">{patient.sex || "Sin registrar"}</td>
                 <td className="px-5 py-4">
                   <Link
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                     to={`/patients/${patient.id}`}
                   >
                     Ver detalle
@@ -298,7 +298,7 @@ type InfoCardProps = {
 function InfoCard({ icon: Icon, label, value }: InfoCardProps) {
   return (
     <div className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50 px-5 py-4">
-      <Icon className="shrink-0 text-brand-500" size={25} />
+      <Icon className="shrink-0 text-teal-500" size={25} />
       <div className="min-w-0">
         <p className="text-sm font-semibold text-slate-500">{label}</p>
         <p className="mt-1 break-words font-bold text-slate-800">{value}</p>

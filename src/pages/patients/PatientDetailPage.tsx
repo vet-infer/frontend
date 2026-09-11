@@ -200,7 +200,7 @@ export function PatientDetailPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-700" to="/patients">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-teal-700" to="/patients">
             <ArrowLeft size={18} />
             Volver a Pacientes
           </Link>
@@ -209,14 +209,14 @@ export function PatientDetailPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             to={`/evaluations?patientId=${patient.id}`}
           >
             <PawPrint size={20} />
             Nueva evaluacion
           </Link>
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             to={`/patients/${patient.id}/history`}
           >
             <History size={19} />
@@ -241,7 +241,7 @@ export function PatientDetailPage() {
 
       <Card className="p-6 sm:p-8">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-brand-700">
+          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-teal-50 text-4xl font-extrabold text-teal-700">
             {getInitial(patient)}
           </span>
           <div>
@@ -331,7 +331,7 @@ export function PatientDetailPage() {
             <p className="mt-1 text-sm font-medium text-slate-500">Evaluaciones registradas para este paciente.</p>
           </div>
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             to={`/evaluations?patientId=${patient.id}`}
           >
             <CalendarPlus size={18} />
@@ -398,7 +398,7 @@ type InfoCardProps = {
 function InfoCard({ icon: Icon, label, value }: InfoCardProps) {
   return (
     <div className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50 px-5 py-4">
-      <Icon className="shrink-0 text-brand-500" size={25} />
+      <Icon className="shrink-0 text-teal-500" size={25} />
       <div>
         <p className="text-sm font-semibold text-slate-500">{label}</p>
         <p className="mt-1 font-bold text-slate-800">{value}</p>

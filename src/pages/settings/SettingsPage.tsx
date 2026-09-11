@@ -424,8 +424,8 @@ export function SettingsPage() {
                 className={cn(
                   "min-h-14 border-b-2 px-4 text-sm font-bold transition",
                   activeTab === tab.id
-                    ? "border-brand-500 text-brand-500"
-                    : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-brand-700"
+                    ? "border-teal-500 text-teal-500"
+                    : "border-transparent text-slate-500 hover:bg-teal-50 hover:text-teal-700"
                 )}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -441,7 +441,7 @@ export function SettingsPage() {
         <section className="grid gap-6 xl:grid-cols-[1fr_0.75fr]">
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-4">
-              <span className="grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-2xl font-extrabold text-brand-500">
+              <span className="grid h-16 w-16 place-items-center rounded-full bg-teal-50 text-2xl font-extrabold text-teal-500">
                 {(currentUser?.full_name ?? "Usuario").charAt(0)}
               </span>
               <div>
@@ -613,7 +613,7 @@ export function SettingsPage() {
                 <Users size={24} />
                 Usuarios registrados
               </h2>
-              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-brand-500">
+              <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-500">
                 {users.length} usuarios
               </span>
             </div>
@@ -727,7 +727,7 @@ export function SettingsPage() {
       {!isAdmin && activeTab !== "users" ? (
         <Card className="p-5">
           <div className="flex items-start gap-3 text-sm font-semibold text-slate-500">
-            <ShieldCheck className="mt-0.5 shrink-0 text-brand-500" size={20} />
+            <ShieldCheck className="mt-0.5 shrink-0 text-teal-500" size={20} />
             La gestion de usuarios solo esta disponible para cuentas con rol ADMINISTRADOR.
           </div>
         </Card>
@@ -762,7 +762,7 @@ function PreferenceButton({
     <button
       className={cn(
         "flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border p-4 text-sm font-bold transition",
-        active ? "border-brand-500 bg-violet-50 text-brand-500" : "border-slate-100 bg-white text-slate-500",
+        active ? "border-teal-500 bg-teal-50 text-teal-500" : "border-slate-100 bg-white text-slate-500",
         disabled && "opacity-55"
       )}
       disabled={disabled}

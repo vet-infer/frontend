@@ -237,7 +237,7 @@ export function PatientsPage() {
           <label className="relative block flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por paciente, propietario, especie o raza..."
               value={query}
@@ -252,8 +252,8 @@ export function PatientsPage() {
                   className={cn(
                     "inline-flex h-12 items-center gap-2 rounded-lg px-7 text-sm font-bold transition",
                     filter === item.value
-                      ? "bg-brand-500 text-white shadow-sm"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
+                      ? "bg-teal-500 text-white shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-teal-50"
                   )}
                   key={item.value}
                   onClick={() => setFilter(item.value)}
@@ -302,7 +302,7 @@ export function PatientsPage() {
                   <tr key={patient.id}>
                     <td className="px-5 py-5">
                       <div className="flex items-center gap-4">
-                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-violet-50 text-lg font-extrabold text-brand-700">
+                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-teal-50 text-lg font-extrabold text-teal-700">
                           {getInitial(patient)}
                         </span>
                         <span className="font-bold text-slate-800">{patient.name}</span>
@@ -328,7 +328,7 @@ export function PatientsPage() {
                     <td className="px-5 py-5">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                           to={`/patients/${patient.id}`}
                         >
                           <Eye size={17} />
@@ -344,7 +344,7 @@ export function PatientsPage() {
                           Editar
                         </Button>
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                           to={`/evaluations?patientId=${patient.id}`}
                         >
                           <CalendarPlus size={17} />
@@ -380,7 +380,7 @@ export function PatientsPage() {
                     >
                       ‹
                     </button>
-                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
+                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-teal-500 font-bold text-white" type="button">
                       {page + 1}
                     </button>
                     <button

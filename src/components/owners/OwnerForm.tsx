@@ -317,7 +317,7 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
           </Button>
         ) : (
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             to="/owners"
           >
             Cancelar

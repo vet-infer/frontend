@@ -2,6 +2,23 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Este proyecto no sigue un esquema de versionado formal todavía; las entradas se agrupan por fecha y, cuando aplica, por el change de OpenSpec que las originó (`openspec/changes/archive/`).
 
+## [2026-09-11] — Rebranding de color: morado → teal
+
+Sin change de OpenSpec asociado (ajuste puntual de marca, sin cambios de comportamiento).
+
+### Changed
+
+- Extendido a toda la app el cambio de color iniciado en `Sidebar.tsx` (commit `5198cd2`): las 27 apariciones restantes de `brand-*` (token de marca en `src/styles/globals.css`, hex `#4635D3` y variantes) y de `violet-*` (paleta morada de Tailwind, usada junto a `brand-*` en hovers/bordes) se reemplazan por `teal-*` de Tailwind, con mapeo directo de tono (`brand-500` → `teal-500`, etc.).
+- `src/styles/globals.css`: eliminado el bloque `@theme` que definía `--color-brand-500/600/700/800` (introducido en Fase 1) — ya sin uso tras el reemplazo.
+
+### Fixed
+
+- El primer intento de reemplazo (sed masivo `brand|violet` → `teal`) reescribió también las claves del bloque `@theme` (`--color-brand-500` → `--color-teal-500`), lo que sobrescribía la paleta `teal` real de Tailwind con los hex morados originales. Corregido eliminando el bloque completo en vez de renombrarlo.
+
+---
+
+**Verificación:** `tsc --noEmit` limpio. **Archivos modificados:** `src/styles/globals.css` y 26 archivos adicionales en `src/components/` y `src/pages/` (ver `git diff` para el listado completo).
+
 ## [2026-09-08] — Interacción de overlays y jerarquía tipográfica (Fase 2)
 
 Change de OpenSpec: [`archive/2026-09-08-frontend-fase2-motion-interaccion`](../openspec/changes/archive/2026-09-08-frontend-fase2-motion-interaccion/). Spec nueva: [`frontend/overlay-interaction`](../openspec/specs/frontend/overlay-interaction/spec.md).

@@ -133,7 +133,7 @@ export function HistoryPage() {
             <span className="mb-2 block text-sm font-bold text-slate-700">Buscar paciente</span>
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por nombre del paciente..."
               value={query}
@@ -240,7 +240,7 @@ export function HistoryPage() {
                   <tr key={row.patient.id}>
                     <td className="px-4 py-5">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-12 w-12 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-brand-700">
+                        <span className="grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-lg font-extrabold text-teal-700">
                           {row.patient.name.charAt(0).toUpperCase()}
                         </span>
                         <div>
@@ -268,7 +268,7 @@ export function HistoryPage() {
                     </td>
                     <td className="px-4 py-5">
                       <Link
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 text-sm font-semibold text-brand-500 shadow-sm transition hover:bg-violet-50"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
                         to={`/patients/${row.patient.id}/history`}
                       >
                         <FileClock size={17} />
@@ -341,7 +341,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
     <div className="relative min-w-[280px]">
       <span className="mb-2 block text-sm font-bold text-slate-700">Rango de fechas</span>
       <button
-        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
+        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/10"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
@@ -350,7 +350,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
           <span className="truncate">{formatRangeLabel(fromDate, toDate)}</span>
         </span>
         {(fromDate || toDate) ? (
-          <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-bold text-brand-500">Activo</span>
+          <span className="rounded-full bg-teal-50 px-2 py-1 text-xs font-bold text-teal-500">Activo</span>
         ) : null}
       </button>
 
@@ -360,7 +360,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
             <label className="block">
               <span className="mb-2 block text-xs font-bold text-slate-500">Desde</span>
               <input
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 onChange={(event) => {
                   const nextFrom = event.target.value;
                   setDraftFrom(nextFrom);
@@ -376,7 +376,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
             <label className="block">
               <span className="mb-2 block text-xs font-bold text-slate-500">Hasta</span>
               <input
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 min={draftFrom || undefined}
                 onChange={(event) => setDraftTo(event.target.value)}
                 type="date"

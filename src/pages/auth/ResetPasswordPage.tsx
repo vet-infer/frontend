@@ -57,7 +57,7 @@ export function ResetPasswordPage() {
     <main className="grid min-h-screen place-items-center bg-[#F6F9FF] px-4 py-6">
       <section className="w-full max-w-[460px] rounded-2xl border border-white/85 bg-white px-6 py-8 shadow-[0_22px_58px_rgba(35,47,91,0.12)] sm:px-9">
         <div className="mb-6 text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-brand-500 text-brand-500">
+          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-teal-500 text-teal-500">
             <KeyRound size={30} />
           </span>
           <h1 className="mt-4 text-2xl font-extrabold text-[#172554]">Restablecer contraseña</h1>
@@ -101,7 +101,7 @@ export function ResetPasswordPage() {
           </form>
         ) : null}
 
-        <Link className="mt-5 block text-center text-sm font-bold text-brand-500" to="/login">
+        <Link className="mt-5 block text-center text-sm font-bold text-teal-500" to="/login">
           Volver al inicio de sesion
         </Link>
       </section>

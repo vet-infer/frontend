@@ -78,7 +78,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
           <span className="relative block">
             <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
             <input
-              className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+              className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setEmail(event.target.value)}
               placeholder="Ingresa tu correo electronico"
               type="email"
@@ -93,7 +93,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       </form>
 
       <button
-        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-bold text-brand-500 transition hover:bg-violet-50"
+        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-bold text-teal-500 transition hover:bg-teal-50"
         onClick={onBack}
         type="button"
       >

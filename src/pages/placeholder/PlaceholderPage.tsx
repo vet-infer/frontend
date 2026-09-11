@@ -10,7 +10,7 @@ export function PlaceholderPage({ title, icon: Icon }: PlaceholderPageProps) {
   return (
     <Card className="p-8">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <span className="grid h-16 w-16 place-items-center rounded-lg bg-violet-50 text-brand-500">
+        <span className="grid h-16 w-16 place-items-center rounded-lg bg-teal-50 text-teal-500">
           <Icon size={31} strokeWidth={1.9} />
         </span>
         <div>

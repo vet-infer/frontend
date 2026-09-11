@@ -81,7 +81,7 @@ export function AppLayout() {
           />
         ) : (
           <button
-            className="mb-5 rounded-lg border border-slate-200 bg-white p-2 text-brand-700 shadow-sm lg:hidden"
+            className="mb-5 rounded-lg border border-slate-200 bg-white p-2 text-teal-700 shadow-sm lg:hidden"
             onClick={() => setIsSidebarOpen(true)}
             aria-label="Abrir menu"
           >

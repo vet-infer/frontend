@@ -107,7 +107,7 @@ export function PatientFormPage() {
       <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mb-5 flex items-center gap-2 text-sm font-bold">
-            <Link className="text-brand-500 hover:text-brand-700" to="/patients">
+            <Link className="text-teal-500 hover:text-teal-700" to="/patients">
               Pacientes
             </Link>
             <span className="text-slate-300">/</span>
