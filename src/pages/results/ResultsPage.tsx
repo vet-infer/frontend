@@ -363,7 +363,12 @@ export function ResultsPage() {
           Zona corporal afectada
         </h2>
         <Suspense fallback={<Skeleton className="h-72 w-full rounded-lg" />}>
-          <AnatomicalViewer3D species={patient.species.name} regions={result.regions ?? []} />
+          <AnatomicalViewer3D
+            species={patient.species.name}
+            riskLevel={result.risk_level}
+            regions={result.regions ?? []}
+            secondaryRegions={result.secondary_regions ?? []}
+          />
         </Suspense>
       </Card>
 

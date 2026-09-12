@@ -108,4 +108,5 @@ export type PersistedInferenceResult = {
   explanation?: string | null;
   activated_rules: PersistedActivatedRule[];
   regions?: AnatomicalRegion[];
+  secondary_regions?: AnatomicalRegion[];
 };
