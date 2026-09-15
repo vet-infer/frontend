@@ -2,9 +2,24 @@ import type { Breed, Patient, PatientPayload, Species } from "../types/patient";
 import { api } from "./api";
 
 export const patientService = {
-  async list() {
-    const { data } = await api.get<Patient[]>("/api/v1/patients");
-    return data;
+  async list({ skip = 0, limit = 20 }: { skip?: number; limit?: number } = {}) {
+    const response = await api.get<Patient[]>("/api/v1/patients", { params: { skip, limit } });
+    const total = Number(response.headers["x-total-count"] ?? response.data.length);
+    return { items: response.data, total };
+  },
+
+  async listAll(): Promise<Patient[]> {
+    const pageSize = 100;
+    const items: Patient[] = [];
+
+    for (let skip = 0; ; skip += pageSize) {
+      const { items: page } = await this.list({ skip, limit: pageSize });
+      items.push(...page);
+
+      if (page.length < pageSize) {
+        return items;
+      }
+    }
   },
 
   async getById(patientId: number) {

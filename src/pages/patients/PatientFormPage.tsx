@@ -34,7 +34,7 @@ export function PatientFormPage() {
 
       try {
         const [ownerData, speciesData, patientData] = await Promise.all([
-          ownerService.list(),
+          ownerService.listAll(),
           patientService.listSpecies(),
           parsedPatientId ? patientService.getById(parsedPatientId) : Promise.resolve(undefined),
         ]);

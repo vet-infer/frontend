@@ -130,7 +130,7 @@ export function ResultsPage() {
         try {
           const [evaluationData, patientData] = await Promise.all([
             evaluationService.list(),
-            patientService.list(),
+            patientService.listAll(),
           ]);
           const patientById = new Map(patientData.map((item) => [item.id, item]));
           const resultEntries = await Promise.all(

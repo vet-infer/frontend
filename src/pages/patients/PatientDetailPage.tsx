@@ -121,7 +121,7 @@ export function PatientDetailPage() {
 
       try {
         const historyData = await historyService.getPatientHistory(parsedPatientId);
-        const [ownerData, speciesData] = await Promise.all([ownerService.list(), patientService.listSpecies()]);
+        const [ownerData, speciesData] = await Promise.all([ownerService.listAll(), patientService.listSpecies()]);
 
         if (isMounted) {
           setPatient(historyData.patient);
