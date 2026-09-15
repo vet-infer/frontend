@@ -46,8 +46,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, login } = useAuth();
-  const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("Admin12345");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState<"login" | "forgot">("login");
   const [isSubmitting, setIsSubmitting] = useState(false);
