@@ -6,21 +6,13 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { FormField } from "../../components/common/FormField";
 import { authService } from "../../services/auth.service";
+import { getErrorMessage } from "../../utils/errors";
 
 type FormValues = {
   resetToken: string;
   newPassword: string;
   confirmPassword: string;
 };
-
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible restablecer la contraseña.";
-  }
-
-  return "No fue posible restablecer la contraseña.";
-}
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -55,7 +47,7 @@ export function ResetPasswordPage() {
       setSuccess(response.message);
       window.setTimeout(() => navigate("/login", { replace: true }), 1500);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible restablecer la contraseña."));
     } finally {
       setIsSubmitting(false);
     }
@@ -65,7 +57,7 @@ export function ResetPasswordPage() {
     <main className="grid min-h-screen place-items-center bg-[#F6F9FF] px-4 py-6">
       <section className="w-full max-w-[460px] rounded-2xl border border-white/85 bg-white px-6 py-8 shadow-[0_22px_58px_rgba(35,47,91,0.12)] sm:px-9">
         <div className="mb-6 text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-[#4635D3] text-[#4635D3]">
+          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-brand-500 text-brand-500">
             <KeyRound size={30} />
           </span>
           <h1 className="mt-4 text-2xl font-extrabold text-[#172554]">Restablecer contraseña</h1>
@@ -109,7 +101,7 @@ export function ResetPasswordPage() {
           </form>
         ) : null}
 
-        <Link className="mt-5 block text-center text-sm font-extrabold text-[#4635D3]" to="/login">
+        <Link className="mt-5 block text-center text-sm font-extrabold text-brand-500" to="/login">
           Volver al inicio de sesion
         </Link>
       </section>

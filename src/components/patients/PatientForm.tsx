@@ -7,6 +7,7 @@ import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 import { FormField } from "../common/FormField";
 import { FormSelect } from "../common/FormSelect";
+import { IconBadge } from "../common/IconBadge";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientFormValues, PatientPayload, Species } from "../../types/patient";
 
@@ -185,9 +186,7 @@ export function PatientForm({
 
       <Card className="p-6 sm:p-8">
         <div className="mb-7 flex items-center gap-4">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-            <PawPrint size={24} />
-          </span>
+          <IconBadge className="h-11 w-11" icon={PawPrint} iconSize={24} />
           <h2 className="text-xl font-extrabold text-[#172554]">Informacion del paciente</h2>
         </div>
 
@@ -239,7 +238,7 @@ export function PatientForm({
           <label className="relative block">
             <span className="mb-2 block text-sm font-bold text-slate-700">Raza <span className="text-red-500">*</span></span>
             <input
-              className={`h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10 disabled:bg-slate-50 disabled:text-slate-400 ${errors.breed_id ? "border-red-300" : "border-slate-200"}`}
+              className={`h-12 w-full rounded-lg border bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 disabled:bg-slate-50 disabled:text-slate-400 ${errors.breed_id ? "border-red-300" : "border-slate-200"}`}
               disabled={!values.species_id}
               onChange={(event) => updateBreedQuery(event.target.value)}
               onFocus={() => setIsBreedListOpen(true)}
@@ -251,7 +250,7 @@ export function PatientForm({
               <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg" role="listbox">
                 {matchingBreeds.length ? matchingBreeds.map((breed) => (
                   <button
-                    className="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-violet-50 hover:text-[#3026A6]"
+                    className="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-violet-50 hover:text-brand-700"
                     key={breed.id}
                     onMouseDown={(event) => { event.preventDefault(); selectBreed(breed); }}
                     role="option"
@@ -308,7 +307,7 @@ export function PatientForm({
           </Button>
         ) : (
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
             to="/patients"
           >
             Cancelar

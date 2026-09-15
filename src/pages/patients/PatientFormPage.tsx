@@ -2,20 +2,13 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
+import { Skeleton } from "../../components/common/Skeleton";
 import { PatientForm } from "../../components/patients/PatientForm";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
-
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible guardar el paciente.";
-  }
-
-  return "No fue posible guardar el paciente.";
-}
+import { getErrorMessage } from "../../utils/errors";
 
 export function PatientFormPage() {
   const navigate = useNavigate();
@@ -56,7 +49,7 @@ export function PatientFormPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible guardar el paciente."));
         }
       } finally {
         if (isMounted) {
@@ -103,7 +96,7 @@ export function PatientFormPage() {
         navigate("/patients", { state: { message: "Paciente registrado correctamente." } });
       }
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible guardar el paciente."));
     } finally {
       setIsSaving(false);
     }
@@ -114,7 +107,7 @@ export function PatientFormPage() {
       <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mb-5 flex items-center gap-2 text-sm font-extrabold">
-            <Link className="text-[#4635D3] hover:text-[#3026A6]" to="/patients">
+            <Link className="text-brand-500 hover:text-brand-700" to="/patients">
               Pacientes
             </Link>
             <span className="text-slate-300">/</span>
@@ -138,7 +131,7 @@ export function PatientFormPage() {
         </Link>
       </section>
 
-      {isLoading ? <div className="h-96 animate-pulse rounded-lg bg-slate-100" /> : null}
+      {isLoading ? <Skeleton className="h-96" /> : null}
 
       {!isLoading && error && isEditMode && !patient ? <AlertMessage message={error} tone="error" /> : null}
 

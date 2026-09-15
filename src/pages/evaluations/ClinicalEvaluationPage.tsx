@@ -4,6 +4,7 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { FormTextarea } from "../../components/common/FormTextarea";
+import { Skeleton } from "../../components/common/Skeleton";
 import { EvaluationFactsPanel } from "../../components/evaluations/EvaluationFactsPanel";
 import { useEvaluationFacts } from "../../hooks/useEvaluationFacts";
 import { evaluationService } from "../../services/evaluation.service";
@@ -170,7 +171,7 @@ export function ClinicalEvaluationPage() {
           <button
             aria-current={activeTab === index ? "step" : undefined}
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-bold ${
-              activeTab === index ? "bg-[#4635D3] text-white" : "bg-slate-100 text-slate-600"
+              activeTab === index ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600"
             }`}
             key={tab}
             onClick={() => goToTab(index)}
@@ -289,7 +290,7 @@ export function ClinicalEvaluationPage() {
       </Card>
 
       <div className="flex justify-between">
-        <Link className="text-sm font-bold text-[#4635D3]" to="/patients">
+        <Link className="text-sm font-bold text-brand-500" to="/patients">
           Volver a pacientes
         </Link>
         <Button disabled={!evaluation || !results.length} onClick={() => navigate(`/results?evaluationId=${evaluation?.id}`)}>
@@ -313,7 +314,7 @@ function PatientTab({
   isLoading: boolean;
   onChange: (id: string) => void;
 }) {
-  if (isLoading) return <div className="h-40 animate-pulse rounded-lg bg-slate-100" />;
+  if (isLoading) return <Skeleton className="h-40" />;
 
   return (
     <div className="space-y-5">

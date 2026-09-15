@@ -3,8 +3,10 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { AlertMessage } from "../common/AlertMessage";
 import { Button } from "../common/Button";
+import { IconBadge } from "../common/IconBadge";
 import { authService } from "../../services/auth.service";
 import { emailJsService } from "../../services/emailjs.service";
+import { getErrorMessage as getApiErrorMessage } from "../../utils/errors";
 
 type ForgotPasswordFormProps = {
   onBack: () => void;
@@ -14,8 +16,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getErrorMessage(error: unknown) {
   if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible enviar el codigo de recuperacion.";
+    return getApiErrorMessage(error, "No fue posible enviar el codigo de recuperacion.");
   }
 
   if (error instanceof Error) {
@@ -77,7 +78,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
           <span className="relative block">
             <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
             <input
-              className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
               onChange={(event) => setEmail(event.target.value)}
               placeholder="Ingresa tu correo electronico"
               type="email"
@@ -92,7 +93,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       </form>
 
       <button
-        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-extrabold text-[#4635D3] transition hover:bg-violet-50"
+        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-extrabold text-brand-500 transition hover:bg-violet-50"
         onClick={onBack}
         type="button"
       >
@@ -100,9 +101,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       </button>
 
       <div className="mt-5 flex items-start gap-3 border-t border-slate-100 pt-5 text-sm font-semibold leading-6 text-slate-500">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-          <Info size={18} />
-        </span>
+        <IconBadge className="h-9 w-9 shrink-0" icon={Info} iconSize={18} />
         <span>El código temporal no expone la contraseña actual y vence en 15 minutos.</span>
       </div>
     </div>

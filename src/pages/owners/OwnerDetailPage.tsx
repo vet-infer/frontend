@@ -6,12 +6,14 @@ import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { OwnerForm } from "../../components/owners/OwnerForm";
 import { PatientForm } from "../../components/patients/PatientForm";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { getErrorMessage } from "../../utils/errors";
 
 function getFullName(owner: Owner) {
   return [owner.first_name, owner.last_name].filter(Boolean).join(" ") || "Sin nombre";
@@ -34,14 +36,6 @@ function getSpeciesBreed(patient: Patient) {
   return `${patient.species?.name ?? "Sin especie"} / ${patient.breed?.name ?? "Sin raza"}`;
 }
 
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } } }).response;
-    return response?.data?.detail ?? "No fue posible completar la accion.";
-  }
-
-  return "No fue posible completar la accion.";
-}
 
 export function OwnerDetailPage() {
   const { ownerId } = useParams();
@@ -86,7 +80,7 @@ export function OwnerDetailPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
         }
       } finally {
         if (isMounted) {
@@ -136,7 +130,7 @@ export function OwnerDetailPage() {
       setSuccess("Propietario actualizado correctamente.");
       setIsEditOpen(false);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsSaving(false);
     }
@@ -158,13 +152,13 @@ export function OwnerDetailPage() {
       setSuccess(`Paciente ${patient.name} registrado correctamente.`);
       setIsPatientCreateOpen(false);
     } catch (caughtError) {
-      setPatientFormError(getErrorMessage(caughtError));
+      setPatientFormError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsPatientSaving(false);
     }
   }
   if (isLoading) {
-    return <div className="h-96 animate-pulse rounded-lg bg-slate-100" />;
+    return <Skeleton className="h-96" />;
   }
 
   if (error || !owner) {
@@ -175,7 +169,7 @@ export function OwnerDetailPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-slate-500 hover:text-[#3026A6]" to="/owners">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-slate-500 hover:text-brand-700" to="/owners">
             <ArrowLeft size={18} />
             Volver a Propietarios
           </Link>
@@ -201,7 +195,7 @@ export function OwnerDetailPage() {
 
       <Card className="p-6 sm:p-8">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-[#3026A6]">
+          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-brand-700">
             {getInitials(owner)}
           </span>
           <div>
@@ -221,7 +215,7 @@ export function OwnerDetailPage() {
         </div>
       </Card>
 
-      <Card className={shouldFocusPatients ? "ring-2 ring-[#4635D3]/30" : undefined}>
+      <Card className={shouldFocusPatients ? "ring-2 ring-brand-500/30" : undefined}>
         <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="flex items-center gap-3 text-xl font-extrabold text-[#172554]">
@@ -255,7 +249,7 @@ export function OwnerDetailPage() {
                 <td className="px-5 py-4 font-semibold">{patient.sex || "Sin registrar"}</td>
                 <td className="px-5 py-4">
                   <Link
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                     to={`/patients/${patient.id}`}
                   >
                     Ver detalle
@@ -304,7 +298,7 @@ type InfoCardProps = {
 function InfoCard({ icon: Icon, label, value }: InfoCardProps) {
   return (
     <div className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50 px-5 py-4">
-      <Icon className="shrink-0 text-[#4635D3]" size={25} />
+      <Icon className="shrink-0 text-brand-500" size={25} />
       <div className="min-w-0">
         <p className="text-sm font-semibold text-slate-500">{label}</p>
         <p className="mt-1 break-words font-extrabold text-slate-800">{value}</p>
