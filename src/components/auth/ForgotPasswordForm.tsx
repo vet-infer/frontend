@@ -74,7 +74,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
 
       <form className="mt-5 space-y-5" onSubmit={handleSubmit}>
         <label className="block">
-          <span className="mb-2 block text-sm font-extrabold text-slate-700">Correo electronico</span>
+          <span className="mb-2 block text-sm font-bold text-slate-700">Correo electronico</span>
           <span className="relative block">
             <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
             <input
@@ -93,7 +93,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       </form>
 
       <button
-        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-extrabold text-brand-500 transition hover:bg-violet-50"
+        className="mt-5 w-full rounded-lg px-4 py-2.5 text-center text-sm font-bold text-brand-500 transition hover:bg-violet-50"
         onClick={onBack}
         type="button"
       >

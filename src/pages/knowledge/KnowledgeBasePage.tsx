@@ -269,7 +269,7 @@ export function KnowledgeBasePage() {
           {tabs.filter((tab) => isAdmin || tab.id !== "rules").map((tab) => (
             <button
               className={cn(
-                "min-h-14 border-b-2 px-4 text-sm font-extrabold transition",
+                "min-h-14 border-b-2 px-4 text-sm font-bold transition",
                 activeTab === tab.id
                   ? "border-brand-500 text-brand-500"
                   : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-brand-700"
@@ -298,7 +298,7 @@ export function KnowledgeBasePage() {
                     <ListButton active={index === selectedIndex} key={disease.id} onClick={() => setSelectedIndex(index)}>
                       <IconBadge className="h-14 w-14" icon={Stethoscope} iconSize={27} />
                       <span className="min-w-0 flex-1">
-                        <span className="block font-extrabold text-[#172554]">{disease.name}</span>
+                        <span className="block font-bold text-[#172554]">{disease.name}</span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
                           {speciesName(disease.species_id)} / {filteredSymptoms.filter((item) => item.species_id === disease.species_id).length} sintomas / {(() => {
                             const count = filteredRules.filter((rule) => rule.is_active && rule.disease_id === disease.id).length;
@@ -322,11 +322,11 @@ export function KnowledgeBasePage() {
                 rows={filteredSymptoms}
                 renderRow={(symptom: CatalogItem) => (
                   <tr key={symptom.id}>
-                    <td className="px-5 py-4 font-extrabold text-slate-700">{symptom.name}</td>
+                    <td className="px-5 py-4 font-bold text-slate-700">{symptom.name}</td>
                     <td className="px-5 py-4">{speciesName(symptom.species_id)}</td>
                     <td className="px-5 py-4">{symptom.description || "Sintoma usado como evidencia clinica."}</td>
                     <td className="px-5 py-4">
-                      <span className="rounded-md bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Activo</span>
+                      <span className="rounded-md bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Activo</span>
                     </td>
                   </tr>
                 )}
@@ -344,7 +344,7 @@ export function KnowledgeBasePage() {
                     <ListButton active={index === selectedIndex} key={variable.id} onClick={() => setSelectedIndex(index)}>
                       <IconBadge className="h-14 w-14" icon={FlaskConical} iconSize={27} />
                       <span className="min-w-0 flex-1">
-                        <span className="block font-extrabold text-[#172554]">{variable.name}</span>
+                        <span className="block font-bold text-[#172554]">{variable.name}</span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
                           {variable.data_type} Â· {speciesName(variable.species_id)} Â· {variableRange(variable)}
                         </span>
@@ -367,7 +367,7 @@ export function KnowledgeBasePage() {
                     <ListButton active={index === selectedIndex} key={rule.id} onClick={() => setSelectedIndex(index)}>
                       <IconBadge className="h-14 w-14" icon={Network} iconSize={27} />
                       <span className="min-w-0 flex-1">
-                        <span className="block font-extrabold text-[#172554]">
+                        <span className="block font-bold text-[#172554]">
                           {rule.code} - {rule.name}
                         </span>
                         <span className="mt-1 block text-xs font-semibold text-slate-500">
@@ -405,7 +405,7 @@ function SpeciesButton({
   return (
     <button
       className={cn(
-        "inline-flex h-12 items-center justify-center gap-2 rounded-lg px-5 text-sm font-extrabold transition",
+        "inline-flex h-12 items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold transition",
         active ? "bg-brand-500 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
       )}
       onClick={onClick}
@@ -441,7 +441,7 @@ function StatCard({
           <Icon size={26} />
         </span>
         <div>
-          <p className="text-xs font-extrabold text-slate-500">{label}</p>
+          <p className="text-xs font-bold text-slate-500">{label}</p>
           <p className="mt-3 text-3xl font-extrabold text-[#172554]">{value}</p>
         </div>
       </div>
@@ -535,7 +535,7 @@ function DiseaseDetail({
         rows={relatedRules}
         renderRow={(rule) => (
           <tr key={rule.id}>
-            <td className="px-5 py-3 font-extrabold text-slate-700">{rule.code}</td>
+            <td className="px-5 py-3 font-bold text-slate-700">{rule.code}</td>
             <td className="px-5 py-3">{conditionText(rule)}</td>
             <td className="px-5 py-3">{rule.risk_level}</td>
             <td className="px-5 py-3">
@@ -567,7 +567,7 @@ function VariableDetail({ variable, rules }: { variable: ClinicalVariable; rules
         rows={relatedRules}
         renderRow={(rule) => (
           <tr key={rule.id}>
-            <td className="px-5 py-3 font-extrabold text-slate-700">{rule.code}</td>
+            <td className="px-5 py-3 font-bold text-slate-700">{rule.code}</td>
             <td className="px-5 py-3">{conditionText(rule)}</td>
             <td className="px-5 py-3">{rule.risk_level}</td>
             <td className="px-5 py-3">
@@ -590,7 +590,7 @@ function RuleDetail({ rule, diseases }: { rule: Rule; diseases: Disease[] }) {
       <h3 className="mb-3 text-lg font-extrabold text-[#172554]">Condicion IF</h3>
       <div className="mb-6 flex flex-wrap gap-3">
         {rule.conditions.map((condition) => (
-          <span className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-extrabold text-slate-600" key={condition.id}>
+          <span className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-600" key={condition.id}>
             {condition.variable_key} {condition.operator} {String(condition.expected_value)}{(condition.logical_group ?? 1) > 1 ? ` · alternativa ${condition.logical_group}` : ""}
           </span>
         ))}
@@ -638,7 +638,7 @@ function RiskLevelsView({
   if (!selectedRisk) {
     return (
       <Card className="p-8 text-center">
-        <p className="font-extrabold text-[#172554]">No hay niveles de riesgo registrados.</p>
+        <p className="font-bold text-[#172554]">No hay niveles de riesgo registrados.</p>
       </Card>
     );
   }
@@ -665,8 +665,8 @@ function RiskLevelsView({
                     {risk.name.toLowerCase().includes("alto") ? <AlertTriangle size={27} /> : <Check size={27} />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-extrabold text-[#172554]">{risk.name}</span>
-                    <span className={cn("mt-2 inline-flex rounded-md px-3 py-1 text-xs font-extrabold", itemTone.className)}>
+                    <span className="block font-bold text-[#172554]">{risk.name}</span>
+                    <span className={cn("mt-2 inline-flex rounded-md px-3 py-1 text-xs font-bold", itemTone.className)}>
                       {probabilityRange(risk)}
                     </span>
                   </span>
@@ -692,7 +692,7 @@ function RiskLevelsView({
             ]}
             renderRow={(row) => (
               <tr key={row.field}>
-                <td className="px-5 py-4 font-extrabold text-slate-700">{row.field}</td>
+                <td className="px-5 py-4 font-bold text-slate-700">{row.field}</td>
                 <td className="px-5 py-4">{row.value}</td>
               </tr>
             )}
@@ -722,7 +722,7 @@ function DetailHeader({
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-3xl font-extrabold text-[#172554]">{title}</h2>
           {badges.map((badge) => (
-            <span className="rounded-md bg-violet-50 px-3 py-1 text-sm font-extrabold text-brand-500" key={badge}>
+            <span className="rounded-md bg-violet-50 px-3 py-1 text-sm font-bold text-brand-500" key={badge}>
               {badge}
             </span>
           ))}
@@ -740,7 +740,7 @@ function TagSection({ title, items }: { title: string; items: string[] }) {
       <div className="flex flex-wrap gap-3">
         {items.length ? (
           items.map((item) => (
-            <span className="rounded-lg border border-slate-100 bg-white px-4 py-2 text-sm font-extrabold text-slate-600" key={item}>
+            <span className="rounded-lg border border-slate-100 bg-white px-4 py-2 text-sm font-bold text-slate-600" key={item}>
               {item}
             </span>
           ))
@@ -754,7 +754,7 @@ function TagSection({ title, items }: { title: string; items: string[] }) {
 
 function StatusPill({ active }: { active: boolean }) {
   return (
-    <span className={cn("rounded-md px-3 py-1 text-xs font-extrabold", active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}>
+    <span className={cn("rounded-md px-3 py-1 text-xs font-bold", active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}>
       {active ? "Activa" : "Inactiva"}
     </span>
   );

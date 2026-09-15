@@ -280,7 +280,7 @@ export function PatientsPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border border-slate-100 bg-slate-50 text-sm font-extrabold text-slate-600">
+                <tr className="border border-slate-100 bg-slate-50 text-sm font-bold text-slate-600">
                   <th className="px-5 py-4">Paciente</th>
                   <th className="px-5 py-4">Especie / raza</th>
                   <th className="px-5 py-4">Propietario</th>
@@ -297,7 +297,7 @@ export function PatientsPage() {
                         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-violet-50 text-lg font-extrabold text-brand-700">
                           {getInitial(patient)}
                         </span>
-                        <span className="font-extrabold text-slate-800">{patient.name}</span>
+                        <span className="font-bold text-slate-800">{patient.name}</span>
                       </div>
                     </td>
                     <td className="px-5 py-5">
@@ -365,7 +365,7 @@ export function PatientsPage() {
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
                   ‹
                 </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-extrabold text-white" type="button">
+                <button className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500 font-bold text-white" type="button">
                   1
                 </button>
                 <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">

@@ -202,7 +202,7 @@ export function HistoryPage() {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-extrabold text-[#172554]">Historiales encontrados</h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
               {filteredRows.length} registros
             </span>
           </div>
@@ -224,7 +224,7 @@ export function HistoryPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-sm font-extrabold text-slate-600">
+                <tr className="border-b border-slate-100 text-sm font-bold text-slate-600">
                   <th className="px-4 py-4">Paciente</th>
                   <th className="px-4 py-4">Propietario</th>
                   <th className="px-4 py-4">Especie</th>
@@ -244,7 +244,7 @@ export function HistoryPage() {
                           {row.patient.name.charAt(0).toUpperCase()}
                         </span>
                         <div>
-                          <p className="font-extrabold text-slate-800">{row.patient.name}</p>
+                          <p className="font-bold text-slate-800">{row.patient.name}</p>
                           <p className="text-xs font-semibold text-slate-500">
                             {row.patient.breed?.name ?? "Sin raza"} · {calculateAge(row.patient.birth_date)}
                           </p>
@@ -262,7 +262,7 @@ export function HistoryPage() {
                     <td className="px-4 py-5 font-semibold">{row.evaluations.length}</td>
                     <td className="px-4 py-5 font-semibold">{row.latestResult}</td>
                     <td className="px-4 py-5">
-                      <span className={`inline-flex rounded-md px-3 py-1 text-xs font-extrabold ${riskClasses(row.latestRisk)}`}>
+                      <span className={`inline-flex rounded-md px-3 py-1 text-xs font-bold ${riskClasses(row.latestRisk)}`}>
                         {riskLabel(row.latestRisk)}
                       </span>
                     </td>
@@ -350,7 +350,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
           <span className="truncate">{formatRangeLabel(fromDate, toDate)}</span>
         </span>
         {(fromDate || toDate) ? (
-          <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-extrabold text-brand-500">Activo</span>
+          <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-bold text-brand-500">Activo</span>
         ) : null}
       </button>
 
@@ -358,7 +358,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
         <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 w-full rounded-lg border border-slate-100 bg-white p-4 shadow-2xl">
           <div className="grid gap-3">
             <label className="block">
-              <span className="mb-2 block text-xs font-extrabold text-slate-500">Desde</span>
+              <span className="mb-2 block text-xs font-bold text-slate-500">Desde</span>
               <input
                 className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
                 onChange={(event) => {
@@ -374,7 +374,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
               />
             </label>
             <label className="block">
-              <span className="mb-2 block text-xs font-extrabold text-slate-500">Hasta</span>
+              <span className="mb-2 block text-xs font-bold text-slate-500">Hasta</span>
               <input
                 className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
                 min={draftFrom || undefined}

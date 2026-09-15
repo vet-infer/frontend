@@ -106,7 +106,7 @@ export function PatientFormPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="mb-5 flex items-center gap-2 text-sm font-extrabold">
+          <div className="mb-5 flex items-center gap-2 text-sm font-bold">
             <Link className="text-brand-500 hover:text-brand-700" to="/patients">
               Pacientes
             </Link>
