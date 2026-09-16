@@ -85,15 +85,6 @@ export type PersistedActivatedRule = {
   rule_version?: number | null;
 };
 
-export type AnatomicalRegion = {
-  id: number;
-  code: string;
-  name: string;
-  mesh_name_dog?: string | null;
-  mesh_name_cat?: string | null;
-  description?: string | null;
-};
-
 export type PersistedInferenceResult = {
   id: number;
   evaluation_id: number;
@@ -107,6 +98,4 @@ export type PersistedInferenceResult = {
   inference_method?: string | null;
   explanation?: string | null;
   activated_rules: PersistedActivatedRule[];
-  regions?: AnatomicalRegion[];
-  secondary_regions?: AnatomicalRegion[];
 };
