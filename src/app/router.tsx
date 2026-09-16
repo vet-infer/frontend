@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- this file only exports `router` (route config, not a component); the `lazy()` consts below are route-splitting definitions, not exported components, so Fast Refresh boundaries are unaffected */
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { AppLayout } from "../components/layout/AppLayout";
@@ -24,6 +24,10 @@ const PlaceholderPage = lazy(() => import("../pages/placeholder/PlaceholderPage"
 const ResultsPage = lazy(() => import("../pages/results/ResultsPage").then((m) => ({ default: m.ResultsPage })));
 const RulesAdminPage = lazy(() => import("../pages/rules/RulesAdminPage").then((m) => ({ default: m.RulesAdminPage })));
 const SettingsPage = lazy(() => import("../pages/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+
+function withSuspense(element: React.ReactNode) {
+  return <Suspense fallback={null}>{element}</Suspense>;
+}
 
 export const router = createBrowserRouter([
   {
