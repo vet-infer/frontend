@@ -5,20 +5,25 @@ import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import { EmptyState } from "../../components/common/EmptyState";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { PatientForm } from "../../components/patients/PatientForm";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
+import { calculateAge, formatDate } from "../../utils/clinical";
 import { cn } from "../../utils/cn";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type FilterMode = "all" | "dogs" | "cats";
 
 type LocationState = {
   message?: string;
 };
+
+const PAGE_SIZE = 20;
 
 const filters: { label: string; value: FilterMode; icon?: typeof Dog }[] = [
   { label: "Todos", value: "all" },
@@ -42,55 +47,19 @@ function getInitial(patient: Patient) {
   return patient.name.charAt(0).toUpperCase();
 }
 
-function calculateAge(birthDate?: string | null) {
-  if (!birthDate) {
-    return "Sin fecha";
-  }
 
-  const birth = new Date(`${birthDate}T00:00:00`);
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    years -= 1;
-  }
-
-  if (years <= 0) {
-    const months = Math.max(
-      0,
-      (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth()
-    );
-    return `${months || 1} ${months === 1 ? "mes" : "meses"}`;
-  }
-
-  return `${years} ${years === 1 ? "año" : "años"}`;
-}
-
-function formatDate(value?: string | null) {
-  if (!value) {
-    return "Sin registrar";
-  }
-
-  return new Intl.DateTimeFormat("es-CO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
-}
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar los pacientes.");
-}
 
 export function PatientsPage() {
   const location = useLocation();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [owners, setOwners] = useState<Owner[]>([]);
   const [species, setSpecies] = useState<Species[]>([]);
   const [breeds, setBreeds] = useState<Breed[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const isBrowsing = query.trim() === "" && filter === "all";
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -109,20 +78,23 @@ export function PatientsPage() {
       setError("");
 
       try {
-        const [patientData, ownerData, speciesData] = await Promise.all([
-          patientService.list(),
-          ownerService.list(),
+        const [patientResult, ownerData, speciesData] = await Promise.all([
+          isBrowsing
+            ? patientService.list({ skip: page * PAGE_SIZE, limit: PAGE_SIZE })
+            : patientService.listAll().then((items) => ({ items, total: items.length })),
+          ownerService.listAll(),
           patientService.listSpecies(),
         ]);
 
         if (isMounted) {
-          setPatients(patientData);
+          setPatients(patientResult.items);
+          setTotal(patientResult.total);
           setOwners(ownerData);
           setSpecies(speciesData);
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
         }
       } finally {
         if (isMounted) {
@@ -136,7 +108,7 @@ export function PatientsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isBrowsing, page]);
 
   const handleSpeciesChange = useCallback(async (speciesId: number | null) => {
     if (!speciesId) {
@@ -174,7 +146,7 @@ export function PatientsPage() {
       setSuccess("Paciente registrado correctamente.");
       setIsCreateOpen(false);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsSaving(false);
     }
@@ -194,7 +166,7 @@ export function PatientsPage() {
       setSuccess("Paciente actualizado correctamente.");
       setPatientToEdit(null);
     } catch (caughtError) {
-      setFormError(getErrorMessage(caughtError));
+      setFormError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsSaving(false);
     }
@@ -214,7 +186,7 @@ export function PatientsPage() {
       setSuccess(`Paciente ${patientToDelete.name} eliminado correctamente.`);
       setPatientToDelete(null);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible cargar los pacientes."));
     } finally {
       setIsDeleting(false);
     }
@@ -265,7 +237,7 @@ export function PatientsPage() {
           <label className="relative block flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por paciente, propietario, especie o raza..."
               value={query}
@@ -280,8 +252,8 @@ export function PatientsPage() {
                   className={cn(
                     "inline-flex h-12 items-center gap-2 rounded-lg px-7 text-sm font-bold transition",
                     filter === item.value
-                      ? "bg-[#4635D3] text-white shadow-sm"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-violet-50"
+                      ? "bg-teal-500 text-white shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-teal-50"
                   )}
                   key={item.value}
                   onClick={() => setFilter(item.value)}
@@ -299,23 +271,16 @@ export function PatientsPage() {
 
         {!isLoading && filteredPatients.length === 0 ? (
           <div className="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-            <div>
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                <PawPrint size={30} />
-              </span>
-              <h2 className="mt-5 text-xl font-extrabold text-[#172554]">No hay pacientes para mostrar</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Registra un paciente o ajusta los filtros para encontrar resultados.
-              </p>
-              <Button
-                className="mt-5"
-                icon={<PawPrint size={18} />}
-                onClick={openCreateModal}
-                type="button"
-              >
-                Registrar paciente
-              </Button>
-            </div>
+            <EmptyState
+              action={
+                <Button className="mt-5" icon={<PawPrint size={18} />} onClick={openCreateModal} type="button">
+                  Registrar paciente
+                </Button>
+              }
+              description="Registra un paciente o ajusta los filtros para encontrar resultados."
+              icon={PawPrint}
+              title="No hay pacientes para mostrar"
+            />
           </div>
         ) : null}
 
@@ -323,7 +288,7 @@ export function PatientsPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border border-slate-100 bg-slate-50 text-sm font-extrabold text-slate-600">
+                <tr className="border border-slate-100 bg-slate-50 text-sm font-bold text-slate-600">
                   <th className="px-5 py-4">Paciente</th>
                   <th className="px-5 py-4">Especie / raza</th>
                   <th className="px-5 py-4">Propietario</th>
@@ -337,10 +302,10 @@ export function PatientsPage() {
                   <tr key={patient.id}>
                     <td className="px-5 py-5">
                       <div className="flex items-center gap-4">
-                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-violet-50 text-lg font-extrabold text-[#3026A6]">
+                        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-[#635BFF] bg-teal-50 text-lg font-extrabold text-teal-700">
                           {getInitial(patient)}
                         </span>
-                        <span className="font-extrabold text-slate-800">{patient.name}</span>
+                        <span className="font-bold text-slate-800">{patient.name}</span>
                       </div>
                     </td>
                     <td className="px-5 py-5">
@@ -363,7 +328,7 @@ export function PatientsPage() {
                     <td className="px-5 py-5">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                           to={`/patients/${patient.id}`}
                         >
                           <Eye size={17} />
@@ -379,7 +344,7 @@ export function PatientsPage() {
                           Editar
                         </Button>
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                           to={`/evaluations?patientId=${patient.id}`}
                         >
                           <CalendarPlus size={17} />
@@ -401,20 +366,38 @@ export function PatientsPage() {
               </tbody>
             </table>
             <div className="flex flex-col gap-4 border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-              <span>
-                Mostrando 1 a {filteredPatients.length} de {filteredPatients.length} pacientes
-              </span>
-              <div className="flex items-center gap-2">
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  ‹
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg bg-[#4635D3] font-extrabold text-white" type="button">
-                  1
-                </button>
-                <button className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400" type="button">
-                  ›
-                </button>
-              </div>
+              {isBrowsing ? (
+                <>
+                  <span>
+                    Mostrando {total === 0 ? 0 : page * PAGE_SIZE + 1} a {Math.min((page + 1) * PAGE_SIZE, total)} de {total} pacientes
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={page === 0}
+                      onClick={() => setPage((current) => Math.max(0, current - 1))}
+                      type="button"
+                    >
+                      ‹
+                    </button>
+                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-teal-500 font-bold text-white" type="button">
+                      {page + 1}
+                    </button>
+                    <button
+                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={(page + 1) * PAGE_SIZE >= total}
+                      onClick={() => setPage((current) => current + 1)}
+                      type="button"
+                    >
+                      ›
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <span>
+                  Mostrando 1 a {filteredPatients.length} de {filteredPatients.length} pacientes
+                </span>
+              )}
             </div>
           </div>
         ) : null}
@@ -472,7 +455,7 @@ function PatientsLoadingState() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div className="h-20 animate-pulse rounded-lg bg-slate-100" key={index} />
+        <Skeleton className="h-20" key={index} />
       ))}
     </div>
   );

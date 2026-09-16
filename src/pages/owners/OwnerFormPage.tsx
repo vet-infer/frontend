@@ -2,14 +2,11 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
+import { Skeleton } from "../../components/common/Skeleton";
 import { OwnerForm } from "../../components/owners/OwnerForm";
 import { ownerService } from "../../services/owner.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible guardar el propietario.");
-}
+import { getErrorMessage } from "../../utils/errors";
 
 export function OwnerFormPage() {
   const navigate = useNavigate();
@@ -40,7 +37,7 @@ export function OwnerFormPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible guardar el propietario."));
         }
       } finally {
         if (isMounted) {
@@ -73,7 +70,7 @@ export function OwnerFormPage() {
         navigate("/owners", { state: { message: "Propietario registrado correctamente." } });
       }
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible guardar el propietario."));
     } finally {
       setIsSaving(false);
     }
@@ -83,8 +80,8 @@ export function OwnerFormPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="mb-5 flex items-center gap-2 text-sm font-extrabold">
-            <Link className="text-[#4635D3] hover:text-[#3026A6]" to="/owners">
+          <div className="mb-5 flex items-center gap-2 text-sm font-bold">
+            <Link className="text-teal-500 hover:text-teal-700" to="/owners">
               Propietarios
             </Link>
             <span className="text-slate-300">/</span>
@@ -110,7 +107,7 @@ export function OwnerFormPage() {
 
       {isLoading ? (
         <div className="space-y-4">
-          <div className="h-80 animate-pulse rounded-lg bg-slate-100" />
+          <Skeleton className="h-80" />
         </div>
       ) : null}
 

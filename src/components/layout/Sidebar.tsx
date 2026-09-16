@@ -1,8 +1,9 @@
 import { ChevronDown, LogOut, PawPrint, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { routes } from "../../config/routes";
 import { useAuth } from "../../hooks/useAuth";
+import { useOverlayTransition } from "../../hooks/useOverlayTransition";
 import type { User } from "../../types/user";
 import { cn } from "../../utils/cn";
 
@@ -30,8 +31,37 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const { isAdmin, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { shouldRender: shouldRenderUserMenu, isVisible: isUserMenuVisible } =
+    useOverlayTransition(isUserMenuOpen);
   const fullName = currentUser?.full_name ?? "Usuario autenticado";
   const roleName = formatRole(currentUser?.role?.name);
+
+  useEffect(() => {
+    if (!isUserMenuOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isUserMenuOpen]);
 
   function handleLogout() {
     logout();
@@ -51,13 +81,13 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-gradient-to-b from-[#3026A6] to-[#281C91] text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-gradient-to-b from-teal-700 to-teal-900 text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex items-center justify-between px-8 py-8">
           <div className="flex items-center gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-[#3026A6]">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-teal-700">
               <PawPrint size={29} fill="currentColor" />
             </span>
             <span className="text-2xl font-extrabold tracking-tight">VetClinic</span>
@@ -91,7 +121,7 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
           })}
         </nav>
 
-        <div className="relative border-t border-white/10 p-5">
+        <div className="relative border-t border-white/10 p-5" ref={userMenuRef}>
           <button
             aria-expanded={isUserMenuOpen}
             aria-haspopup="menu"
@@ -99,7 +129,7 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
             onClick={() => setIsUserMenuOpen((current) => !current)}
             type="button"
           >
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-sm font-extrabold text-[#3026A6]">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-sm font-bold text-teal-700">
               {getInitials(fullName)}
             </span>
             <span className="min-w-0 flex-1">
@@ -109,9 +139,14 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
             <ChevronDown className={cn("transition", isUserMenuOpen && "rotate-180")} size={18} />
           </button>
 
-          {isUserMenuOpen ? (
-            <div className="absolute bottom-[calc(100%-0.5rem)] left-5 right-5 rounded-lg border border-white/10 bg-white p-2 text-slate-700 shadow-2xl">
-
+          {shouldRenderUserMenu ? (
+            <div
+              className={cn(
+                "absolute bottom-[calc(100%-0.5rem)] left-5 right-5 rounded-lg border border-white/10 bg-white p-2 text-slate-700 shadow-2xl transition duration-150",
+                isUserMenuVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
+              )}
+              role="menu"
+            >
               <button
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
                 onClick={handleLogout}

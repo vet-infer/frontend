@@ -24,12 +24,13 @@ import { DataTable } from "../../components/common/DataTable";
 import { FormField } from "../../components/common/FormField";
 import { FormSelect } from "../../components/common/FormSelect";
 import { Modal } from "../../components/common/Modal";
+import { Skeleton } from "../../components/common/Skeleton";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/auth.service";
 import { userService } from "../../services/user.service";
 import type { User, UserFormValues } from "../../types/user";
 import { cn } from "../../utils/cn";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type SettingsTab = "general" | "preferences" | "security" | "users";
 
@@ -65,9 +66,6 @@ const tabs: { id: SettingsTab; label: string; adminOnly?: boolean }[] = [
   { id: "users", label: "Usuarios", adminOnly: true },
 ];
 
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible completar la accion.");
-}
 
 function validateUserForm(values: UserFormValues): FormErrors {
   const errors: FormErrors = {};
@@ -214,7 +212,7 @@ export function SettingsPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
         }
       } finally {
         if (isMounted) {
@@ -260,7 +258,7 @@ export function SettingsPage() {
       setPasswordForm(initialPasswordForm);
       setMessage(response.message);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsChangingPassword(false);
     }
@@ -302,7 +300,7 @@ export function SettingsPage() {
       setUserForm(initialUserForm);
       setMessage("Usuario creado correctamente.");
     } catch (caughtError) {
-      const errorMessage = getErrorMessage(caughtError);
+      const errorMessage = getErrorMessage(caughtError, "No fue posible completar la accion.");
 
       if (isDuplicateEmailError(errorMessage)) {
         setFormErrors((current) => ({ ...current, email: errorMessage }));
@@ -372,7 +370,7 @@ export function SettingsPage() {
       setUserToEdit(null);
       setMessage("Usuario actualizado correctamente.");
     } catch (caughtError) {
-      const errorMessage = getErrorMessage(caughtError);
+      const errorMessage = getErrorMessage(caughtError, "No fue posible completar la accion.");
 
       if (isDuplicateEmailError(errorMessage)) {
         setEditFormErrors((current) => ({ ...current, email: errorMessage }));
@@ -399,7 +397,7 @@ export function SettingsPage() {
       setProfileUser((current) => (current?.id === updated.id ? updated : current));
       setMessage(updated.is_active ? "Usuario activado correctamente." : "Usuario desactivado correctamente.");
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError));
+      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
     } finally {
       setIsUpdatingStatus(null);
     }
@@ -424,10 +422,10 @@ export function SettingsPage() {
             .map((tab) => (
               <button
                 className={cn(
-                  "min-h-14 border-b-2 px-4 text-sm font-extrabold transition",
+                  "min-h-14 border-b-2 px-4 text-sm font-bold transition",
                   activeTab === tab.id
-                    ? "border-[#4635D3] text-[#4635D3]"
-                    : "border-transparent text-slate-500 hover:bg-violet-50 hover:text-[#3026A6]"
+                    ? "border-teal-500 text-teal-500"
+                    : "border-transparent text-slate-500 hover:bg-teal-50 hover:text-teal-700"
                 )}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -443,7 +441,7 @@ export function SettingsPage() {
         <section className="grid gap-6 xl:grid-cols-[1fr_0.75fr]">
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-4">
-              <span className="grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-2xl font-extrabold text-[#4635D3]">
+              <span className="grid h-16 w-16 place-items-center rounded-full bg-teal-50 text-2xl font-extrabold text-teal-500">
                 {(currentUser?.full_name ?? "Usuario").charAt(0)}
               </span>
               <div>
@@ -615,19 +613,19 @@ export function SettingsPage() {
                 <Users size={24} />
                 Usuarios registrados
               </h2>
-              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-extrabold text-[#4635D3]">
+              <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-500">
                 {users.length} usuarios
               </span>
             </div>
             {isLoadingUsers ? (
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, index) => (
-                  <div className="h-16 animate-pulse rounded-lg bg-slate-100" key={index} />
+                  <Skeleton className="h-16" key={index} />
                 ))}
               </div>
             ) : users.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                <p className="font-extrabold text-[#172554]">No hay usuarios registrados</p>
+                <p className="font-bold text-[#172554]">No hay usuarios registrados</p>
                 <p className="mt-2 text-sm text-slate-500">Crea el primer usuario clinico desde el formulario.</p>
               </div>
             ) : (
@@ -636,13 +634,13 @@ export function SettingsPage() {
                 rows={users}
                 renderRow={(item) => (
                   <tr key={item.id}>
-                    <td className="px-5 py-4 font-extrabold text-slate-700">{item.full_name}</td>
+                    <td className="px-5 py-4 font-bold text-slate-700">{item.full_name}</td>
                     <td className="px-5 py-4">{item.email}</td>
                     <td className="px-5 py-4">{roleLabel(item.role?.name)}</td>
                     <td className="px-5 py-4">
                       <span
                         className={cn(
-                          "rounded-md px-3 py-1 text-xs font-extrabold",
+                          "rounded-md px-3 py-1 text-xs font-bold",
                           item.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
                         )}
                       >
@@ -729,7 +727,7 @@ export function SettingsPage() {
       {!isAdmin && activeTab !== "users" ? (
         <Card className="p-5">
           <div className="flex items-start gap-3 text-sm font-semibold text-slate-500">
-            <ShieldCheck className="mt-0.5 shrink-0 text-[#4635D3]" size={20} />
+            <ShieldCheck className="mt-0.5 shrink-0 text-teal-500" size={20} />
             La gestion de usuarios solo esta disponible para cuentas con rol ADMINISTRADOR.
           </div>
         </Card>
@@ -742,7 +740,7 @@ function InfoBox({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
       <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-2 break-words font-extrabold text-[#172554]">{value}</p>
+      <p className="mt-2 break-words font-bold text-[#172554]">{value}</p>
     </div>
   );
 }
@@ -763,8 +761,8 @@ function PreferenceButton({
   return (
     <button
       className={cn(
-        "flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border p-4 text-sm font-extrabold transition",
-        active ? "border-[#4635D3] bg-violet-50 text-[#4635D3]" : "border-slate-100 bg-white text-slate-500",
+        "flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border p-4 text-sm font-bold transition",
+        active ? "border-teal-500 bg-teal-50 text-teal-500" : "border-slate-100 bg-white text-slate-500",
         disabled && "opacity-55"
       )}
       disabled={disabled}

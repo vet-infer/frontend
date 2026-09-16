@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Card } from "../../components/common/Card";
+import { Skeleton } from "../../components/common/Skeleton";
 import { historyService, type PatientHistoryEvaluation, type PatientHistorySummary } from "../../services/history.service";
 import {
   calculateAge,
@@ -23,11 +24,7 @@ import {
   riskClasses,
   riskLabel,
 } from "../../utils/clinical";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar el historial del paciente.");
-}
+import { getErrorMessage } from "../../utils/errors";
 
 export function PatientHistoryPage() {
   const { patientId } = useParams();
@@ -58,7 +55,7 @@ export function PatientHistoryPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar el historial del paciente."));
         }
       } finally {
         if (isMounted) {
@@ -102,7 +99,7 @@ export function PatientHistoryPage() {
   }
 
   if (isLoading) {
-    return <div className="h-96 animate-pulse rounded-lg bg-slate-100" />;
+    return <Skeleton className="h-96" />;
   }
 
   if (error || !history) {
@@ -113,7 +110,7 @@ export function PatientHistoryPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#4635D3]" to="/history">
+          <Link className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-teal-500" to="/history">
             <ArrowLeft size={18} />
             Historial clinico
           </Link>
@@ -124,14 +121,14 @@ export function PatientHistoryPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3526AD]"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
             to={`/evaluations?patientId=${history.patient.id}`}
           >
             <ClipboardPlus size={19} />
             Nueva evaluacion
           </Link>
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 py-2 text-sm font-semibold text-[#4635D3] shadow-sm transition hover:bg-violet-50"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 py-2 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
             to={latest ? `/results?evaluationId=${latest.evaluation.id}` : "/results"}
           >
             <LineChart size={19} />
@@ -143,7 +140,7 @@ export function PatientHistoryPage() {
       <Card className="p-6 sm:p-8">
         <div className="grid gap-6 xl:grid-cols-[1.2fr_2fr]">
           <div className="flex items-center gap-5">
-            <span className="grid h-24 w-24 place-items-center rounded-full bg-violet-50 text-4xl font-extrabold text-[#3026A6]">
+            <span className="grid h-24 w-24 place-items-center rounded-full bg-teal-50 text-4xl font-extrabold text-teal-700">
               {history.patient.name.charAt(0).toUpperCase()}
             </span>
             <div>
@@ -173,13 +170,13 @@ export function PatientHistoryPage() {
           </h2>
           <div className="mb-6 grid gap-3 md:grid-cols-[1fr_220px]">
             <input
-              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por motivo o resultado..."
               value={query}
             />
             <select
-              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setRiskFilter(event.target.value)}
               value={riskFilter}
             >
@@ -192,7 +189,7 @@ export function PatientHistoryPage() {
 
           {filteredEvaluations.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-              <p className="font-extrabold text-[#172554]">Sin evaluaciones registradas</p>
+              <p className="font-bold text-[#172554]">Sin evaluaciones registradas</p>
               <p className="mt-2 text-sm text-slate-500">Cuando se registre una evaluacion, aparecera en esta linea de tiempo.</p>
             </div>
           ) : (
@@ -241,15 +238,15 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
   return (
     <div className="grid gap-4 sm:grid-cols-[44px_1fr]">
       <div className="flex flex-col items-center">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-[#4635D3] text-sm font-extrabold text-white">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-teal-500 text-sm font-bold text-white">
           {index}
         </span>
-        <span className="mt-2 h-full w-px bg-violet-100" />
+        <span className="mt-2 h-full w-px bg-teal-100" />
       </div>
       <div className="rounded-lg border border-slate-100 bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
         <div className="grid gap-4 lg:grid-cols-[150px_1fr_1fr_170px_140px] lg:items-center">
           <div>
-            <p className="font-extrabold text-[#172554]">{formatDate(item.evaluation.created_at)}</p>
+            <p className="font-bold text-[#172554]">{formatDate(item.evaluation.created_at)}</p>
             <p className="mt-1 text-xs font-semibold text-slate-500">
               <Calendar className="mr-1 inline" size={14} />
               {formatDate(item.evaluation.created_at, true).split(",").at(-1)?.trim()}
@@ -257,7 +254,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Motivo de consulta</p>
-            <p className="mt-1 font-extrabold text-slate-700">{item.evaluation.reason || "Sin motivo registrado"}</p>
+            <p className="mt-1 font-bold text-slate-700">{item.evaluation.reason || "Sin motivo registrado"}</p>
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Sintomas observados</p>
@@ -265,17 +262,17 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Resultado sugerido</p>
-            <p className="mt-1 font-extrabold text-slate-700">{result?.suggested_diagnosis ?? "Sin resultado procesado"}</p>
+            <p className="mt-1 font-bold text-slate-700">{result?.suggested_diagnosis ?? "Sin resultado procesado"}</p>
             <p className="mt-2 text-xs font-semibold text-slate-500">
               Reglas activadas {result?.activated_rules.length ?? 0}
             </p>
           </div>
           <div className="space-y-3">
-            <span className={`inline-flex rounded-md px-3 py-1 text-xs font-extrabold ${riskClasses(result?.risk_level)}`}>
+            <span className={`inline-flex rounded-md px-3 py-1 text-xs font-bold ${riskClasses(result?.risk_level)}`}>
               Riesgo {riskLabel(result?.risk_level).toLowerCase()}
             </span>
             <Link
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-3 text-xs font-extrabold text-[#4635D3] transition hover:bg-violet-50"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-3 text-xs font-bold text-teal-500 transition hover:bg-teal-50"
               to={`/results?evaluationId=${item.evaluation.id}`}
             >
               <Eye size={15} />
@@ -292,7 +289,7 @@ function InfoMini({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-2 font-extrabold text-[#172554]">{value}</p>
+      <p className="mt-2 font-bold text-[#172554]">{value}</p>
     </div>
   );
 }

@@ -4,10 +4,12 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
+import { EmptyState } from "../../components/common/EmptyState";
 import { FormSelect } from "../../components/common/FormSelect";
+import { Skeleton } from "../../components/common/Skeleton";
 import { historyService, type PatientHistorySummary } from "../../services/history.service";
 import { calculateAge, formatDate, getOwnerName, primaryResult, riskClasses, riskLabel } from "../../utils/clinical";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { getErrorMessage } from "../../utils/errors";
 
 type HistoryRow = PatientHistorySummary & {
   latestDate: string | null;
@@ -15,10 +17,6 @@ type HistoryRow = PatientHistorySummary & {
   latestRisk: string;
   latestEvaluationId?: number;
 };
-
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar el historial clinico.");
-}
 
 function toHistoryRow(history: PatientHistorySummary): HistoryRow {
   const latest = history.evaluations[0];
@@ -63,7 +61,7 @@ export function HistoryPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar el historial clinico."));
         }
       } finally {
         if (isMounted) {
@@ -135,7 +133,7 @@ export function HistoryPage() {
             <span className="mb-2 block text-sm font-bold text-slate-700">Buscar paciente</span>
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar por nombre del paciente..."
               value={query}
@@ -204,7 +202,7 @@ export function HistoryPage() {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-extrabold text-[#172554]">Historiales encontrados</h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
               {filteredRows.length} registros
             </span>
           </div>
@@ -214,15 +212,11 @@ export function HistoryPage() {
 
         {!isLoading && filteredRows.length === 0 ? (
           <div className="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-            <div>
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                <FileClock size={30} />
-              </span>
-              <h2 className="mt-5 text-xl font-extrabold text-[#172554]">Sin historial clinico</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                No se encontraron evaluaciones para los filtros seleccionados.
-              </p>
-            </div>
+            <EmptyState
+              description="No se encontraron evaluaciones para los filtros seleccionados."
+              icon={FileClock}
+              title="Sin historial clinico"
+            />
           </div>
         ) : null}
 
@@ -230,7 +224,7 @@ export function HistoryPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-sm font-extrabold text-slate-600">
+                <tr className="border-b border-slate-100 text-sm font-bold text-slate-600">
                   <th className="px-4 py-4">Paciente</th>
                   <th className="px-4 py-4">Propietario</th>
                   <th className="px-4 py-4">Especie</th>
@@ -246,11 +240,11 @@ export function HistoryPage() {
                   <tr key={row.patient.id}>
                     <td className="px-4 py-5">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-12 w-12 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-[#3026A6]">
+                        <span className="grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-lg font-extrabold text-teal-700">
                           {row.patient.name.charAt(0).toUpperCase()}
                         </span>
                         <div>
-                          <p className="font-extrabold text-slate-800">{row.patient.name}</p>
+                          <p className="font-bold text-slate-800">{row.patient.name}</p>
                           <p className="text-xs font-semibold text-slate-500">
                             {row.patient.breed?.name ?? "Sin raza"} · {calculateAge(row.patient.birth_date)}
                           </p>
@@ -268,13 +262,13 @@ export function HistoryPage() {
                     <td className="px-4 py-5 font-semibold">{row.evaluations.length}</td>
                     <td className="px-4 py-5 font-semibold">{row.latestResult}</td>
                     <td className="px-4 py-5">
-                      <span className={`inline-flex rounded-md px-3 py-1 text-xs font-extrabold ${riskClasses(row.latestRisk)}`}>
+                      <span className={`inline-flex rounded-md px-3 py-1 text-xs font-bold ${riskClasses(row.latestRisk)}`}>
                         {riskLabel(row.latestRisk)}
                       </span>
                     </td>
                     <td className="px-4 py-5">
                       <Link
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 text-sm font-semibold text-[#4635D3] shadow-sm transition hover:bg-violet-50"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
                         to={`/patients/${row.patient.id}/history`}
                       >
                         <FileClock size={17} />
@@ -347,7 +341,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
     <div className="relative min-w-[280px]">
       <span className="mb-2 block text-sm font-bold text-slate-700">Rango de fechas</span>
       <button
-        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:border-[#4635D3] focus:outline-none focus:ring-4 focus:ring-[#4635D3]/10"
+        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/10"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
@@ -356,7 +350,7 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
           <span className="truncate">{formatRangeLabel(fromDate, toDate)}</span>
         </span>
         {(fromDate || toDate) ? (
-          <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-extrabold text-[#4635D3]">Activo</span>
+          <span className="rounded-full bg-teal-50 px-2 py-1 text-xs font-bold text-teal-500">Activo</span>
         ) : null}
       </button>
 
@@ -364,9 +358,9 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
         <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 w-full rounded-lg border border-slate-100 bg-white p-4 shadow-2xl">
           <div className="grid gap-3">
             <label className="block">
-              <span className="mb-2 block text-xs font-extrabold text-slate-500">Desde</span>
+              <span className="mb-2 block text-xs font-bold text-slate-500">Desde</span>
               <input
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 onChange={(event) => {
                   const nextFrom = event.target.value;
                   setDraftFrom(nextFrom);
@@ -380,9 +374,9 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
               />
             </label>
             <label className="block">
-              <span className="mb-2 block text-xs font-extrabold text-slate-500">Hasta</span>
+              <span className="mb-2 block text-xs font-bold text-slate-500">Hasta</span>
               <input
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 min={draftFrom || undefined}
                 onChange={(event) => setDraftTo(event.target.value)}
                 type="date"
@@ -408,7 +402,7 @@ function HistoryLoadingState() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div className="h-20 animate-pulse rounded-lg bg-slate-100" key={index} />
+        <Skeleton className="h-20" key={index} />
       ))}
     </div>
   );

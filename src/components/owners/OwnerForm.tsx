@@ -7,6 +7,7 @@ import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 import { FormField } from "../common/FormField";
 import { FormSelect } from "../common/FormSelect";
+import { IconBadge } from "../common/IconBadge";
 import { PERU_UBIGEO } from "../../data/peruUbigeo";
 import type { Owner, OwnerFormValues, OwnerPayload } from "../../types/owner";
 
@@ -190,9 +191,7 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
 
       <Card className="p-6 sm:p-8">
         <div className="mb-8 flex items-center gap-4">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-            <UserRound size={24} />
-          </span>
+          <IconBadge className="h-11 w-11" icon={UserRound} iconSize={24} />
           <h2 className="text-xl font-extrabold text-[#172554]">Informacion del propietario</h2>
         </div>
 
@@ -318,7 +317,7 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
           </Button>
         ) : (
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-[#4635D3]/30"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             to="/owners"
           >
             Cancelar

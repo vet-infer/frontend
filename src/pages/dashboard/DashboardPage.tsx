@@ -5,6 +5,7 @@ import { Cell, Legend, Bar, BarChart, Pie, PieChart, ResponsiveContainer, Toolti
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
+import { IconBadge } from "../../components/common/IconBadge";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { dashboardService } from "../../services/dashboard.service";
 import type { DashboardData, DashboardScope, RecentEvaluation, RecentPatient, SummaryCard, WeekRange } from "../../types/dashboard";
@@ -100,7 +101,7 @@ export function DashboardPage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-extrabold text-[#172554]">Alcance del dashboard</h2>
+          <h2 className="text-base font-bold text-[#172554]">Alcance del dashboard</h2>
           <p className="mt-1 text-sm font-medium text-slate-500">{scopeDescription}</p>
         </div>
         <div className="inline-flex w-full rounded-lg border border-slate-200 bg-slate-50 p-1 sm:w-auto">
@@ -133,18 +134,16 @@ export function DashboardPage() {
           return (
             <Card className="p-4" key={item.label}>
               <div className="flex items-center gap-4">
-                <span
-                  className={
-                    isDanger
-                      ? "grid h-14 w-14 shrink-0 place-items-center rounded-full bg-red-50 text-red-600"
-                      : "grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]"
-                  }
-                >
-                  <Icon size={24} strokeWidth={1.9} />
-                </span>
+                <IconBadge
+                  className="h-14 w-14 shrink-0"
+                  icon={Icon}
+                  iconSize={24}
+                  iconStrokeWidth={1.9}
+                  tone={isDanger ? "danger" : "brand"}
+                />
                 <div className="min-w-0">
-                  <h3 className="text-sm font-extrabold leading-5 text-[#172554]">{item.label}</h3>
-                  <p className="mt-1 text-2xl font-extrabold leading-none text-[#4635D3]">{item.value}</p>
+                  <h3 className="text-sm font-bold leading-5 text-[#172554]">{item.label}</h3>
+                  <p className="mt-1 text-2xl font-extrabold leading-none text-teal-500">{item.value}</p>
                   <p className={isDanger ? "mt-1 text-xs font-semibold text-red-500" : "mt-1 text-xs font-semibold text-emerald-600"}>
                     {item.change}
                   </p>
@@ -158,7 +157,7 @@ export function DashboardPage() {
       <section className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
           <div className="mb-4">
-            <h3 className="text-base font-extrabold text-[#172554]">Distribucion de Riesgo Clinico</h3>
+            <h3 className="text-base font-bold text-[#172554]">Distribucion de Riesgo Clinico</h3>
             <p className="text-xs font-medium text-slate-500">Severidad de los casos clinicos procesados por el motor</p>
           </div>
           <div className="h-64">
@@ -182,7 +181,7 @@ export function DashboardPage() {
 
         <Card className="p-5">
           <div className="mb-4">
-            <h3 className="text-base font-extrabold text-[#172554]">Top Enfermedades Inferidas</h3>
+            <h3 className="text-base font-bold text-[#172554]">Top Enfermedades Inferidas</h3>
             <p className="text-xs font-medium text-slate-500">Patologias con mayor frecuencia de diagnostico</p>
           </div>
           <div className="h-64">
@@ -285,8 +284,8 @@ function EmptyChartMessage({ message }: { message: string }) {
 function PanelHeader({ title, to }: { title: string; to: string }) {
   return (
     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-      <h2 className="text-base font-extrabold text-[#172554]">{title}</h2>
-      <Link className="text-sm font-extrabold text-[#4635D3] hover:text-[#3026A6]" to={to}>
+      <h2 className="text-base font-bold text-[#172554]">{title}</h2>
+      <Link className="text-sm font-bold text-teal-500 hover:text-teal-700" to={to}>
         Ver todas
       </Link>
     </div>

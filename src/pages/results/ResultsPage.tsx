@@ -23,11 +23,16 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
+import { EmptyState } from "../../components/common/EmptyState";
+import { IconBadge } from "../../components/common/IconBadge";
+import { Skeleton } from "../../components/common/Skeleton";
 import { evaluationService } from "../../services/evaluation.service";
 import { patientService } from "../../services/patient.service";
 import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../../types/evaluation";
 import type { Patient } from "../../types/patient";
 import { cn } from "../../utils/cn";
+import { calculateAge, formatDate as formatDateWithTime } from "../../utils/clinical";
+import { getErrorMessage } from "../../utils/errors";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
@@ -39,43 +44,8 @@ function getInitial(patient: Patient) {
   return patient.name.charAt(0).toUpperCase();
 }
 
-function calculateAge(birthDate?: string | null) {
-  if (!birthDate) {
-    return "Sin fecha";
-  }
-
-  const birth = new Date(`${birthDate}T00:00:00`);
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    years -= 1;
-  }
-
-  if (years <= 0) {
-    const months = Math.max(
-      0,
-      (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth()
-    );
-    return `${months || 1} ${months === 1 ? "mes" : "meses"}`;
-  }
-
-  return `${years} ${years === 1 ? "año" : "años"}`;
-}
-
 function formatDate(value?: string | null) {
-  if (!value) {
-    return "Sin registrar";
-  }
-
-  return new Intl.DateTimeFormat("es-CO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
+  return formatDateWithTime(value, true);
 }
 
 function getRiskTone(riskLevel?: string | null) {
@@ -115,9 +85,6 @@ function riskRangeLabel(riskLevel?: string | null) {
   return "0% a menos de 40%";
 }
 
-function getErrorMessage(error: unknown) {
-  return getResponseErrorMessage(error, "No fue posible cargar los resultados.");
-}
 
 function factLabel(fact: ClinicalFactOut) {
   return `${fact.fact_key}: ${String(fact.value)}`;
@@ -164,7 +131,7 @@ export function ResultsPage() {
         try {
           const [evaluationData, patientData] = await Promise.all([
             evaluationService.list(),
-            patientService.list(),
+            patientService.listAll(),
           ]);
           const patientById = new Map(patientData.map((item) => [item.id, item]));
           const resultEntries = await Promise.all(
@@ -202,7 +169,7 @@ export function ResultsPage() {
           }
         } catch (caughtError) {
           if (isMounted) {
-            setError(getErrorMessage(caughtError));
+            setError(getErrorMessage(caughtError, "No fue posible cargar los resultados."));
           }
         } finally {
           if (isMounted) {
@@ -230,7 +197,7 @@ export function ResultsPage() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(getErrorMessage(caughtError));
+          setError(getErrorMessage(caughtError, "No fue posible cargar los resultados."));
         }
       } finally {
         if (isMounted) {
@@ -286,7 +253,7 @@ export function ResultsPage() {
   }
 
   if (isLoading) {
-    return <div className="h-96 animate-pulse rounded-lg bg-slate-100" />;
+    return <Skeleton className="h-96" />;
   }
 
   if (error) {
@@ -302,23 +269,21 @@ export function ResultsPage() {
       <div className="space-y-6">
         <PageHeader patientId={patient.id} />
         <Card className="grid min-h-80 place-items-center p-8 text-center">
-          <div>
-            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-              <LineChart size={30} />
-            </span>
-            <h2 className="mt-5 text-xl font-extrabold text-[#172554]">Evaluacion sin resultados procesados</h2>
-            <p className="mt-2 max-w-lg text-sm leading-6 text-slate-500">
-              Esta evaluacion existe, pero aun no tiene resultados persistidos. Procesala desde la pantalla de evaluacion
-              clinica.
-            </p>
-            <Link
-              className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3526AD]"
-              to={`/evaluations?patientId=${patient.id}`}
-            >
-              <ClipboardPlus size={18} />
-              Nueva evaluacion
-            </Link>
-          </div>
+          <EmptyState
+            action={
+              <Link
+                className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
+                to={`/evaluations?patientId=${patient.id}`}
+              >
+                <ClipboardPlus size={18} />
+                Nueva evaluacion
+              </Link>
+            }
+            description="Esta evaluacion existe, pero aun no tiene resultados persistidos. Procesala desde la pantalla de evaluacion clinica."
+            descriptionClassName="max-w-lg"
+            icon={LineChart}
+            title="Evaluacion sin resultados procesados"
+          />
         </Card>
       </div>
     );
@@ -334,7 +299,7 @@ export function ResultsPage() {
       <Card className="p-6 sm:p-8">
         <div className="grid gap-6 xl:grid-cols-[1.1fr_1.6fr]">
           <div className="flex items-center gap-5 border-b border-slate-100 pb-6 xl:border-b-0 xl:border-r xl:pb-0 xl:pr-8">
-            <span className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-violet-50 text-5xl font-extrabold text-[#3026A6]">
+            <span className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-teal-50 text-5xl font-extrabold text-teal-700">
               {getInitial(patient)}
             </span>
             <div>
@@ -362,7 +327,7 @@ export function ResultsPage() {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard icon={ClipboardPlus} label="Resultado sugerido" value={result.suggested_diagnosis} />
         <SummaryCard icon={AlertTriangle} iconClassName={riskTone.iconClassName} label="Nivel de riesgo">
-          <span className={cn("inline-flex rounded-md px-3 py-1 text-sm font-extrabold", riskTone.className)}>
+          <span className={cn("inline-flex rounded-md px-3 py-1 text-sm font-bold", riskTone.className)}>
             {riskTone.label}
           </span>
         </SummaryCard>
@@ -372,9 +337,7 @@ export function ResultsPage() {
 
       <Card className="p-6">
         <div className="flex gap-5">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-[#3026A6]">
-            <Info size={30} />
-          </span>
+          <IconBadge className="h-14 w-14 shrink-0 text-teal-700" icon={Info} iconSize={30} />
           <div className="min-w-0 flex-1">
             <h2 className="text-xl font-extrabold text-[#172554]">Explicacion del resultado</h2>
             <p className="mt-3 leading-7 text-slate-600">
@@ -402,7 +365,7 @@ export function ResultsPage() {
               rows={result.activated_rules}
               renderRow={(rule) => (
                 <tr key={rule.id}>
-                  <td className="whitespace-nowrap px-5 py-3 font-extrabold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
+                  <td className="whitespace-nowrap px-5 py-3 font-bold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
                   <td className="px-5 py-3">{Array.isArray(rule.fulfilled_conditions) ? rule.fulfilled_conditions.map(String).join(" · ") : String(rule.fulfilled_conditions ?? "Condiciones registradas")}</td>
                   <td className="px-5 py-3">{rule.justification || "Regla activada por condiciones cumplidas."}</td>
                 </tr>
@@ -423,9 +386,7 @@ export function ResultsPage() {
 
       <Card className="p-6">
         <div className="flex gap-5">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-            <HeartHandshake size={28} />
-          </span>
+          <IconBadge className="h-14 w-14 shrink-0" icon={HeartHandshake} iconSize={28} />
           <div>
             <h2 className="text-xl font-extrabold text-[#172554]">Recomendacion de seguimiento</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -438,14 +399,14 @@ export function ResultsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to="/results"
         >
           <ArrowLeft size={18} />
           Volver a resultados
         </Link>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to={`/patients/${patient.id}/history`}
         >
           <FileClock size={18} />
@@ -490,7 +451,7 @@ function ResultsListView({
           </p>
         </div>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3526AD]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
           to="/evaluations"
         >
           <ClipboardPlus size={20} />
@@ -513,7 +474,7 @@ function ResultsListView({
             <span className="mb-2 block text-sm font-bold text-slate-700">Buscar resultado</span>
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="Paciente, propietario o diagnostico..."
               value={query}
@@ -522,7 +483,7 @@ function ResultsListView({
           <label className="block min-w-[210px]">
             <span className="mb-2 block text-sm font-bold text-slate-700">Nivel de riesgo</span>
             <select
-              className="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[#4635D3] focus:ring-4 focus:ring-[#4635D3]/10"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => onRiskFilterChange(event.target.value)}
               value={riskFilter}
             >
@@ -539,32 +500,30 @@ function ResultsListView({
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-extrabold text-[#172554]">Resultados encontrados</h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
               {filteredRows.length} registros
             </span>
           </div>
         </div>
 
-        {isLoading ? <div className="h-72 animate-pulse rounded-lg bg-slate-100" /> : null}
+        {isLoading ? <Skeleton className="h-72" /> : null}
 
         {!isLoading && filteredRows.length === 0 ? (
           <div className="grid min-h-72 place-items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-            <div>
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-violet-50 text-[#4635D3]">
-                <LineChart size={30} />
-              </span>
-              <h2 className="mt-5 text-xl font-extrabold text-[#172554]">No hay resultados procesados</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Cuando una evaluacion clinica tenga resultados persistidos, aparecera en este listado.
-              </p>
-              <Link
-                className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3526AD]"
-                to="/evaluations"
-              >
-                <ClipboardPlus size={18} />
-                Crear evaluacion
-              </Link>
-            </div>
+            <EmptyState
+              action={
+                <Link
+                  className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
+                  to="/evaluations"
+                >
+                  <ClipboardPlus size={18} />
+                  Crear evaluacion
+                </Link>
+              }
+              description="Cuando una evaluacion clinica tenga resultados persistidos, aparecera en este listado."
+              icon={LineChart}
+              title="No hay resultados procesados"
+            />
           </div>
         ) : null}
 
@@ -572,7 +531,7 @@ function ResultsListView({
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-sm font-extrabold text-slate-600">
+                <tr className="border-b border-slate-100 text-sm font-bold text-slate-600">
                   <th className="px-4 py-4">Paciente</th>
                   <th className="px-4 py-4">Propietario</th>
                   <th className="px-4 py-4">Fecha</th>
@@ -590,11 +549,11 @@ function ResultsListView({
                     <tr key={row.evaluation.id}>
                       <td className="px-4 py-5">
                         <div className="flex items-center gap-3">
-                          <span className="grid h-12 w-12 place-items-center rounded-full bg-violet-50 text-lg font-extrabold text-[#3026A6]">
+                          <span className="grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-lg font-extrabold text-teal-700">
                             {getInitial(row.patient)}
                           </span>
                           <div>
-                            <p className="font-extrabold text-slate-800">{row.patient.name}</p>
+                            <p className="font-bold text-slate-800">{row.patient.name}</p>
                             <p className="text-xs font-semibold text-slate-500">
                               {row.patient.species.name} · {row.patient.breed?.name ?? "Sin raza"}
                             </p>
@@ -605,7 +564,7 @@ function ResultsListView({
                       <td className="whitespace-nowrap px-4 py-5 font-semibold">{formatDate(row.evaluation.created_at)}</td>
                       <td className="max-w-[260px] px-4 py-5 font-semibold">{row.result.suggested_diagnosis}</td>
                       <td className="px-4 py-5">
-                        <span className={cn("inline-flex rounded-md px-3 py-1 text-xs font-extrabold", tone.className)}>
+                        <span className={cn("inline-flex rounded-md px-3 py-1 text-xs font-bold", tone.className)}>
                           {tone.label}
                         </span>
                       </td>
@@ -614,7 +573,7 @@ function ResultsListView({
                       </td>
                       <td className="px-4 py-5">
                         <Link
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-white px-4 text-sm font-semibold text-[#4635D3] shadow-sm transition hover:bg-violet-50"
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
                           to={`/results?evaluationId=${row.evaluation.id}`}
                         >
                           Ver resultado
@@ -640,8 +599,8 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
   return (
     <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
       <div>
-        <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
-          <Link className="text-[#4635D3] hover:text-[#3026A6]" to="/results">
+        <div className="mb-3 flex items-center gap-2 text-sm font-bold">
+          <Link className="text-teal-500 hover:text-teal-700" to="/results">
             Resultados
           </Link>
           <span className="text-slate-300">/</span>
@@ -657,7 +616,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
       <div className="flex flex-wrap gap-3">
         {onDownloadPdf ? (
           <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
             onClick={onDownloadPdf}
             type="button"
           >
@@ -666,14 +625,14 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
           </button>
         ) : null}
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4635D3] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3526AD]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
           to={patientId ? `/evaluations?patientId=${patientId}` : "/evaluations"}
         >
           <ClipboardPlus size={20} />
           Nueva evaluacion
         </Link>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#3026A6] shadow-sm transition hover:bg-violet-50"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
           to={patientId ? `/patients/${patientId}/history` : "/history"}
         >
           <FileClock size={20} />
@@ -687,10 +646,10 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
 function InfoTile({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) {
   return (
     <div className="flex items-center gap-4 border-b border-slate-100 px-2 py-3">
-      <Icon className="shrink-0 text-[#4635D3]" size={25} />
+      <Icon className="shrink-0 text-teal-500" size={25} />
       <div>
         <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <p className="mt-1 font-extrabold text-slate-800">{value}</p>
+        <p className="mt-1 font-bold text-slate-800">{value}</p>
       </div>
     </div>
   );
@@ -712,12 +671,10 @@ function SummaryCard({
   return (
     <Card className="p-5">
       <div className="flex items-center gap-4">
-        <span className={cn("grid h-16 w-16 shrink-0 place-items-center rounded-full bg-violet-50 text-[#4635D3]", iconClassName)}>
-          <Icon size={29} />
-        </span>
+        <IconBadge className={cn("h-16 w-16 shrink-0", iconClassName)} icon={Icon} iconSize={29} />
         <div>
-          <p className="text-sm font-extrabold text-slate-500">{label}</p>
-          {children ?? <p className="mt-2 text-xl font-extrabold text-[#3026A6]">{value}</p>}
+          <p className="text-sm font-bold text-slate-500">{label}</p>
+          {children ?? <p className="mt-2 text-xl font-extrabold text-teal-700">{value}</p>}
         </div>
       </div>
     </Card>
@@ -727,7 +684,7 @@ function SummaryCard({
 function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: string; tone: "green" | "violet" }) {
   return (
     <div className="mb-5 last:mb-0">
-      <h3 className="mb-3 text-sm font-extrabold text-slate-600">{title}</h3>
+      <h3 className="mb-3 text-sm font-bold text-slate-600">{title}</h3>
       {facts.length === 0 ? (
         <p className="text-sm font-semibold text-slate-400">Sin datos registrados.</p>
       ) : (
@@ -735,8 +692,8 @@ function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: st
           {facts.map((fact) => (
             <span
               className={cn(
-                "rounded-md px-4 py-2 text-sm font-extrabold",
-                tone === "green" ? "bg-emerald-50 text-emerald-700" : "bg-violet-50 text-[#4635D3]"
+                "rounded-md px-4 py-2 text-sm font-bold",
+                tone === "green" ? "bg-emerald-50 text-emerald-700" : "bg-teal-50 text-teal-500"
               )}
               key={fact.id}
             >
