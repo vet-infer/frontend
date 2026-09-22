@@ -147,7 +147,7 @@ export const dashboardService = {
           patient: patient?.name ?? `Paciente #${evaluation.patient_id}`,
           speciesBreed: patient ? speciesBreed(patient) : "Sin datos clinicos",
           date: formatDate(evaluation.created_at),
-          result: mainResult?.suggested_diagnosis ?? evaluation.reason ?? "Pendiente de inferencia",
+          result: mainResult?.suggested_diagnosis ?? evaluation.reason ?? "Pendiente de diagnostico",
           risk: normalizeRisk(mainResult?.risk_level),
         };
       });

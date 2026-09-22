@@ -1,5 +1,6 @@
 import type { ClinicalFactOut, PersistedInferenceResult } from "../types/evaluation";
 import type { Patient } from "../types/patient";
+import { resolveFactDisplayName, type FactCatalog } from "./factLabel";
 
 export function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -83,7 +84,9 @@ export function riskClasses(risk?: string | null) {
   return "bg-slate-100 text-slate-500";
 }
 
-export function factSummary(facts: ClinicalFactOut[] = []) {
-  const symptoms = facts.filter((fact) => fact.source_type === "symptom").map((fact) => fact.fact_key);
+export function factSummary(facts: ClinicalFactOut[] = [], catalog: FactCatalog = []) {
+  const symptoms = facts
+    .filter((fact) => fact.source_type === "symptom")
+    .map((fact) => resolveFactDisplayName(fact.fact_key, catalog));
   return symptoms.length ? symptoms.join(", ") : "Sin sintomas registrados.";
 }

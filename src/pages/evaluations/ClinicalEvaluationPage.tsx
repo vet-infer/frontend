@@ -228,7 +228,7 @@ export function ClinicalEvaluationPage() {
             <div>
               <h2 className="text-xl font-extrabold text-[#172554]">Sintomas</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Registra solo signos clinicos observados. Estos facts se envian con source_type symptom.
+                Registra solo signos clinicos observados durante la consulta.
               </p>
             </div>
             <EvaluationFactsPanel
@@ -247,7 +247,7 @@ export function ClinicalEvaluationPage() {
             <div>
               <h2 className="text-xl font-extrabold text-[#172554]">Variables clinicas</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Registra mediciones clinicas principales. Estos facts se envian con source_type clinical_variable.
+                Registra las mediciones clinicas principales tomadas durante la consulta.
               </p>
             </div>
             <EvaluationFactsPanel
@@ -266,7 +266,7 @@ export function ClinicalEvaluationPage() {
             <div>
               <h2 className="text-xl font-extrabold text-[#172554]">Variables complementarias</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Registra biomarcadores, mediciones avanzadas o resultados de apoyo diagnostico. Siguen siendo clinical_variables para conservar compatibilidad con facts y reglas.
+                Registra biomarcadores, mediciones avanzadas o resultados de apoyo diagnostico.
               </p>
             </div>
             <EvaluationFactsPanel
@@ -348,7 +348,7 @@ function PatientTab({
         </dl>
       ) : (
         <p className="text-sm text-slate-500">
-          El propietario se determina a partir del paciente real seleccionado; el endpoint de evaluacion no acepta un propietario independiente.
+          El propietario se determina a partir del paciente seleccionado; el sistema no permite registrar un propietario independiente del paciente.
         </p>
       )}
     </div>
@@ -370,12 +370,12 @@ function ProcessingTab({
 }) {
   return (
     <div className="space-y-5">
-      <p className="text-slate-600">Guarda los sintomas, variables clinicas y variables complementarias validadas antes de ejecutar el motor IF-THEN + Bayes.</p>
+      <p className="text-slate-600">Guarda los sintomas, variables clinicas y variables complementarias validadas antes de generar el diagnostico sugerido.</p>
       <div className="flex flex-wrap gap-3">
         <Button disabled={isSaving || Boolean(evaluation)} onClick={onSave}>{isSaving ? "Guardando..." : "Guardar"}</Button>
         <Button disabled={!evaluation || isProcessing} onClick={onProcess}>{isProcessing ? "Procesando..." : "Procesar evaluacion"}</Button>
       </div>
-      {evaluation ? <p className="text-sm font-bold text-emerald-700">Evaluacion #{evaluation.id} persistida.</p> : null}
+      {evaluation ? <p className="text-sm font-bold text-emerald-700">Evaluacion #{evaluation.id} guardada.</p> : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { ChangeEvent } from "react";
 import { Skeleton } from "../common/Skeleton";
 import type { FactDefinition } from "../../types/evaluation";
+import { formatFactLabel, normalizeAccents } from "../../utils/factLabel";
 
 type Props = {
   facts: FactDefinition[];
@@ -9,45 +10,6 @@ type Props = {
   isLoading: boolean;
   error: string;
   emptyMessage?: string;
-};
-
-const ACCENT_FIXES: Record<string, string> = {
-  perdida: "pérdida",
-  cardiaco: "cardíaco",
-  cardiaca: "cardíaca",
-  pequena: "pequeña",
-  pequeno: "pequeño",
-  disminucion: "disminución",
-  sincope: "síncope",
-  recesion: "recesión",
-  vacunacion: "vacunación",
-  cronica: "crónica",
-  cronico: "crónico",
-  oidos: "oídos",
-  otico: "ótico",
-  otica: "ótica",
-  secrecion: "secreción",
-  pabellon: "pabellón",
-  simetrica: "simétrica",
-  frio: "frío",
-  vomito: "vómito",
-  fosforo: "fósforo",
-  inorganico: "inorgánico",
-  inorganica: "inorgánica",
-  ecograficos: "ecográficos",
-  ecografico: "ecográfico",
-  ecografica: "ecográfica",
-  radiograficos: "radiográficos",
-  radiografico: "radiográfico",
-  radiografica: "radiográfica",
-  toracicos: "torácicos",
-  toracico: "torácico",
-  toracica: "torácica",
-  sanguinea: "sanguínea",
-  sanguineo: "sanguíneo",
-  coinfeccion: "coinfección",
-  clasificacion: "clasificación",
-  citologia: "citología",
 };
 
 const OPTION_LABEL_OVERRIDES: Record<string, string> = {
@@ -62,24 +24,12 @@ const CLINICAL_REFERENCE_FALLBACKS: Record<string, string> = {
   uacr: "Ejemplo: valor normal menor a 30 mg/g; entre 30 y 300 mg/g indica microalbuminuria.",
 };
 
-function normalizeAccents(text: string): string {
-  return text.replace(/\p{L}+/gu, (word) => ACCENT_FIXES[word.toLowerCase()] ?? word);
-}
-
-function capitalize(text: string): string {
-  return text.length ? text.charAt(0).toUpperCase() + text.slice(1) : text;
-}
-
-function formatFactLabel(text: string): string {
-  return capitalize(normalizeAccents(text));
-}
-
 function optionLabel(value: unknown): string {
   const raw = String(value);
   return OPTION_LABEL_OVERRIDES[raw] ?? raw;
 }
 
-export function EvaluationFactsPanel({ facts, values, onChange, isLoading, error, emptyMessage = "No hay facts activos para esta especie." }: Props) {
+export function EvaluationFactsPanel({ facts, values, onChange, isLoading, error, emptyMessage = "No hay variables activas para esta especie." }: Props) {
   if (isLoading) return <Skeleton className="h-52" />;
   if (error) return <p className="rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>;
   if (facts.length === 0) return <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">{emptyMessage}</p>;
@@ -165,7 +115,7 @@ function factHelpText(fact: FactDefinition, type: string) {
     return `Ejemplo: ${fact.allowed_values.slice(0, 3).map(optionLabel).join(" / ")}. Selecciona el valor que coincida con la evidencia disponible.`;
   }
 
-  return "Este fact categorico no posee valores permitidos publicados; revisar catalogo antes de registrar.";
+  return "Esta variable no tiene valores permitidos publicados; verificar antes de registrar.";
 }
 
 function numericHelpText(fact: FactDefinition): string {

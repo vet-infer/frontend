@@ -80,7 +80,7 @@ export function DashboardPage() {
     const prevalence: Record<string, number> = {};
 
     dashboard.recentEvaluations.forEach((evalItem) => {
-      if (evalItem.result && evalItem.result !== "Pendiente de inferencia") {
+      if (evalItem.result && evalItem.result !== "Pendiente de diagnostico") {
         prevalence[evalItem.result] = (prevalence[evalItem.result] ?? 0) + 1;
       }
     });
@@ -158,7 +158,7 @@ export function DashboardPage() {
         <Card className="p-5">
           <div className="mb-4">
             <h3 className="text-base font-bold text-[#172554]">Distribucion de Riesgo Clinico</h3>
-            <p className="text-xs font-medium text-slate-500">Severidad de los casos clinicos procesados por el motor</p>
+            <p className="text-xs font-medium text-slate-500">Severidad de los casos clinicos evaluados</p>
           </div>
           <div className="h-64">
             {riskDistributionData.length > 0 ? (

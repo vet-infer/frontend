@@ -28,12 +28,15 @@ import { IconBadge } from "../../components/common/IconBadge";
 import { Skeleton } from "../../components/common/Skeleton";
 import { evaluationService } from "../../services/evaluation.service";
 import { patientService } from "../../services/patient.service";
-import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../../types/evaluation";
+import type { ClinicalFactOut, Evaluation, PersistedActivatedRule, PersistedInferenceResult } from "../../types/evaluation";
 import type { Patient } from "../../types/patient";
 import { cn } from "../../utils/cn";
 import { calculateAge, formatDate as formatDateWithTime } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
+import { useEvaluationFacts } from "../../hooks/useEvaluationFacts";
+import { useAuth } from "../../hooks/useAuth";
+import { formatCondition, resolveFactDisplayName, type FactCatalog } from "../../utils/factLabel";
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -85,8 +88,16 @@ function riskRangeLabel(riskLevel?: string | null) {
 }
 
 
-function factLabel(fact: ClinicalFactOut) {
-  return `${fact.fact_key}: ${String(fact.value)}`;
+function factLabel(fact: ClinicalFactOut, catalog: FactCatalog) {
+  return `${resolveFactDisplayName(fact.fact_key, catalog)}: ${String(fact.value)}`;
+}
+
+function conditionsLabel(rule: PersistedActivatedRule, catalog: FactCatalog) {
+  if (!Array.isArray(rule.fulfilled_conditions)) {
+    return String(rule.fulfilled_conditions ?? "Condiciones registradas");
+  }
+
+  return rule.fulfilled_conditions.map((condition) => formatCondition(String(condition), catalog)).join(" · ");
 }
 
 function splitFacts(facts: ClinicalFactOut[] = []) {
@@ -107,6 +118,7 @@ type ResultListRow = {
 };
 
 export function ResultsPage() {
+  const { isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const evaluationId = searchParams.get("evaluationId");
   const parsedEvaluationId = evaluationId ? Number(evaluationId) : null;
@@ -213,6 +225,7 @@ export function ResultsPage() {
   }, [parsedEvaluationId]);
 
   const result = useMemo(() => primaryResult(results), [results]);
+  const factCatalog = useEvaluationFacts(patient?.species.id).data;
   const facts = splitFacts(evaluation?.facts ?? []);
   const riskTone = getRiskTone(result?.risk_level);
   const filteredResultRows = useMemo(() => {
@@ -241,6 +254,7 @@ export function ResultsPage() {
       <ResultsListView
         error={error}
         filteredRows={filteredResultRows}
+        isAdmin={isAdmin}
         isLoading={isLoading}
         onQueryChange={setQuery}
         onRiskFilterChange={setRiskFilter}
@@ -278,7 +292,7 @@ export function ResultsPage() {
                 Nueva evaluacion
               </Link>
             }
-            description="Esta evaluacion existe, pero aun no tiene resultados persistidos. Procesala desde la pantalla de evaluacion clinica."
+            description="Esta evaluacion existe, pero aun no tiene resultados guardados. Procesala desde la pantalla de evaluacion clinica."
             descriptionClassName="max-w-lg"
             icon={LineChart}
             title="Evaluacion sin resultados procesados"
@@ -291,7 +305,7 @@ export function ResultsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        onDownloadPdf={() => downloadEvaluationPdf({ evaluation, patient, results })}
+        onDownloadPdf={() => downloadEvaluationPdf({ evaluation, patient, results, factCatalog })}
         patientId={patient.id}
       />
 
@@ -331,7 +345,9 @@ export function ResultsPage() {
           </span>
         </SummaryCard>
         <SummaryCard icon={LineChart} iconClassName="bg-blue-50 text-blue-600" label="Probabilidad calculada" value={probabilityLabel(result.probability)} />
-        <SummaryCard icon={Settings} label="Motor aplicado" value={result.inference_method ?? "Reglas IF-THEN + inferencia clinica"} />
+        {isAdmin ? (
+          <SummaryCard icon={Settings} label="Metodo de diagnostico (tecnico)" value={result.inference_method ?? "Sin registrar"} />
+        ) : null}
       </section>
 
       <Card className="p-6">
@@ -344,7 +360,7 @@ export function ResultsPage() {
                 "El resultado sugerido se obtuvo a partir de los sintomas y variables clinicas registradas en la evaluacion."}
             </p>
             <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700">
-              El {probabilityLabel(result.probability)} se ubica en el rango de riesgo {result.risk_level.toLowerCase()} ({riskRangeLabel(result.risk_level)}). Las reglas IF-THEN y las variables registradas sustentan esta inferencia; no reemplaza el juicio profesional del médico veterinario.
+              El {probabilityLabel(result.probability)} se ubica en el rango de riesgo {result.risk_level.toLowerCase()} ({riskRangeLabel(result.risk_level)}). Las reglas clinicas y las variables registradas sustentan este resultado; no reemplaza el juicio profesional del médico veterinario.
             </div>
           </div>
         </div>
@@ -365,7 +381,7 @@ export function ResultsPage() {
               renderRow={(rule) => (
                 <tr key={rule.id}>
                   <td className="whitespace-nowrap px-5 py-3 font-bold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
-                  <td className="px-5 py-3">{Array.isArray(rule.fulfilled_conditions) ? rule.fulfilled_conditions.map(String).join(" · ") : String(rule.fulfilled_conditions ?? "Condiciones registradas")}</td>
+                  <td className="px-5 py-3">{conditionsLabel(rule, factCatalog)}</td>
                   <td className="px-5 py-3">{rule.justification || "Regla activada por condiciones cumplidas."}</td>
                 </tr>
               )}
@@ -378,8 +394,8 @@ export function ResultsPage() {
             <FlaskConical size={24} />
             Variables consideradas
           </h2>
-          <FactGroup facts={facts.symptoms} title="Sintomas observados" tone="green" />
-          <FactGroup facts={facts.variables} title="Variables clinicas" tone="violet" />
+          <FactGroup catalog={factCatalog} facts={facts.symptoms} title="Sintomas observados" tone="green" />
+          <FactGroup catalog={factCatalog} facts={facts.variables} title="Variables clinicas" tone="violet" />
         </Card>
       </section>
 
@@ -419,6 +435,7 @@ export function ResultsPage() {
 type ResultsListViewProps = {
   error: string;
   filteredRows: ResultListRow[];
+  isAdmin: boolean;
   isLoading: boolean;
   onQueryChange: (value: string) => void;
   onRiskFilterChange: (value: string) => void;
@@ -430,6 +447,7 @@ type ResultsListViewProps = {
 function ResultsListView({
   error,
   filteredRows,
+  isAdmin,
   isLoading,
   onQueryChange,
   onRiskFilterChange,
@@ -519,7 +537,7 @@ function ResultsListView({
                   Crear evaluacion
                 </Link>
               }
-              description="Cuando una evaluacion clinica tenga resultados persistidos, aparecera en este listado."
+              description="Cuando una evaluacion clinica tenga resultados guardados, aparecera en este listado."
               icon={LineChart}
               title="No hay resultados procesados"
             />
@@ -536,7 +554,7 @@ function ResultsListView({
                   <th className="px-4 py-4">Fecha</th>
                   <th className="px-4 py-4">Diagnostico sugerido</th>
                   <th className="px-4 py-4">Riesgo</th>
-                  <th className="px-4 py-4">Motor</th>
+                  {isAdmin ? <th className="px-4 py-4">Metodo (tecnico)</th> : null}
                   <th className="px-4 py-4">Accion</th>
                 </tr>
               </thead>
@@ -567,9 +585,11 @@ function ResultsListView({
                           {tone.label}
                         </span>
                       </td>
-                      <td className="max-w-[220px] px-4 py-5 font-semibold">
-                        {row.result.inference_method ?? "Reglas IF-THEN + inferencia clinica"}
-                      </td>
+                      {isAdmin ? (
+                        <td className="max-w-[220px] px-4 py-5 font-semibold">
+                          {row.result.inference_method ?? "Sin registrar"}
+                        </td>
+                      ) : null}
                       <td className="px-4 py-5">
                         <Link
                           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-white px-4 text-sm font-semibold text-teal-500 shadow-sm transition hover:bg-teal-50"
@@ -680,7 +700,7 @@ function SummaryCard({
   );
 }
 
-function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: string; tone: "green" | "violet" }) {
+function FactGroup({ catalog, facts, title, tone }: { catalog: FactCatalog; facts: ClinicalFactOut[]; title: string; tone: "green" | "violet" }) {
   return (
     <div className="mb-5 last:mb-0">
       <h3 className="mb-3 text-sm font-bold text-slate-600">{title}</h3>
@@ -696,7 +716,7 @@ function FactGroup({ facts, title, tone }: { facts: ClinicalFactOut[]; title: st
               )}
               key={fact.id}
             >
-              {factLabel(fact)}
+              {factLabel(fact, catalog)}
             </span>
           ))}
         </div>

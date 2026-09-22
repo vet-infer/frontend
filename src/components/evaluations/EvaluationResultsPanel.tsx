@@ -25,7 +25,7 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
         <p className="text-sm font-bold text-teal-500">Paso 3 · Resultado de la inferencia</p>
         <h2 className="mt-1 text-lg font-extrabold text-[#172554]">Revisa la sugerencia y su evidencia clínica</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          El motor ya procesó los facts registrados y guardó {results.length === 1 ? "una sugerencia" : `${results.length} sugerencias`} para esta evaluación. El resultado sugerido orienta la priorización; revisa el riesgo, la probabilidad y las reglas que explican por qué se generó antes de tomar una decisión clínica.
+          El sistema ya proceso los datos registrados y guardó {results.length === 1 ? "una sugerencia" : `${results.length} sugerencias`} para esta evaluación. El resultado sugerido orienta la priorización; revisa el riesgo, la probabilidad y las reglas que explican por qué se generó antes de tomar una decisión clínica.
         </p>
         {evaluationId ? (
           <Link className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-teal-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-600" to={`/results?evaluationId=${evaluationId}`}>
@@ -35,7 +35,7 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
       </section>
 
       <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-5 text-sm sm:grid-cols-3">
-        <div><p className="font-bold text-slate-700">1. Sugerencia y riesgo</p><p className="mt-1 leading-5 text-slate-500">Identifican el hallazgo priorizado por el motor.</p></div>
+        <div><p className="font-bold text-slate-700">1. Sugerencia y riesgo</p><p className="mt-1 leading-5 text-slate-500">Identifican el hallazgo priorizado por el sistema.</p></div>
         <div><p className="font-bold text-slate-700">2. Probabilidad y método</p><p className="mt-1 leading-5 text-slate-500">Muestran el peso del cálculo y cómo se obtuvo.</p></div>
         <div><p className="font-bold text-slate-700">3. Reglas activadas</p><p className="mt-1 leading-5 text-slate-500">Relacionan la conclusión con las condiciones clínicas cumplidas.</p></div>
       </section>
@@ -47,8 +47,8 @@ export function EvaluationResultsPanel({ evaluationId, results }: EvaluationResu
             <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-bold text-teal-700">Riesgo {result.risk_level} · {riskRange(result.risk_level)}</span>
           </div>
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-            <div><dt className="font-semibold text-slate-500">Probabilidad Bayes</dt><dd className="font-bold text-slate-700">{result.probability == null ? "No disponible" : `${(result.probability * 100).toFixed(1)}%`}</dd></div>
-            <div><dt className="font-semibold text-slate-500">Método</dt><dd className="font-bold text-slate-700">{result.inference_method ?? "No registrado"}</dd></div>
+            <div><dt className="font-semibold text-slate-500">Probabilidad estimada</dt><dd className="font-bold text-slate-700">{result.probability == null ? "No disponible" : `${(result.probability * 100).toFixed(1)}%`}</dd></div>
+            <div><dt className="font-semibold text-slate-500">Método</dt><dd className="font-bold text-slate-700">Reglas clínicas y cálculo de probabilidad</dd></div>
           </dl>
           <h4 className="mt-5 font-bold text-slate-700">Reglas activadas</h4>
           <p className="mt-1 text-sm text-slate-500">Las condiciones cumplidas en estas reglas sustentan la evidencia clínica del resultado.</p>
