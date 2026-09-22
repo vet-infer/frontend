@@ -254,7 +254,7 @@ export function KnowledgeBasePage() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard icon={BookOpen} label="Enfermedades consideradas" value={stats.diseases} />
           <StatCard icon={Activity} label="Variables clinicas" value={stats.variables} tone="green" />
           <StatCard icon={Network} label="Reglas activas" value={stats.activeRules} />
@@ -435,14 +435,19 @@ function StatCard({
   };
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center gap-4">
-        <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-full", tones[tone])}>
-          <Icon size={26} />
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <span
+          className={cn(
+            "grid h-10 w-10 shrink-0 place-items-center rounded-full sm:h-14 sm:w-14",
+            tones[tone]
+          )}
+        >
+          <Icon className="h-5 w-5 sm:h-[26px] sm:w-[26px]" />
         </span>
-        <div>
-          <p className="text-xs font-bold text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-extrabold text-[#172554]">{value}</p>
+        <div className="min-w-0 w-full">
+          <p className="break-words text-[11px] font-bold leading-tight text-slate-500 sm:text-xs">{label}</p>
+          <p className="mt-1 text-2xl font-extrabold text-[#172554] sm:mt-3 sm:text-3xl">{value}</p>
         </div>
       </div>
     </Card>
