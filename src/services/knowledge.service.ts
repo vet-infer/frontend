@@ -41,7 +41,7 @@ export const knowledgeService = {
   async getKnowledgeBase(includeRules = false): Promise<KnowledgeBaseData> {
     const [diseases, symptoms, clinicalVariables, rules, riskLevels] = await Promise.all([
       this.listDiseases(),
-      evaluationService.listSymptoms(),
+      includeRules ? evaluationService.listSymptomsAdmin() : evaluationService.listSymptoms(),
       evaluationService.listClinicalVariables(),
       includeRules ? this.listRules() : Promise.resolve([]),
       this.listRiskLevels(),
