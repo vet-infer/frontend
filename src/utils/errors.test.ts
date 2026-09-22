@@ -23,4 +23,19 @@ describe("getErrorMessage", () => {
     const message = getErrorMessage(new Error("network error"), "No fue posible completar la accion.");
     expect(message).toBe("No fue posible completar la accion.");
   });
+
+  it("retorna el detail curado cuando el backend responde 409 (conflicto)", () => {
+    const error = {
+      response: {
+        status: 409,
+        data: {
+          detail: "El documento ya esta registrado",
+        },
+      },
+    };
+
+    const message = getErrorMessage(error, "No fue posible completar la accion.");
+
+    expect(message).toBe("El documento ya esta registrado");
+  });
 });
