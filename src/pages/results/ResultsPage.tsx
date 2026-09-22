@@ -34,7 +34,6 @@ import { cn } from "../../utils/cn";
 import { calculateAge, formatDate as formatDateWithTime } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
-import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
