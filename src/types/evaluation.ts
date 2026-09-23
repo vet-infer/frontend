@@ -37,6 +37,10 @@ export type CatalogItem = {
   is_active: boolean;
 };
 
+export type CatalogStatusPayload = {
+  is_active: boolean;
+};
+
 export type ClinicalVariable = {
   id: number;
   key: string;

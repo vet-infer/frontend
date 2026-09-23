@@ -44,7 +44,7 @@ export function useEvaluationFacts(speciesId?: number) {
       .catch((cause: unknown) => {
         if (!active) return;
         setGroups(emptyGroups);
-        setError(getErrorMessage(cause, "No fue posible cargar los facts clinicos."));
+        setError(getErrorMessage(cause, "No fue posible cargar los sintomas y variables clinicas."));
         setFailedSpeciesId(speciesId);
       });
 
