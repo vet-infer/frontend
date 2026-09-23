@@ -273,7 +273,7 @@ export function KnowledgeBasePage() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-5 xl:grid-cols-[1fr_0.95fr]">
+      <section className="space-y-5">
         <div>
           <h1 className="text-3xl font-extrabold tracking-normal text-[#172554]">Base de conocimiento</h1>
           <p className="mt-2 text-base text-slate-500">
@@ -295,7 +295,7 @@ export function KnowledgeBasePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard icon={BookOpen} label="Enfermedades consideradas" value={stats.diseases} />
           <StatCard icon={Activity} label="Variables clinicas" value={stats.variables} tone="green" />
           <StatCard icon={Network} label="Reglas activas" value={stats.activeRules} />

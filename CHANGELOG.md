@@ -2,6 +2,29 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Este proyecto no sigue un esquema de versionado formal todavía; las entradas se agrupan por fecha y, cuando aplica, por el change de OpenSpec que las originó (`openspec/changes/archive/`).
 
+## [2026-09-22] — Recuperacion de contrasena sin EmailJS en el navegador y estadisticas de la base de conocimiento
+
+Sin change de OpenSpec asociado.
+
+### Changed
+
+- Recuperar contrasena: el envio del correo lo hace ahora el backend por la API REST de EmailJS. `ForgotPasswordForm.tsx` solo llama a `POST /api/v1/auth/forgot-password` y muestra el mensaje generico de la respuesta.
+- Base de conocimiento (`/knowledge`): las 4 tarjetas de estadisticas (enfermedades, variables clinicas, reglas activas, reglas inactivas) pasan de una columna lateral a una fila horizontal debajo de la busqueda y los filtros de especie (4 columnas desde `md`, 2x2 en movil). `KnowledgeBasePage.tsx`.
+
+### Removed
+
+- `src/services/emailjs.service.ts`, el tipo `PasswordResetEmailPayload` y el campo `reset_email` de `ForgotPasswordResponse` (`src/types/auth.ts`): la rama que enviaba el correo desde React nunca se ejecutaba, porque el backend no devuelve el token por seguridad.
+- Dependencia `@emailjs/browser`.
+- Variables `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` y `VITE_EMAILJS_PUBLIC_KEY` de `.env.example`, `README.md` y `Dockerfile` (`ARG`/`ENV`).
+
+### Fixed
+
+- "Network Error" al solicitar recuperacion de contrasena con un correo registrado. La causa estaba en el backend (ver `backend/CHANGELOG.md`, 2026-09-22).
+
+---
+
+**Verificacion:** `eslint` limpio sobre los archivos modificados. `npm run build` falla por errores de tipos preexistentes en `src/components/evaluations/EvaluationFactsPanel.tsx` (`normal_min`/`normal_max` no existen en `FactDefinition`), archivo no tocado en este cambio. **Archivos eliminados:** `src/services/emailjs.service.ts`. **Archivos modificados:** `src/components/auth/ForgotPasswordForm.tsx`, `src/types/auth.ts`, `src/pages/knowledge/KnowledgeBasePage.tsx`, `package.json`, `package-lock.json`, `.env.example`, `Dockerfile`, `README.md`.
+
 ## [2026-09-21] — Terminologia amigable para el veterinario en pantallas de uso diario
 
 Change de OpenSpec: [`simplify-vet-facing-terminology`](../openspec/changes/simplify-vet-facing-terminology/) (aun no archivado). Specs nuevas: [`results-diagnostic-terminology`](../openspec/changes/simplify-vet-facing-terminology/specs/results-diagnostic-terminology/spec.md), [`results-facts-readable-labels`](../openspec/changes/simplify-vet-facing-terminology/specs/results-facts-readable-labels/spec.md), [`clinical-error-messages`](../openspec/changes/simplify-vet-facing-terminology/specs/clinical-error-messages/spec.md).
