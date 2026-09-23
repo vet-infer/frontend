@@ -61,6 +61,8 @@ export type FactDefinition = {
   data_type: string;
   unit?: string | null;
   allowed_values?: Array<string | number | boolean> | null;
+  normal_min?: number | null;
+  normal_max?: number | null;
   species_id?: number | null;
   is_active: boolean;
 };
