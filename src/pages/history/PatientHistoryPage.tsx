@@ -25,6 +25,7 @@ import {
   riskLabel,
 } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
+import { useEvaluationFacts } from "../../hooks/useEvaluationFacts";
 
 export function PatientHistoryPage() {
   const { patientId } = useParams();
@@ -71,13 +72,15 @@ export function PatientHistoryPage() {
     };
   }, [parsedPatientId]);
 
+  const factCatalog = useEvaluationFacts(history?.patient.species.id).data;
+
   const filteredEvaluations = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return (history?.evaluations ?? []).filter((item) => {
       const result = primaryResult(item.results);
       const matchesQuery = normalizedQuery
-        ? [item.evaluation.reason, result?.suggested_diagnosis, factSummary(item.evaluation.facts)]
+        ? [item.evaluation.reason, result?.suggested_diagnosis, factSummary(item.evaluation.facts, factCatalog)]
             .filter(Boolean)
             .some((value) => value!.toLowerCase().includes(normalizedQuery))
         : true;
@@ -85,7 +88,7 @@ export function PatientHistoryPage() {
 
       return matchesQuery && matchesRisk;
     });
-  }, [history?.evaluations, query, riskFilter]);
+  }, [history?.evaluations, factCatalog, query, riskFilter]);
 
   const latest = history?.evaluations[0];
   const latestResult = latest ? primaryResult(latest.results) : null;
@@ -195,7 +198,7 @@ export function PatientHistoryPage() {
           ) : (
             <div className="space-y-4">
               {filteredEvaluations.map((item, index) => (
-                <TimelineItem item={item} index={index + 1} key={item.evaluation.id} />
+                <TimelineItem catalog={factCatalog} item={item} index={index + 1} key={item.evaluation.id} />
               ))}
             </div>
           )}
@@ -232,7 +235,7 @@ export function PatientHistoryPage() {
   );
 }
 
-function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: number }) {
+function TimelineItem({ catalog, item, index }: { catalog: ReturnType<typeof useEvaluationFacts>["data"]; item: PatientHistoryEvaluation; index: number }) {
   const result = primaryResult(item.results);
 
   return (
@@ -258,7 +261,7 @@ function TimelineItem({ item, index }: { item: PatientHistoryEvaluation; index: 
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Sintomas observados</p>
-            <p className="mt-1 text-sm font-semibold text-slate-600">{factSummary(item.evaluation.facts)}</p>
+            <p className="mt-1 text-sm font-semibold text-slate-600">{factSummary(item.evaluation.facts, catalog)}</p>
           </div>
           <div>
             <p className="text-xs font-bold text-slate-500">Resultado sugerido</p>

@@ -12,17 +12,8 @@ export type ForgotPasswordRequest = {
   email: string;
 };
 
-export type PasswordResetEmailPayload = {
-  to_email: string;
-  to_name: string;
-  reset_url: string;
-  reset_token: string;
-  expires_minutes: number;
-};
-
 export type ForgotPasswordResponse = {
   message: string;
-  reset_email?: PasswordResetEmailPayload | null;
 };
 
 export type ResetPasswordRequest = {

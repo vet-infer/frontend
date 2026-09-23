@@ -1,5 +1,6 @@
 import type {
   CatalogItem,
+  CatalogStatusPayload,
   ClinicalVariable,
   FactDefinition,
   Evaluation,
@@ -42,6 +43,16 @@ export const evaluationService = {
 
   async listSymptoms() {
     const { data } = await api.get<CatalogItem[]>("/api/v1/symptoms");
+    return data;
+  },
+
+  async listSymptomsAdmin() {
+    const { data } = await api.get<CatalogItem[]>("/api/v1/symptoms/admin");
+    return data;
+  },
+
+  async updateSymptomStatus(symptomId: number, payload: CatalogStatusPayload) {
+    const { data } = await api.patch<CatalogItem>(`/api/v1/symptoms/${symptomId}/status`, payload);
     return data;
   },
 

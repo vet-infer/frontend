@@ -2,6 +2,53 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Este proyecto no sigue un esquema de versionado formal todavía; las entradas se agrupan por fecha y, cuando aplica, por el change de OpenSpec que las originó (`openspec/changes/archive/`).
 
+## [2026-09-22] — Recuperacion de contrasena sin EmailJS en el navegador y estadisticas de la base de conocimiento
+
+Sin change de OpenSpec asociado.
+
+### Changed
+
+- Recuperar contrasena: el envio del correo lo hace ahora el backend por la API REST de EmailJS. `ForgotPasswordForm.tsx` solo llama a `POST /api/v1/auth/forgot-password` y muestra el mensaje generico de la respuesta.
+- Base de conocimiento (`/knowledge`): las 4 tarjetas de estadisticas (enfermedades, variables clinicas, reglas activas, reglas inactivas) pasan de una columna lateral a una fila horizontal debajo de la busqueda y los filtros de especie (4 columnas desde `md`, 2x2 en movil). `KnowledgeBasePage.tsx`.
+
+### Removed
+
+- `src/services/emailjs.service.ts`, el tipo `PasswordResetEmailPayload` y el campo `reset_email` de `ForgotPasswordResponse` (`src/types/auth.ts`): la rama que enviaba el correo desde React nunca se ejecutaba, porque el backend no devuelve el token por seguridad.
+- Dependencia `@emailjs/browser`.
+- Variables `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` y `VITE_EMAILJS_PUBLIC_KEY` de `.env.example`, `README.md` y `Dockerfile` (`ARG`/`ENV`).
+
+### Fixed
+
+- "Network Error" al solicitar recuperacion de contrasena con un correo registrado. La causa estaba en el backend (ver `backend/CHANGELOG.md`, 2026-09-22).
+
+---
+
+**Verificacion:** `eslint` limpio sobre los archivos modificados. `npm run build` falla por errores de tipos preexistentes en `src/components/evaluations/EvaluationFactsPanel.tsx` (`normal_min`/`normal_max` no existen en `FactDefinition`), archivo no tocado en este cambio. **Archivos eliminados:** `src/services/emailjs.service.ts`. **Archivos modificados:** `src/components/auth/ForgotPasswordForm.tsx`, `src/types/auth.ts`, `src/pages/knowledge/KnowledgeBasePage.tsx`, `package.json`, `package-lock.json`, `.env.example`, `Dockerfile`, `README.md`.
+
+## [2026-09-21] — Terminologia amigable para el veterinario en pantallas de uso diario
+
+Change de OpenSpec: [`simplify-vet-facing-terminology`](../openspec/changes/simplify-vet-facing-terminology/) (aun no archivado). Specs nuevas: [`results-diagnostic-terminology`](../openspec/changes/simplify-vet-facing-terminology/specs/results-diagnostic-terminology/spec.md), [`results-facts-readable-labels`](../openspec/changes/simplify-vet-facing-terminology/specs/results-facts-readable-labels/spec.md), [`clinical-error-messages`](../openspec/changes/simplify-vet-facing-terminology/specs/clinical-error-messages/spec.md).
+
+### Added
+
+- `src/utils/factLabel.ts`: util compartido para nombre legible de una variable/sintoma a partir de su `fact_key` (`resolveFactDisplayName`, con fallback derivado de la clave cuando no hay coincidencia en el catalogo) y traduccion de condiciones de reglas activadas a lenguaje natural (`formatCondition`, tabla de operadores `==`/`!=`/`>`/`<`/`>=`/`<=`). Extraido de `EvaluationFactsPanel.tsx`, que antes lo tenia duplicado.
+- `src/utils/factLabel.test.ts`, `src/utils/errors.test.ts`: primeras pruebas unitarias del repo (antes no habia ningun `*.test.ts`).
+
+### Changed
+
+- Dashboard, Evaluacion clinica, Resultados (detalle, listado y PDF exportado) e Historial clinico: eliminada/reemplazada la jerga de implementacion visible al veterinario ("motor IF-THEN + Bayes", "endpoint", "persistida", "source_type", "facts") por lenguaje clinico comun, en `DashboardPage.tsx`, `ClinicalEvaluationPage.tsx`, `ResultsPage.tsx`, `EvaluationResultsPanel.tsx`, `useEvaluationFacts.ts`, `dashboard.service.ts` y `utils/evaluationPdf.ts`.
+- Resultados y Historial: las claves tecnicas crudas de sintomas/variables (`hallazgos_ecograficos_renales: true`, `sdma: 12`) y las condiciones de reglas activadas (`sdma == 15`) se muestran ahora con nombre legible y en lenguaje natural, reutilizando el mismo catalogo que ya usaba el formulario de evaluacion (`resolveFactDisplayName`/`formatCondition`). Afecta `ResultsPage.tsx`, `ActivatedRulesPanel.tsx`, `utils/clinical.ts` (`factSummary`) y `utils/evaluationPdf.ts`.
+- `src/utils/errors.ts`: `getErrorMessage` deja de exponer en pantalla el `detail` crudo que devuelve el backend (validaciones de Pydantic/FastAPI, mensajes en ingles); siempre retorna el `fallback` en espanol de cada pantalla y registra el detalle tecnico original con `console.error` para diagnostico.
+- `ResultsPage.tsx`: el campo "Metodo de diagnostico" (detalle y listado de resultados) queda oculto para el rol veterinario; solo el rol administrador lo ve, etiquetado como informacion tecnica, con el valor crudo del backend (p. ej. `reglas_bayes`) sin traducir.
+
+### Fixed
+
+- (Detectado en pruebas manuales del usuario tras el primer despliegue de este change) El campo "Metodo de diagnostico" mostraba `reglas_bayes` en vez del texto clinico esperado, porque el fallback en espanol solo aplicaba cuando el backend no enviaba valor — y el backend siempre lo envia. Corregido ocultando el campo para veterinario en vez de intentar traducir cada valor tecnico posible (ver punto anterior); el PDF y el panel embebido dejaron de leer ese valor del todo.
+
+---
+
+**Verificacion:** `tsc --noEmit`, `eslint` (sobre los archivos modificados) y `vitest run` (10/10, incluye las pruebas nuevas) limpios. No se realizo recorrido visual en navegador dentro de esta sesion (sin servidor `npm run dev` levantado); la correccion del punto "Fixed" fue reportada y confirmada por el usuario probando la app localmente. **Archivos nuevos:** `src/utils/factLabel.ts`, `src/utils/factLabel.test.ts`, `src/utils/errors.test.ts`. **Archivos modificados:** `src/components/evaluations/ActivatedRulesPanel.tsx`, `src/components/evaluations/EvaluationFactsPanel.tsx`, `src/components/evaluations/EvaluationResultsPanel.tsx`, `src/hooks/useEvaluationFacts.ts`, `src/pages/dashboard/DashboardPage.tsx`, `src/pages/evaluations/ClinicalEvaluationPage.tsx`, `src/pages/history/PatientHistoryPage.tsx`, `src/pages/results/ResultsPage.tsx`, `src/services/dashboard.service.ts`, `src/utils/clinical.ts`, `src/utils/errors.ts`, `src/utils/evaluationPdf.ts`.
+
 ## [2026-09-11] — Rebranding de color: morado → teal
 
 Sin change de OpenSpec asociado (ajuste puntual de marca, sin cambios de comportamiento).

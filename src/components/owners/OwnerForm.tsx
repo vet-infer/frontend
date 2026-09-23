@@ -9,7 +9,16 @@ import { FormField } from "../common/FormField";
 import { FormSelect } from "../common/FormSelect";
 import { IconBadge } from "../common/IconBadge";
 import { PERU_UBIGEO } from "../../data/peruUbigeo";
-import type { Owner, OwnerFormValues, OwnerPayload } from "../../types/owner";
+import type { DocumentType, Owner, OwnerFormValues, OwnerPayload } from "../../types/owner";
+
+const DOCUMENT_TYPE_OPTIONS: { value: DocumentType; label: string }[] = [
+  { value: "DNI", label: "DNI" },
+  { value: "CE", label: "Carné de Extranjería" },
+  { value: "PASSPORT", label: "Pasaporte" },
+];
+
+const DNI_PATTERN = /^\d{8}$/;
+const FOREIGN_DOCUMENT_PATTERN = /^[A-Za-z0-9]{1,12}$/;
 
 type OwnerFormProps = {
   owner?: Owner;
@@ -27,6 +36,8 @@ const emptyValues: OwnerFormValues = {
   last_name: "",
   phone: "",
   email: "",
+  document_type: "",
+  document_number: "",
   address: "",
   department: "",
   province: "",
@@ -40,6 +51,8 @@ function normalizePayload(values: OwnerFormValues): OwnerPayload {
     last_name: values.last_name.trim() || null,
     phone: values.phone.trim() || null,
     email: values.email.trim() || null,
+    document_type: values.document_type || null,
+    document_number: values.document_number.trim() || null,
     address: values.address.trim() || null,
     department: values.department.trim() || null,
     province: values.province.trim() || null,
@@ -80,6 +93,21 @@ function validate(values: OwnerFormValues, requireLocation: boolean): FormErrors
     errors.email = "Ingresa un correo electronico valido.";
   }
 
+  if (!values.document_type) {
+    errors.document_type = "Selecciona el tipo de documento.";
+  }
+
+  if (!values.document_number.trim()) {
+    errors.document_number = "Ingresa el numero de documento.";
+  } else if (values.document_type === "DNI" && !DNI_PATTERN.test(values.document_number.trim())) {
+    errors.document_number = "El DNI debe tener exactamente 8 digitos numericos.";
+  } else if (
+    (values.document_type === "CE" || values.document_type === "PASSPORT") &&
+    !FOREIGN_DOCUMENT_PATTERN.test(values.document_number.trim())
+  ) {
+    errors.document_number = "El numero de documento debe ser alfanumerico de hasta 12 caracteres.";
+  }
+
   if (!values.address.trim()) {
     errors.address = "Ingresa la direccion completa.";
   }
@@ -112,6 +140,8 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
             last_name: owner.last_name ?? "",
             phone: owner.phone ?? "",
             email: owner.email ?? "",
+            document_type: owner.document_type ?? "",
+            document_number: owner.document_number ?? "",
             address: owner.address ?? "",
             department: owner.department ?? "",
             province: owner.province ?? "",
@@ -164,9 +194,14 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
     await onSubmit(normalizePayload(values));
   }
 
-  function updateField(field: keyof OwnerFormValues, value: string) {
+  function updateField(field: Exclude<keyof OwnerFormValues, "document_type">, value: string) {
     setValues((current) => ({ ...current, [field]: field === "phone" ? normalizePhone(value) : value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
+  }
+
+  function updateDocumentType(value: DocumentType | "") {
+    setValues((current) => ({ ...current, document_type: value }));
+    setErrors((current) => ({ ...current, document_type: undefined }));
   }
 
   function updateDepartment(department: string) {
@@ -241,6 +276,28 @@ export function OwnerForm({ owner, mode, isSaving, error, onCancel, onSubmit }: 
             required
             type="email"
             value={values.email}
+          />
+          <FormSelect
+            error={errors.document_type}
+            label="Tipo de documento"
+            onChange={(event) => updateDocumentType(event.target.value as DocumentType | "")}
+            required
+            value={values.document_type}
+          >
+            <option value="">Seleccionar tipo de documento</option>
+            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </FormSelect>
+          <FormField
+            error={errors.document_number}
+            label="Numero de documento"
+            onChange={(event) => updateField("document_number", event.target.value)}
+            placeholder={values.document_type === "DNI" ? "Ej. 12345678" : "Ej. AB123456"}
+            required
+            value={values.document_number}
           />
         </div>
       </Card>

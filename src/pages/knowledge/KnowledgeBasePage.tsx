@@ -10,16 +10,20 @@ import {
   FlaskConical,
   Info,
   Network,
+  Power,
   Search,
   ShieldCheck,
   Stethoscope,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AlertMessage } from "../../components/common/AlertMessage";
+import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
+import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { DataTable } from "../../components/common/DataTable";
 import { IconBadge } from "../../components/common/IconBadge";
 import { Skeleton } from "../../components/common/Skeleton";
+import { evaluationService } from "../../services/evaluation.service";
 import { knowledgeService } from "../../services/knowledge.service";
 import { useAuth } from "../../hooks/useAuth";
 import type { ClinicalVariable, CatalogItem } from "../../types/evaluation";
@@ -125,11 +129,28 @@ export function KnowledgeBasePage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [statusSymptom, setStatusSymptom] = useState<CatalogItem | null>(null);
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
+
+  async function loadKnowledgeBase() {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await knowledgeService.getKnowledgeBase(isAdmin);
+      setData(result);
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "No fue posible cargar la base de conocimiento."));
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadKnowledgeBase() {
+    async function initialLoad() {
       setIsLoading(true);
       setError("");
 
@@ -150,12 +171,32 @@ export function KnowledgeBasePage() {
       }
     }
 
-    loadKnowledgeBase();
+    initialLoad();
 
     return () => {
       isMounted = false;
     };
   }, [isAdmin]);
+
+  async function confirmSymptomStatusChange() {
+    if (!statusSymptom) {
+      return;
+    }
+
+    setIsSavingStatus(true);
+    setError("");
+
+    try {
+      await evaluationService.updateSymptomStatus(statusSymptom.id, { is_active: !statusSymptom.is_active });
+      setMessage(statusSymptom.is_active ? "Sintoma desactivado correctamente." : "Sintoma activado correctamente.");
+      setStatusSymptom(null);
+      await loadKnowledgeBase();
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "No fue posible actualizar el estado del sintoma."));
+    } finally {
+      setIsSavingStatus(false);
+    }
+  }
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -232,7 +273,7 @@ export function KnowledgeBasePage() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-5 xl:grid-cols-[1fr_0.95fr]">
+      <section className="space-y-5">
         <div>
           <h1 className="text-3xl font-extrabold tracking-normal text-[#172554]">Base de conocimiento</h1>
           <p className="mt-2 text-base text-slate-500">
@@ -254,7 +295,7 @@ export function KnowledgeBasePage() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard icon={BookOpen} label="Enfermedades consideradas" value={stats.diseases} />
           <StatCard icon={Activity} label="Variables clinicas" value={stats.variables} tone="green" />
           <StatCard icon={Network} label="Reglas activas" value={stats.activeRules} />
@@ -262,6 +303,7 @@ export function KnowledgeBasePage() {
         </div>
       </section>
 
+      {message ? <AlertMessage message={message} tone="success" onClose={() => setMessage("")} /> : null}
       {error ? <AlertMessage message={error} tone="error" onClose={() => setError("")} /> : null}
 
       <Card className="overflow-hidden">
@@ -318,7 +360,7 @@ export function KnowledgeBasePage() {
             <Card className="p-6">
               <h2 className="mb-5 text-xl font-extrabold text-[#172554]">Catalogo de sintomas</h2>
               <DataTable
-                columns={["Sintoma", "Especie", "Descripcion", "Estado"]}
+                columns={isAdmin ? ["Sintoma", "Especie", "Descripcion", "Estado", "Acciones"] : ["Sintoma", "Especie", "Descripcion", "Estado"]}
                 rows={filteredSymptoms}
                 renderRow={(symptom: CatalogItem) => (
                   <tr key={symptom.id}>
@@ -326,8 +368,20 @@ export function KnowledgeBasePage() {
                     <td className="px-5 py-4">{speciesName(symptom.species_id)}</td>
                     <td className="px-5 py-4">{symptom.description || "Sintoma usado como evidencia clinica."}</td>
                     <td className="px-5 py-4">
-                      <span className="rounded-md bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Activo</span>
+                      <StatusPill active={symptom.is_active} activeLabel="Activo" inactiveLabel="Inactivo" />
                     </td>
+                    {isAdmin ? (
+                      <td className="px-5 py-4">
+                        <Button
+                          icon={<Power size={16} />}
+                          onClick={() => setStatusSymptom(symptom)}
+                          type="button"
+                          variant={symptom.is_active ? "danger" : "secondary"}
+                        >
+                          {symptom.is_active ? "Desactivar" : "Activar"}
+                        </Button>
+                      </td>
+                    ) : null}
                   </tr>
                 )}
               />
@@ -387,6 +441,16 @@ export function KnowledgeBasePage() {
           ) : null}
         </>
       )}
+
+      <ConfirmDialog
+        confirmLabel={statusSymptom?.is_active ? "Desactivar" : "Activar"}
+        isLoading={isSavingStatus}
+        isOpen={Boolean(statusSymptom)}
+        message="Esta accion actualiza solo el estado logico del sintoma. No elimina registros seed ni historicos clinicos."
+        onCancel={() => setStatusSymptom(null)}
+        onConfirm={confirmSymptomStatusChange}
+        title={statusSymptom?.is_active ? "Desactivar sintoma" : "Activar sintoma"}
+      />
     </div>
   );
 }
@@ -435,14 +499,19 @@ function StatCard({
   };
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center gap-4">
-        <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-full", tones[tone])}>
-          <Icon size={26} />
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <span
+          className={cn(
+            "grid h-10 w-10 shrink-0 place-items-center rounded-full sm:h-14 sm:w-14",
+            tones[tone]
+          )}
+        >
+          <Icon className="h-5 w-5 sm:h-[26px] sm:w-[26px]" />
         </span>
-        <div>
-          <p className="text-xs font-bold text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-extrabold text-[#172554]">{value}</p>
+        <div className="min-w-0 w-full">
+          <p className="break-words text-[11px] font-bold leading-tight text-slate-500 sm:text-xs">{label}</p>
+          <p className="mt-1 text-2xl font-extrabold text-[#172554] sm:mt-3 sm:text-3xl">{value}</p>
         </div>
       </div>
     </Card>
@@ -752,10 +821,10 @@ function TagSection({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function StatusPill({ active }: { active: boolean }) {
+function StatusPill({ active, activeLabel = "Activa", inactiveLabel = "Inactiva" }: { active: boolean; activeLabel?: string; inactiveLabel?: string }) {
   return (
     <span className={cn("rounded-md px-3 py-1 text-xs font-bold", active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}>
-      {active ? "Activa" : "Inactiva"}
+      {active ? activeLabel : inactiveLabel}
     </span>
   );
 }

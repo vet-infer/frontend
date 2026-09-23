@@ -5,7 +5,6 @@ import { AlertMessage } from "../common/AlertMessage";
 import { Button } from "../common/Button";
 import { IconBadge } from "../common/IconBadge";
 import { authService } from "../../services/auth.service";
-import { emailJsService } from "../../services/emailjs.service";
 import { getErrorMessage as getApiErrorMessage } from "../../utils/errors";
 
 type ForgotPasswordFormProps = {
@@ -47,11 +46,6 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
 
     try {
       const response = await authService.forgotPassword({ email: normalizedEmail });
-
-      if (response.reset_email) {
-        await emailJsService.sendPasswordReset(response.reset_email);
-      }
-
       setSuccess(response.message);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError));

@@ -1,10 +1,12 @@
 import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../types/evaluation";
 import type { Patient } from "../types/patient";
+import { formatCondition, resolveFactDisplayName, type FactCatalog } from "./factLabel";
 
 type PdfExportInput = {
   evaluation: Evaluation;
   patient: Patient;
   results: PersistedInferenceResult[];
+  factCatalog?: FactCatalog;
 };
 
 type PdfColor = [number, number, number];
@@ -19,7 +21,7 @@ type PdfBlock =
   | { type: "section"; title: string }
   | { type: "kv"; items: KeyValue[] }
   | { type: "factList"; emptyText: string; items: string[]; title: string; tone: "green" | "violet" | "slate" }
-  | { type: "result"; index: number; result: PersistedInferenceResult }
+  | { type: "result"; index: number; result: PersistedInferenceResult; ruleConditions: string[] }
   | { type: "paragraph"; text: string };
 
 const PAGE_WIDTH = 595;
@@ -79,8 +81,8 @@ function ownerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
 }
 
-function factLine(fact: ClinicalFactOut) {
-  return `${fact.fact_key}: ${String(fact.value)} (${fact.source_type})`;
+function factLine(fact: ClinicalFactOut, catalog: FactCatalog = []) {
+  return `${resolveFactDisplayName(fact.fact_key, catalog)}: ${String(fact.value)}`;
 }
 
 function splitFacts(facts: ClinicalFactOut[] = []) {
@@ -90,8 +92,8 @@ function splitFacts(facts: ClinicalFactOut[] = []) {
   };
 }
 
-function conditionsLabel(value: unknown) {
-  if (Array.isArray(value)) return value.map(String).join("; ");
+function conditionsLabel(value: unknown, catalog: FactCatalog = []) {
+  if (Array.isArray(value)) return value.map((condition) => formatCondition(String(condition), catalog)).join("; ");
   return value ? String(value) : "Condiciones registradas";
 }
 
@@ -232,7 +234,7 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
     commands.push(text(palette.label, PAGE_WIDTH - MARGIN_X - 105, y + 27, 8, palette.foreground, "F2"));
     commands.push(text(`Probabilidad: ${probabilityLabel(block.result.probability)}`, MARGIN_X + 18, y + 46, 9, COLORS.slateDark, "F2"));
     commands.push(text(`Puntaje: ${block.result.score}`, MARGIN_X + 190, y + 46, 9, COLORS.slate));
-    commands.push(text(`Metodo: ${block.result.inference_method ?? "Reglas IF-THEN + Bayes"}`, MARGIN_X + 290, y + 46, 9, COLORS.slate));
+    commands.push(text("Metodo: Reglas clinicas y calculo de probabilidad", MARGIN_X + 290, y + 46, 9, COLORS.slate));
     const afterExplanation = drawWrappedText(commands, block.result.explanation ?? "Sin explicacion registrada.", MARGIN_X + 18, y + 68, 88, 9, COLORS.slate);
     commands.push(text("Reglas activadas", MARGIN_X + 18, afterExplanation + 12, 10, COLORS.navy, "F2"));
 
@@ -246,7 +248,7 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
       const ruleY = afterExplanation + 29 + index * 50;
       commands.push(rect(MARGIN_X + 18, ruleY - 12, CONTENT_WIDTH - 36, 42, COLORS.slateLight));
       commands.push(text(rule.rule_code ?? `Regla #${rule.rule_id}`, MARGIN_X + 28, ruleY + 2, 9, COLORS.violetDark, "F2"));
-      commands.push(text(`Condiciones: ${conditionsLabel(rule.fulfilled_conditions)}`, MARGIN_X + 28, ruleY + 17, 8, COLORS.slate));
+      commands.push(text(`Condiciones: ${block.ruleConditions[index] ?? conditionsLabel(rule.fulfilled_conditions)}`, MARGIN_X + 28, ruleY + 17, 8, COLORS.slate));
       drawWrappedText(commands, `Justificacion: ${rule.justification || "Regla activada por condiciones cumplidas."}`, MARGIN_X + 28, ruleY + 31, 82, 8, COLORS.slate);
     });
 
@@ -258,7 +260,7 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
   return y + blockHeight(block);
 }
 
-function buildBlocks({ evaluation, patient, results }: PdfExportInput) {
+function buildBlocks({ evaluation, patient, results, factCatalog = [] }: PdfExportInput) {
   const facts = splitFacts(evaluation.facts ?? []);
   const mainResult = primaryResult(results);
 
@@ -282,13 +284,13 @@ function buildBlocks({ evaluation, patient, results }: PdfExportInput) {
         { label: "Peso", value: patient.weight ? `${patient.weight} kg` : "Sin registrar" },
       ],
     },
-    { type: "section", title: "Resumen de inferencia" },
+    { type: "section", title: "Resumen del diagnostico" },
     {
       type: "kv",
       items: [
         { label: "Nivel de riesgo", value: mainResult?.risk_level ?? "Sin resultado" },
         { label: "Probabilidad", value: probabilityLabel(mainResult?.probability) },
-        { label: "Metodo", value: mainResult?.inference_method ?? "Reglas IF-THEN + Bayes" },
+        { label: "Metodo", value: "Reglas clinicas y calculo de probabilidad" },
         { label: "Fecha evaluacion", value: formatDate(evaluation.created_at) },
         { label: "Motivo", value: evaluation.reason ?? "Sin registrar" },
         { label: "Observaciones", value: evaluation.observations ?? "Sin registrar" },
@@ -298,31 +300,29 @@ function buildBlocks({ evaluation, patient, results }: PdfExportInput) {
     {
       type: "factList",
       title: "Sintomas observados",
-      items: facts.symptoms.map(factLine),
+      items: facts.symptoms.map((fact) => factLine(fact, factCatalog)),
       emptyText: "Sin sintomas registrados.",
       tone: "green",
     },
     {
       type: "factList",
       title: "Variables clinicas",
-      items: facts.variables.map(factLine),
+      items: facts.variables.map((fact) => factLine(fact, factCatalog)),
       emptyText: "Sin variables registradas.",
       tone: "violet",
     },
-    {
-      type: "factList",
-      title: "Facts usados por el motor",
-      items: (evaluation.facts ?? []).map(factLine),
-      emptyText: "Sin facts registrados.",
-      tone: "slate",
-    },
     { type: "section", title: "Resultados y reglas activadas" },
     ...(results.length
-      ? results.map((result, index) => ({ type: "result" as const, index: index + 1, result }))
-      : [{ type: "paragraph" as const, text: "Sin resultados persistidos para esta evaluacion." }]),
+      ? results.map((result, index) => ({
+          type: "result" as const,
+          index: index + 1,
+          result,
+          ruleConditions: result.activated_rules.map((rule) => conditionsLabel(rule.fulfilled_conditions, factCatalog)),
+        }))
+      : [{ type: "paragraph" as const, text: "Sin resultados guardados para esta evaluacion." }]),
     {
       type: "paragraph",
-      text: "Conclusion academica: el reporte consolida la trazabilidad entre datos del paciente, facts clinicos, inferencia hibrida y reglas activadas. La salida documenta evidencia para OE3 y no reemplaza el juicio profesional veterinario.",
+      text: "Conclusion: el reporte consolida la trazabilidad entre los datos del paciente, los sintomas y variables clinicas registradas, y las reglas activadas. La salida documenta evidencia clinica y no reemplaza el juicio profesional veterinario.",
     },
   ] satisfies PdfBlock[];
 }
