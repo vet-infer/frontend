@@ -29,10 +29,6 @@ function formatDate(value?: string | null) {
   }).format(date);
 }
 
-function scopeChange(count: number, week?: WeekRange) {
-  return week ? `${count} esta semana` : undefined;
-}
-
 function readEvaluationDate(evaluation: Evaluation) {
   return evaluation.evaluation_date ?? evaluation.created_at ?? evaluation.date;
 }
@@ -179,37 +175,29 @@ export const dashboardService = {
       const highRiskCases = [...resultsByEvaluation.values()].filter((results) =>
         results.some((result) => normalizeRisk(result.risk_level) === "high")
       ).length;
-      const highRiskCasesThisWeek = weeklyEvaluations.filter((evaluation) => {
-        const results = resultsByEvaluation.get(evaluation.id) ?? [];
-        return results.some((result) => normalizeRisk(result.risk_level) === "high");
-      }).length;
 
       return [
         {
           label: "Propietarios registrados",
           value: String(countCreatedThisWeek<Owner>(owners, week)),
-          change: scopeChange(countCreatedThisWeek<Owner>(owners, week), week),
           tone: "primary",
           icon: Users,
         },
         {
           label: "Pacientes registrados",
           value: String(countCreatedThisWeek<Patient>(patients, week)),
-          change: scopeChange(countCreatedThisWeek<Patient>(patients, week), week),
           tone: "primary",
           icon: PawPrint,
         },
         {
           label: "Evaluaciones realizadas",
           value: String(weeklyEvaluations.length),
-          change: scopeChange(weeklyEvaluations.length, week),
           tone: "primary",
           icon: ClipboardPlus,
         },
         {
           label: "Casos con riesgo alto",
           value: String(highRiskCases),
-          change: scopeChange(highRiskCasesThisWeek, week),
           tone: "danger",
           icon: TriangleAlert,
         },

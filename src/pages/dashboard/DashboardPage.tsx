@@ -1,6 +1,6 @@
 import { CalendarDays, Eye, LayoutDashboard } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
@@ -8,6 +8,7 @@ import { DataTable } from "../../components/common/DataTable";
 import { IconBadge } from "../../components/common/IconBadge";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { dashboardService } from "../../services/dashboard.service";
+import { diseaseName } from "../../utils/clinical";
 import type { DashboardData, DashboardScope, RecentEvaluation, RecentPatient, SummaryCard, WeekRange } from "../../types/dashboard";
 
 const initialDashboard: DashboardData = {
@@ -21,15 +22,12 @@ const RISK_COLORS = {
   low: "#10B981",
 };
 
-const DIAGNOSIS_PREFIX = /^diagn[oó]stico sugerido:\s*posible riesgo asociado a\s*/i;
-
 export function DashboardPage() {
   const { selectedWeek } = useOutletContext<{ selectedWeek: WeekRange }>();
   const navigate = useNavigate();
   const [summary, setSummary] = useState<SummaryCard[]>([]);
   const [dashboard, setDashboard] = useState<DashboardData>(initialDashboard);
   const [scope, setScope] = useState<DashboardScope>("general");
-  const [isWeeklyFallback, setIsWeeklyFallback] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,15 +40,10 @@ export function DashboardPage() {
         dashboardService.getSummary(requestedWeek),
         dashboardService.getDashboard(requestedWeek),
       ]);
-      const shouldUseGeneralFallback = scope === "weekly" && dashboardData.recentEvaluations.length === 0;
-      const [effectiveSummary, effectiveDashboard] = shouldUseGeneralFallback
-        ? await Promise.all([dashboardService.getSummary(), dashboardService.getDashboard()])
-        : [summaryData, dashboardData];
 
       if (isMounted) {
-        setSummary(effectiveSummary);
-        setDashboard(effectiveDashboard);
-        setIsWeeklyFallback(shouldUseGeneralFallback);
+        setSummary(summaryData);
+        setDashboard(dashboardData);
         setIsLoading(false);
       }
     }
@@ -83,8 +76,8 @@ export function DashboardPage() {
 
     dashboard.recentEvaluations.forEach((evalItem) => {
       if (evalItem.result && evalItem.result !== "Pendiente de diagnostico") {
-        const diseaseName = evalItem.result.replace(DIAGNOSIS_PREFIX, "").trim() || evalItem.result;
-        prevalence[diseaseName] = (prevalence[diseaseName] ?? 0) + 1;
+        const disease = diseaseName(evalItem.result);
+        prevalence[disease] = (prevalence[disease] ?? 0) + 1;
       }
     });
 
@@ -94,9 +87,14 @@ export function DashboardPage() {
       .slice(0, 5);
   }, [dashboard.recentEvaluations]);
 
-  const scopeDescription = isWeeklyFallback
-    ? "La semana seleccionada no registra evaluaciones; se muestran indicadores generales."
-    : scope === "weekly"
+  const isWeekly = scope === "weekly";
+  const isWeeklyEmpty =
+    isWeekly && !isLoading && dashboard.recentEvaluations.length === 0 && dashboard.recentPatients.length === 0;
+  const weeklyEmptyMessage = "No hay información registrada en la semana seleccionada.";
+
+  const scopeDescription = isWeeklyEmpty
+    ? weeklyEmptyMessage
+    : isWeekly
       ? "Indicadores calculados con las evaluaciones de la semana seleccionada."
       : "Indicadores generales acumulados con la informacion clinica registrada.";
 
@@ -147,9 +145,6 @@ export function DashboardPage() {
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-5 text-[#172554]">{item.label}</h3>
                   <p className="mt-1 text-2xl font-extrabold leading-none text-teal-500">{item.value}</p>
-                  <p className={isDanger ? "mt-1 text-xs font-semibold text-red-500" : "mt-1 text-xs font-semibold text-emerald-600"}>
-                    {item.change}
-                  </p>
                 </div>
               </div>
             </Card>
@@ -177,7 +172,9 @@ export function DashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyChartMessage message="Sin evaluaciones procesadas para calcular distribucion de riesgo." />
+              <EmptyChartMessage
+                message={isWeekly ? weeklyEmptyMessage : "Sin evaluaciones procesadas para calcular distribucion de riesgo."}
+              />
             )}
           </div>
         </Card>
@@ -212,7 +209,7 @@ export function DashboardPage() {
                 ))}
               </ul>
             ) : (
-              <EmptyChartMessage message="Sin diagnosticos inferidos para calcular prevalencia." />
+              <EmptyChartMessage message={isWeekly ? weeklyEmptyMessage : "Sin diagnosticos inferidos para calcular prevalencia."} />
             )}
           </div>
         </Card>
@@ -222,11 +219,11 @@ export function DashboardPage() {
 
       <section className="grid gap-5 2xl:grid-cols-2">
         <Card>
-          <PanelHeader title="Ultimas evaluaciones clinicas" to="/evaluations" />
+          <PanelHeader title="Ultimas evaluaciones clinicas"/>
           <DataTable
             compact
             columns={["Paciente", "Especie / Raza", "Fecha", "Resultado", "Riesgo", "Accion"]}
-            emptyMessage="Aun no hay evaluaciones clinicas registradas."
+            emptyMessage={isWeekly ? "No hay evaluaciones clínicas registradas esta semana." : "Aun no hay evaluaciones clinicas registradas."}
             rows={dashboard.recentEvaluations}
             renderRow={(row: RecentEvaluation) => (
               <tr key={row.id}>
@@ -254,11 +251,11 @@ export function DashboardPage() {
         </Card>
 
         <Card>
-          <PanelHeader title="Pacientes recientes" to="/patients" />
+          <PanelHeader title="Pacientes recientes" />
           <DataTable
             compact
             columns={["Paciente", "Especie / Raza", "Propietario", "Ult. evaluacion", "Accion"]}
-            emptyMessage="Aun no hay pacientes registrados."
+            emptyMessage={isWeekly ? "No hay pacientes con actividad esta semana." : "Aun no hay pacientes registrados."}
             rows={dashboard.recentPatients}
             renderRow={(row: RecentPatient) => (
               <tr key={row.id}>
@@ -288,13 +285,10 @@ function EmptyChartMessage({ message }: { message: string }) {
   );
 }
 
-function PanelHeader({ title, to }: { title: string; to: string }) {
+function PanelHeader({ title }: { title: string }) {
   return (
     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
       <h2 className="text-base font-bold text-[#172554]">{title}</h2>
-      <Link className="text-sm font-bold text-teal-500 hover:text-teal-700" to={to}>
-        Ver todas
-      </Link>
     </div>
   );
 }

@@ -7,8 +7,10 @@ import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { EmptyState } from "../../components/common/EmptyState";
 import { Modal } from "../../components/common/Modal";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
 import { PatientForm } from "../../components/patients/PatientForm";
+import { usePagination } from "../../hooks/usePagination";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner } from "../../types/owner";
@@ -211,6 +213,8 @@ export function PatientsPage() {
       return matchesQuery && matchesFilter;
     });
   }, [filter, patients, query]);
+  const clientPagination = usePagination(filteredPatients, PAGE_SIZE, `${query}|${filter}`);
+  const visibleRows = isBrowsing ? filteredPatients : clientPagination.pageItems;
 
   return (
     <div className="space-y-6">
@@ -298,7 +302,7 @@ export function PatientsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 border-x border-b border-slate-100 text-slate-600">
-                {filteredPatients.map((patient) => (
+                {visibleRows.map((patient) => (
                   <tr key={patient.id}>
                     <td className="px-5 py-5">
                       <div className="flex items-center gap-4">
@@ -345,6 +349,7 @@ export function PatientsPage() {
                         </Button>
                         <Link
                           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                          state={{ returnTo: "/patients" }}
                           to={`/evaluations?patientId=${patient.id}`}
                         >
                           <CalendarPlus size={17} />
@@ -365,40 +370,13 @@ export function PatientsPage() {
                 ))}
               </tbody>
             </table>
-            <div className="flex flex-col gap-4 border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-              {isBrowsing ? (
-                <>
-                  <span>
-                    Mostrando {total === 0 ? 0 : page * PAGE_SIZE + 1} a {Math.min((page + 1) * PAGE_SIZE, total)} de {total} pacientes
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={page === 0}
-                      onClick={() => setPage((current) => Math.max(0, current - 1))}
-                      type="button"
-                    >
-                      ‹
-                    </button>
-                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-teal-500 font-bold text-white" type="button">
-                      {page + 1}
-                    </button>
-                    <button
-                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={(page + 1) * PAGE_SIZE >= total}
-                      onClick={() => setPage((current) => current + 1)}
-                      type="button"
-                    >
-                      ›
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <span>
-                  Mostrando 1 a {filteredPatients.length} de {filteredPatients.length} pacientes
-                </span>
-              )}
-            </div>
+            <Pagination
+              itemLabel="pacientes"
+              onPageChange={isBrowsing ? setPage : clientPagination.setPage}
+              page={isBrowsing ? page : clientPagination.page}
+              pageSize={PAGE_SIZE}
+              total={isBrowsing ? total : filteredPatients.length}
+            />
           </div>
         ) : null}
       </Card>

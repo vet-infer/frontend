@@ -22,16 +22,20 @@ import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { DataTable } from "../../components/common/DataTable";
 import { IconBadge } from "../../components/common/IconBadge";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
 import { evaluationService } from "../../services/evaluation.service";
 import { knowledgeService } from "../../services/knowledge.service";
 import { useAuth } from "../../hooks/useAuth";
+import { usePagination } from "../../hooks/usePagination";
 import type { ClinicalVariable, CatalogItem } from "../../types/evaluation";
 import type { Disease, KnowledgeBaseData, KnowledgeTab, RiskLevel, Rule } from "../../types/knowledge";
 import { cn } from "../../utils/cn";
 import { getErrorMessage } from "../../utils/errors";
 
 type SpeciesFilter = "all" | "dog" | "cat";
+
+const SYMPTOMS_PAGE_SIZE = 10;
 
 const tabs: { id: KnowledgeTab; label: string }[] = [
   { id: "diseases", label: "Enfermedades" },
@@ -124,6 +128,18 @@ export function KnowledgeBasePage() {
   const [speciesFilter, setSpeciesFilter] = useState<SpeciesFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const changeTab = (tab: KnowledgeTab) => {
+    setActiveTab(tab);
+    setSelectedIndex(0);
+  };
+  const changeQuery = (value: string) => {
+    setQuery(value);
+    setSelectedIndex(0);
+  };
+  const changeSpeciesFilter = (filter: SpeciesFilter) => {
+    setSpeciesFilter(filter);
+    setSelectedIndex(0);
+  };
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -195,10 +211,6 @@ export function KnowledgeBasePage() {
     }
   }
 
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [activeTab, query, speciesFilter]);
-
   const filteredDiseases = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return (data?.diseases ?? [])
@@ -228,6 +240,7 @@ export function KnowledgeBasePage() {
             .some((value) => value!.toLowerCase().includes(normalizedQuery)))
     );
   }, [data?.symptoms, query, speciesFilter]);
+  const symptomPagination = usePagination(filteredSymptoms, SYMPTOMS_PAGE_SIZE, `${query}|${speciesFilter}`);
 
   const filteredVariables = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -281,22 +294,26 @@ export function KnowledgeBasePage() {
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={21} />
               <input
                 className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => changeQuery(event.target.value)}
                 placeholder="Buscar por enfermedad, regla o variable clinica..."
                 value={query}
               />
             </label>
-            <SpeciesButton active={speciesFilter === "all"} label="Todos" onClick={() => setSpeciesFilter("all")} />
-            <SpeciesButton active={speciesFilter === "dog"} icon={Dog} label="Perro" onClick={() => setSpeciesFilter("dog")} />
-            <SpeciesButton active={speciesFilter === "cat"} icon={Cat} label="Gato" onClick={() => setSpeciesFilter("cat")} />
+            <SpeciesButton active={speciesFilter === "all"} label="Todos" onClick={() => changeSpeciesFilter("all")} />
+            <SpeciesButton active={speciesFilter === "dog"} icon={Dog} label="Perro" onClick={() => changeSpeciesFilter("dog")} />
+            <SpeciesButton active={speciesFilter === "cat"} icon={Cat} label="Gato" onClick={() => changeSpeciesFilter("cat")} />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className={cn("grid grid-cols-2 gap-3", isAdmin && "md:grid-cols-4")}>
           <StatCard icon={BookOpen} label="Enfermedades consideradas" value={stats.diseases} />
           <StatCard icon={Activity} label="Variables clinicas" value={stats.variables} tone="green" />
-          <StatCard icon={Network} label="Reglas activas" value={stats.activeRules} />
-          <StatCard icon={CircleDot} label="Reglas inactivas" value={stats.inactiveRules} tone="orange" />
+          {isAdmin ? (
+            <>
+              <StatCard icon={Network} label="Reglas activas" value={stats.activeRules} />
+              <StatCard icon={CircleDot} label="Reglas inactivas" value={stats.inactiveRules} tone="orange" />
+            </>
+          ) : null}
         </div>
       </section>
 
@@ -314,7 +331,7 @@ export function KnowledgeBasePage() {
                   : "border-transparent text-slate-500 hover:bg-teal-50 hover:text-teal-700"
               )}
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => changeTab(tab.id)}
               type="button"
             >
               {tab.label}
@@ -358,7 +375,7 @@ export function KnowledgeBasePage() {
               <h2 className="mb-5 text-xl font-extrabold text-[#172554]">Catalogo de sintomas</h2>
               <DataTable
                 columns={isAdmin ? ["Sintoma", "Especie", "Descripcion", "Estado", "Acciones"] : ["Sintoma", "Especie", "Descripcion", "Estado"]}
-                rows={filteredSymptoms}
+                rows={symptomPagination.pageItems}
                 renderRow={(symptom: CatalogItem) => (
                   <tr key={symptom.id}>
                     <td className="px-5 py-4 font-bold text-slate-700">{symptom.name}</td>
@@ -382,6 +399,15 @@ export function KnowledgeBasePage() {
                   </tr>
                 )}
               />
+              {filteredSymptoms.length > 0 ? (
+                <Pagination
+                  itemLabel="sintomas"
+                  onPageChange={symptomPagination.setPage}
+                  page={symptomPagination.page}
+                  pageSize={SYMPTOMS_PAGE_SIZE}
+                  total={filteredSymptoms.length}
+                />
+              ) : null}
             </Card>
           ) : null}
 
@@ -543,7 +569,7 @@ function KnowledgeSplit({
       <div className="grid xl:grid-cols-[0.47fr_1fr]">
         <aside className="border-b border-slate-100 p-5 xl:border-b-0 xl:border-r">
           <h2 className="mb-5 text-xl font-extrabold text-[#172554]">{listTitle}</h2>
-          <div className="space-y-3">{left}</div>
+          <div className="max-h-[45vh] space-y-3 overflow-y-auto pr-2 xl:max-h-[65vh]">{left}</div>
         </aside>
         <section className="p-6">{right}</section>
       </div>
@@ -709,8 +735,6 @@ function RiskLevelsView({
     );
   }
 
-  const tone = riskTone(selectedRisk.name);
-
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-4 rounded-lg border border-blue-100 bg-blue-50 p-5 text-blue-700">
@@ -742,7 +766,7 @@ function RiskLevelsView({
           </div>
         </Card>
         <Card className="p-6">
-          <DetailHeader icon={ShieldCheck} title={selectedRisk.name} badges={[probabilityRange(selectedRisk), tone.label]} subtitle={selectedRisk.description ?? "Nivel utilizado para interpretar el resultado sugerido."} />
+          <DetailHeader icon={ShieldCheck} title={selectedRisk.name} badges={[probabilityRange(selectedRisk)]} subtitle={selectedRisk.description ?? "Nivel utilizado para interpretar el resultado sugerido."} />
           <DataTable
             columns={["Campo", "Descripcion"]}
             rows={[
