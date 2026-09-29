@@ -30,7 +30,7 @@ function formatDate(value?: string | null) {
 }
 
 function scopeChange(count: number, week?: WeekRange) {
-  return week ? `${count} esta semana` : `${count} en total`;
+  return week ? `${count} esta semana` : undefined;
 }
 
 function readEvaluationDate(evaluation: Evaluation) {

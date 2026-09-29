@@ -72,7 +72,6 @@ function riskTone(codeOrName: string) {
     return {
       className: "bg-red-50 text-red-700",
       iconClassName: "bg-red-600 text-white",
-      label: "Rojo",
     };
   }
 
@@ -80,14 +79,12 @@ function riskTone(codeOrName: string) {
     return {
       className: "bg-amber-50 text-amber-700",
       iconClassName: "bg-amber-500 text-white",
-      label: "Naranja",
     };
   }
 
   return {
     className: "bg-emerald-50 text-emerald-700",
     iconClassName: "bg-emerald-600 text-white",
-    label: "Verde",
   };
 }
 

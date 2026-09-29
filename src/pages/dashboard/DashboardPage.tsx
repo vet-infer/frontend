@@ -1,7 +1,7 @@
 import { CalendarDays, Eye, LayoutDashboard } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { Cell, Legend, Bar, BarChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
@@ -20,6 +20,8 @@ const RISK_COLORS = {
   moderate: "#F59E0B",
   low: "#10B981",
 };
+
+const DIAGNOSIS_PREFIX = /^diagn[oó]stico sugerido:\s*posible riesgo asociado a\s*/i;
 
 export function DashboardPage() {
   const { selectedWeek } = useOutletContext<{ selectedWeek: WeekRange }>();
@@ -81,7 +83,8 @@ export function DashboardPage() {
 
     dashboard.recentEvaluations.forEach((evalItem) => {
       if (evalItem.result && evalItem.result !== "Pendiente de diagnostico") {
-        prevalence[evalItem.result] = (prevalence[evalItem.result] ?? 0) + 1;
+        const diseaseName = evalItem.result.replace(DIAGNOSIS_PREFIX, "").trim() || evalItem.result;
+        prevalence[diseaseName] = (prevalence[diseaseName] ?? 0) + 1;
       }
     });
 
@@ -157,7 +160,7 @@ export function DashboardPage() {
       <section className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
           <div className="mb-4">
-            <h3 className="text-base font-bold text-[#172554]">Distribucion de Riesgo Clinico</h3>
+            <h3 className="text-base font-bold text-[#172554]">Distribución de Riesgo Clinico</h3>
             <p className="text-xs font-medium text-slate-500">Severidad de los casos clinicos evaluados</p>
           </div>
           <div className="h-64">
@@ -182,28 +185,32 @@ export function DashboardPage() {
         <Card className="p-5">
           <div className="mb-4">
             <h3 className="text-base font-bold text-[#172554]">Top Enfermedades Inferidas</h3>
-            <p className="text-xs font-medium text-slate-500">Patologias con mayor frecuencia de diagnostico</p>
+            <p className="text-xs font-medium text-slate-500">
+              Patologias con mayor frecuencia de diagnostico sugerido (posible riesgo asociado)
+            </p>
           </div>
           <div className="h-64">
             {diseasePrevalenceData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={diseasePrevalenceData} layout="vertical" margin={{ left: 10, right: 30, top: 10, bottom: 5 }}>
-                  <XAxis type="number" hide />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    axisLine={false}
-                    tickLine={false}
-                    width={140}
-                    style={{ fontSize: "11px", fontWeight: "bold", fill: "#334155" }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "#F8FAFC" }}
-                    contentStyle={{ background: "#FFF", borderRadius: "8px", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: "bold" }}
-                  />
-                  <Bar dataKey="Casos" fill="#6366F1" radius={[0, 4, 4, 0]} barSize={16} />
-                </BarChart>
-              </ResponsiveContainer>
+              <ul className="flex h-full flex-col justify-center gap-4">
+                {diseasePrevalenceData.map((item) => (
+                  <li key={item.name}>
+                    <div className="mb-1 flex items-baseline justify-between gap-3 text-xs">
+                      <span className="truncate font-bold text-slate-700" title={item.name}>
+                        {item.name}
+                      </span>
+                      <span className="shrink-0 font-semibold text-slate-500">
+                        {item.Casos} {item.Casos === 1 ? "caso" : "casos"}
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-[#6366F1]"
+                        style={{ width: `${(item.Casos / diseasePrevalenceData[0].Casos) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             ) : (
               <EmptyChartMessage message="Sin diagnosticos inferidos para calcular prevalencia." />
             )}
