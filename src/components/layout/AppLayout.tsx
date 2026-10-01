@@ -73,7 +73,7 @@ export function AppLayout() {
         {isDashboard ? (
           <Topbar
             currentUser={currentUser}
-            onNextWeek={() => setSelectedWeek((current) => shiftWeek(current, 1))}
+            onNextWeek={() => setSelectedWeek((current) => (current.end < new Date() ? shiftWeek(current, 1) : current))}
             onOpenSidebar={() => setIsSidebarOpen(true)}
             onPreviousWeek={() => setSelectedWeek((current) => shiftWeek(current, -1))}
             onResetWeek={() => setSelectedWeek(buildWeekRange(new Date()))}

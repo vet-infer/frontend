@@ -5,7 +5,6 @@ export type RiskLevel = "low" | "moderate" | "high";
 export type SummaryCard = {
   label: string;
   value: string;
-  change: string;
   tone: "primary" | "danger";
   icon: LucideIcon;
 };

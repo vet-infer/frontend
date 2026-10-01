@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Calendar,
   Check,
   ClipboardPlus,
@@ -25,6 +24,7 @@ import { Card } from "../../components/common/Card";
 import { DataTable } from "../../components/common/DataTable";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconBadge } from "../../components/common/IconBadge";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
 import { evaluationService } from "../../services/evaluation.service";
 import { patientService } from "../../services/patient.service";
@@ -36,7 +36,8 @@ import { getErrorMessage } from "../../utils/errors";
 import { downloadEvaluationPdf } from "../../utils/evaluationPdf";
 import { useEvaluationFacts } from "../../hooks/useEvaluationFacts";
 import { useAuth } from "../../hooks/useAuth";
-import { formatCondition, resolveFactDisplayName, type FactCatalog } from "../../utils/factLabel";
+import { usePagination } from "../../hooks/usePagination";
+import { formatCondition, formatFact, type FactCatalog } from "../../utils/factLabel";
 
 function getOwnerName(patient: Patient) {
   return [patient.owner.first_name, patient.owner.last_name].filter(Boolean).join(" ") || "Sin propietario";
@@ -89,7 +90,7 @@ function riskRangeLabel(riskLevel?: string | null) {
 
 
 function factLabel(fact: ClinicalFactOut, catalog: FactCatalog) {
-  return `${resolveFactDisplayName(fact.fact_key, catalog)}: ${String(fact.value)}`;
+  return formatFact(fact.fact_key, fact.value, catalog);
 }
 
 function conditionsLabel(rule: PersistedActivatedRule, catalog: FactCatalog) {
@@ -106,6 +107,8 @@ function splitFacts(facts: ClinicalFactOut[] = []) {
     variables: facts.filter((fact) => fact.source_type !== "symptom"),
   };
 }
+
+const PAGE_SIZE = 10;
 
 function primaryResult(results: PersistedInferenceResult[]) {
   return [...results].sort((a, b) => (b.probability ?? -1) - (a.probability ?? -1) || b.score - a.score)[0] ?? null;
@@ -375,17 +378,28 @@ export function ResultsPage() {
           {result.activated_rules.length === 0 ? (
             <p className="rounded-lg bg-slate-50 p-4 text-sm font-semibold text-slate-500">No hay reglas activadas asociadas.</p>
           ) : (
-            <DataTable
-              columns={["Regla", "Condiciones cumplidas", "Justificacion"]}
-              rows={result.activated_rules}
-              renderRow={(rule) => (
-                <tr key={rule.id}>
-                  <td className="whitespace-nowrap px-5 py-3 font-bold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
-                  <td className="px-5 py-3">{conditionsLabel(rule, factCatalog)}</td>
-                  <td className="px-5 py-3">{rule.justification || "Regla activada por condiciones cumplidas."}</td>
-                </tr>
-              )}
-            />
+            isAdmin ? (
+              <DataTable
+                columns={["Regla", "Condiciones cumplidas", "Justificacion"]}
+                rows={result.activated_rules}
+                renderRow={(rule) => (
+                  <tr key={rule.id}>
+                    <td className="whitespace-nowrap px-5 py-3 font-bold text-slate-700">{rule.rule_code ?? `#${rule.rule_id}`}</td>
+                    <td className="px-5 py-3">{conditionsLabel(rule, factCatalog)}</td>
+                    <td className="px-5 py-3">{rule.justification || "Regla activada por condiciones cumplidas."}</td>
+                  </tr>
+                )}
+              />
+            ) : (
+              <ul className="space-y-3">
+                {result.activated_rules.map((rule) => (
+                  <li className="flex gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600" key={rule.id}>
+                    <Check className="mt-0.5 shrink-0 text-teal-500" size={18} />
+                    {rule.justification || "Regla activada por condiciones cumplidas."}
+                  </li>
+                ))}
+              </ul>
+            )
           )}
         </Card>
 
@@ -411,23 +425,6 @@ export function ResultsPage() {
           </div>
         </div>
       </Card>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
-          to="/results"
-        >
-          <ArrowLeft size={18} />
-          Volver a resultados
-        </Link>
-        <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
-          to={`/patients/${patient.id}/history`}
-        >
-          <FileClock size={18} />
-          Ver historial clinico
-        </Link>
-      </div>
     </div>
   );
 }
@@ -457,6 +454,7 @@ function ResultsListView({
 }: ResultsListViewProps) {
   const highRiskCount = rows.filter((row) => getRiskTone(row.result.risk_level).label === "Riesgo alto").length;
   const moderateRiskCount = rows.filter((row) => getRiskTone(row.result.risk_level).label === "Riesgo moderado").length;
+  const { page, setPage, pageItems: pageRows } = usePagination(filteredRows, PAGE_SIZE, `${query}|${riskFilter}`);
 
   return (
     <div className="space-y-6">
@@ -559,7 +557,7 @@ function ResultsListView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
-                {filteredRows.map((row) => {
+                {pageRows.map((row) => {
                   const tone = getRiskTone(row.result.risk_level);
 
                   return (
@@ -604,9 +602,7 @@ function ResultsListView({
                 })}
               </tbody>
             </table>
-            <div className="border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500">
-              Mostrando 1 a {filteredRows.length} de {filteredRows.length} resultados
-            </div>
+            <Pagination itemLabel="resultados" onPageChange={setPage} page={page} pageSize={PAGE_SIZE} total={filteredRows.length} />
           </div>
         ) : null}
       </Card>
@@ -616,15 +612,43 @@ function ResultsListView({
 
 function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; patientId?: number }) {
   return (
-    <section className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-      <div>
-        <div className="mb-3 flex items-center gap-2 text-sm font-bold">
+    <>
+      <div className="sticky top-0 z-30 -mx-1 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 text-sm font-bold">
           <Link className="text-teal-500 hover:text-teal-700" to="/results">
             Resultados
           </Link>
           <span className="text-slate-300">/</span>
           <span className="text-slate-500">Detalle del resultado</span>
         </div>
+        <div className="flex flex-wrap gap-2">
+          {onDownloadPdf ? (
+            <button
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
+              onClick={onDownloadPdf}
+              type="button"
+            >
+              <FileDown size={20} />
+              Descargar PDF
+            </button>
+          ) : null}
+          <Link
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
+            to={patientId ? `/evaluations?patientId=${patientId}` : "/evaluations"}
+          >
+            <ClipboardPlus size={20} />
+            Nueva evaluacion
+          </Link>
+          <Link
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
+            to={patientId ? `/patients/${patientId}/history` : "/history"}
+          >
+            <FileClock size={20} />
+            Ver historial clinico
+          </Link>
+        </div>
+      </div>
+      <div>
         <h1 className="text-2xl font-extrabold leading-tight tracking-normal text-[#172554]">
           Resultado de la evaluacion
         </h1>
@@ -632,33 +656,7 @@ function PageHeader({ onDownloadPdf, patientId }: { onDownloadPdf?: () => void; 
           Interpretacion generada a partir de la evaluacion clinica procesada.
         </p>
       </div>
-      <div className="flex flex-wrap gap-3">
-        {onDownloadPdf ? (
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
-            onClick={onDownloadPdf}
-            type="button"
-          >
-            <FileDown size={20} />
-            Descargar PDF
-          </button>
-        ) : null}
-        <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600"
-          to={patientId ? `/evaluations?patientId=${patientId}` : "/evaluations"}
-        >
-          <ClipboardPlus size={20} />
-          Nueva evaluacion
-        </Link>
-        <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"
-          to={patientId ? `/patients/${patientId}/history` : "/history"}
-        >
-          <FileClock size={20} />
-          Ver historial clinico
-        </Link>
-      </div>
-    </section>
+    </>
   );
 }
 

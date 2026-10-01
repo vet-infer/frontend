@@ -71,6 +71,24 @@ export function resolveFactDisplayName(factKey: string, catalog: FactCatalog = [
   return match ? formatFactLabel(match.display_name) : labelFromFactKey(factKey);
 }
 
+function readBoolean(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  const text = String(value).trim().toLowerCase();
+  if (text === "true") return true;
+  if (text === "false") return false;
+  return null;
+}
+
+/** "Tos" si está presente, "Tos: No" si está ausente, "Temperatura: 39.5" para valores. */
+export function formatFact(factKey: string, value: unknown, catalog: FactCatalog = []): string {
+  const name = resolveFactDisplayName(factKey, catalog);
+  const flag = readBoolean(value);
+
+  if (flag === true) return name;
+  if (flag === false) return `${name}: No`;
+  return `${name}: ${String(value)}`;
+}
+
 export function formatCondition(condition: string, catalog: FactCatalog = []): string {
   const match = condition.match(/^\s*([^\s=!<>]+)\s*(==|!=|>=|<=|>|<)\s*(.+?)\s*$/);
   if (!match) {
@@ -78,6 +96,11 @@ export function formatCondition(condition: string, catalog: FactCatalog = []): s
   }
 
   const [, factKey, operator, value] = match;
+  const flag = readBoolean(value);
+  if (flag !== null && (operator === "==" || operator === "!=")) {
+    return formatFact(factKey, operator === "==" ? flag : !flag, catalog);
+  }
+
   const operatorLabel = OPERATOR_LABELS[operator];
   if (!operatorLabel) {
     return condition;

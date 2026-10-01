@@ -7,9 +7,11 @@ import { Card } from "../../components/common/Card";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { EmptyState } from "../../components/common/EmptyState";
 import { Modal } from "../../components/common/Modal";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
 import { OwnerForm } from "../../components/owners/OwnerForm";
 import { PatientForm } from "../../components/patients/PatientForm";
+import { usePagination } from "../../hooks/usePagination";
 import { ownerService } from "../../services/owner.service";
 import { patientService } from "../../services/patient.service";
 import type { Owner, OwnerPayload } from "../../types/owner";
@@ -149,6 +151,8 @@ export function OwnersPage() {
       return matchesQuery && matchesFilter;
     });
   }, [filter, owners, query]);
+  const clientPagination = usePagination(filteredOwners, PAGE_SIZE, `${query}|${filter}`);
+  const visibleRows = isBrowsing ? filteredOwners : clientPagination.pageItems;
 
   async function handleDelete() {
     if (!ownerToDelete) {
@@ -330,7 +334,7 @@ export function OwnersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
-                {filteredOwners.map((owner) => (
+                {visibleRows.map((owner) => (
                   <tr key={owner.id}>
                     <td className="px-3 py-5">
                       <div className="flex items-center gap-4">
@@ -415,40 +419,13 @@ export function OwnersPage() {
                 ))}
               </tbody>
             </table>
-            <div className="flex flex-col gap-4 border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-              {isBrowsing ? (
-                <>
-                  <span>
-                    Mostrando {total === 0 ? 0 : page * PAGE_SIZE + 1} a {Math.min((page + 1) * PAGE_SIZE, total)} de {total} propietarios
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={page === 0}
-                      onClick={() => setPage((current) => Math.max(0, current - 1))}
-                      type="button"
-                    >
-                      &lt;
-                    </button>
-                    <button className="grid h-10 w-10 place-items-center rounded-lg bg-teal-500 font-bold text-white" type="button">
-                      {page + 1}
-                    </button>
-                    <button
-                      className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={(page + 1) * PAGE_SIZE >= total}
-                      onClick={() => setPage((current) => current + 1)}
-                      type="button"
-                    >
-                      {">"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <span>
-                  Mostrando 1 a {filteredOwners.length} de {filteredOwners.length} propietarios
-                </span>
-              )}
-            </div>
+            <Pagination
+              itemLabel="propietarios"
+              onPageChange={isBrowsing ? setPage : clientPagination.setPage}
+              page={isBrowsing ? page : clientPagination.page}
+              pageSize={PAGE_SIZE}
+              total={isBrowsing ? total : filteredOwners.length}
+            />
           </div>
         ) : null}
       </Card>

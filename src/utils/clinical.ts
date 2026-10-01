@@ -90,3 +90,9 @@ export function factSummary(facts: ClinicalFactOut[] = [], catalog: FactCatalog 
     .map((fact) => resolveFactDisplayName(fact.fact_key, catalog));
   return symptoms.length ? symptoms.join(", ") : "Sin sintomas registrados.";
 }
+
+const DIAGNOSIS_PREFIX = /^diagn[oó]stico sugerido:\s*posible riesgo asociado a\s*/i;
+
+export function diseaseName(diagnosis: string) {
+  return diagnosis.replace(DIAGNOSIS_PREFIX, "").trim() || diagnosis;
+}

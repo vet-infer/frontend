@@ -27,7 +27,7 @@ import { patientService } from "../../services/patient.service";
 import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../../types/evaluation";
 import type { Owner } from "../../types/owner";
 import type { Breed, Patient, PatientPayload, Species } from "../../types/patient";
-import { calculateAge, formatDate as formatDateWithMonth } from "../../utils/clinical";
+import { calculateAge, diseaseName, formatDate as formatDateWithMonth } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
 
 function getOwnerName(patient: Patient) {
@@ -210,6 +210,7 @@ export function PatientDetailPage() {
         <div className="flex flex-wrap gap-3">
           <Link
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+            state={{ returnTo: `/patients/${patient.id}` }}
             to={`/evaluations?patientId=${patient.id}`}
           >
             <PawPrint size={20} />
@@ -277,7 +278,7 @@ export function PatientDetailPage() {
         </div>
 
         <DataTable
-          columns={["Fecha", "Evaluacion", "Sintoma", "Valor", "Resultado asociado"]}
+          columns={["Fecha", "Evaluacion", "Sintoma", "Valor", "Riesgo asociado"]}
           emptyMessage="Sin sintomas registrados para este paciente."
           rows={symptomRows}
           renderRow={(row) => (
@@ -286,7 +287,7 @@ export function PatientDetailPage() {
               <td className="px-5 py-4 font-semibold">#{row.evaluation.id}</td>
               <td className="px-5 py-4">{formatFactKey(row.fact.fact_key)}</td>
               <td className="px-5 py-4 font-semibold">{formatFactValue(row.fact)}</td>
-              <td className="px-5 py-4">{row.result?.suggested_diagnosis ?? "Sin resultado procesado"}</td>
+              <td className="px-5 py-4">{row.result ? diseaseName(row.result.suggested_diagnosis) : "Sin resultado procesado"}</td>
             </tr>
           )}
         />
@@ -306,7 +307,7 @@ export function PatientDetailPage() {
         </div>
 
         <DataTable
-          columns={["Fecha", "Evaluacion", "Variable clinica", "Valor", "Resultado asociado"]}
+          columns={["Fecha", "Evaluacion", "Variable clinica", "Valor", "Riesgo asociado"]}
           emptyMessage="Sin variables clinicas registradas para este paciente."
           rows={clinicalVariableRows}
           renderRow={(row) => (
@@ -315,7 +316,7 @@ export function PatientDetailPage() {
               <td className="px-5 py-4 font-semibold">#{row.evaluation.id}</td>
               <td className="px-5 py-4">{formatFactKey(row.fact.fact_key)}</td>
               <td className="px-5 py-4 font-semibold">{formatFactValue(row.fact)}</td>
-              <td className="px-5 py-4">{row.result?.suggested_diagnosis ?? "Sin resultado procesado"}</td>
+              <td className="px-5 py-4">{row.result ? diseaseName(row.result.suggested_diagnosis) : "Sin resultado procesado"}</td>
             </tr>
           )}
         />
@@ -332,6 +333,7 @@ export function PatientDetailPage() {
           </div>
           <Link
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+            state={{ returnTo: `/patients/${patient.id}` }}
             to={`/evaluations?patientId=${patient.id}`}
           >
             <CalendarPlus size={18} />
@@ -355,7 +357,7 @@ export function PatientDetailPage() {
                 <tr key={evaluation.id}>
                   <td className="whitespace-nowrap px-5 py-4 font-semibold">{formatDate(getEvaluationDate(evaluation))}</td>
                   <td className="px-5 py-4 font-semibold">{evaluation.reason || "Evaluacion clinica"}</td>
-                  <td className="px-5 py-4">{result?.suggested_diagnosis ?? evaluation.result ?? "Pendiente de resultado"}</td>
+                  <td className="px-5 py-4">{diseaseName(result?.suggested_diagnosis ?? evaluation.result ?? "Pendiente de resultado")}</td>
                   <td className="px-5 py-4">
                     {result?.risk_level ?? (typeof evaluation.risk_level === "string" ? evaluation.risk_level : evaluation.risk_level?.name ?? "Sin riesgo")}
                   </td>

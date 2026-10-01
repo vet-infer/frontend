@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCondition, resolveFactDisplayName } from "./factLabel";
+import { formatCondition, formatFact, resolveFactDisplayName } from "./factLabel";
 
 const catalog = [
   { fact_key: "hallazgos_ecograficos_renales", display_name: "hallazgos ecograficos renales" },
@@ -25,6 +25,27 @@ describe("formatCondition", () => {
     ["sdma >= 15", "Sdma es mayor o igual a 15"],
     ["sdma <= 15", "Sdma es menor o igual a 15"],
   ])("traduce la condicion cruda '%s'", (condition, expected) => {
+    expect(formatCondition(condition, catalog)).toBe(expected);
+  });
+});
+
+describe("formatFact", () => {
+  it.each([
+    [true, "Sdma"],
+    ["true", "Sdma"],
+    [false, "Sdma: No"],
+    [15, "Sdma: 15"],
+  ])("formatea %s", (value, expected) => {
+    expect(formatFact("sdma", value, catalog)).toBe(expected);
+  });
+});
+
+describe("formatCondition con booleanos", () => {
+  it.each([
+    ["sdma == true", "Sdma"],
+    ["sdma == false", "Sdma: No"],
+    ["sdma != true", "Sdma: No"],
+  ])("%s", (condition, expected) => {
     expect(formatCondition(condition, catalog)).toBe(expected);
   });
 });
