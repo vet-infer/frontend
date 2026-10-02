@@ -6,10 +6,13 @@ import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { EmptyState } from "../../components/common/EmptyState";
 import { FormSelect } from "../../components/common/FormSelect";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
+import { usePagination } from "../../hooks/usePagination";
 import { historyService, type PatientHistorySummary } from "../../services/history.service";
 import { calculateAge, formatDate, getOwnerName, primaryResult, riskClasses, riskLabel } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
+import { stripDigits } from "../../utils/text";
 
 type HistoryRow = PatientHistorySummary & {
   latestDate: string | null;
@@ -30,6 +33,8 @@ function toHistoryRow(history: PatientHistorySummary): HistoryRow {
     latestEvaluationId: latest?.evaluation.id,
   };
 }
+
+const PAGE_SIZE = 10;
 
 export function HistoryPage() {
   const [searchParams] = useSearchParams();
@@ -104,6 +109,11 @@ export function HistoryPage() {
       return matchesQuery && matchesOwner && matchesSpecies && matchesRisk && matchesFrom && matchesTo;
     });
   }, [fromDate, ownerFilter, query, riskFilter, rows, speciesFilter, toDate]);
+  const { page, setPage, pageItems: pageRows } = usePagination(
+    filteredRows,
+    PAGE_SIZE,
+    [query, ownerFilter, speciesFilter, riskFilter, fromDate, toDate].join("|")
+  );
 
   function clearFilters() {
     setQuery("");
@@ -134,7 +144,7 @@ export function HistoryPage() {
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
               className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => setQuery(stripDigits(event.target.value))}
               placeholder="Buscar por nombre del paciente..."
               value={query}
             />
@@ -236,7 +246,7 @@ export function HistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
-                {filteredRows.map((row) => (
+                {pageRows.map((row) => (
                   <tr key={row.patient.id}>
                     <td className="px-4 py-5">
                       <div className="flex items-center gap-3">
@@ -280,9 +290,7 @@ export function HistoryPage() {
                 ))}
               </tbody>
             </table>
-            <div className="border-t border-slate-100 px-3 py-4 text-sm font-semibold text-slate-500">
-              Mostrando 1 a {filteredRows.length} de {filteredRows.length} registros
-            </div>
+            <Pagination itemLabel="registros" onPageChange={setPage} page={page} pageSize={PAGE_SIZE} total={filteredRows.length} />
           </div>
         ) : null}
       </Card>
@@ -320,11 +328,6 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
   const [draftFrom, setDraftFrom] = useState(fromDate);
   const [draftTo, setDraftTo] = useState(toDate);
 
-  useEffect(() => {
-    setDraftFrom(fromDate);
-    setDraftTo(toDate);
-  }, [fromDate, toDate]);
-
   function applyRange() {
     onChange(draftFrom, draftTo);
     setIsOpen(false);
@@ -342,7 +345,13 @@ function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
       <span className="mb-2 block text-sm font-bold text-slate-700">Rango de fechas</span>
       <button
         className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/10"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          if (!isOpen) {
+            setDraftFrom(fromDate);
+            setDraftTo(toDate);
+          }
+          setIsOpen((current) => !current);
+        }}
         type="button"
       >
         <span className="inline-flex min-w-0 items-center gap-2">

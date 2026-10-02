@@ -1,6 +1,6 @@
 import type { ClinicalFactOut, Evaluation, PersistedInferenceResult } from "../types/evaluation";
 import type { Patient } from "../types/patient";
-import { formatCondition, resolveFactDisplayName, type FactCatalog } from "./factLabel";
+import { formatCondition, formatFact, type FactCatalog } from "./factLabel";
 
 type PdfExportInput = {
   evaluation: Evaluation;
@@ -82,7 +82,7 @@ function ownerName(patient: Patient) {
 }
 
 function factLine(fact: ClinicalFactOut, catalog: FactCatalog = []) {
-  return `${resolveFactDisplayName(fact.fact_key, catalog)}: ${String(fact.value)}`;
+  return formatFact(fact.fact_key, fact.value, catalog);
 }
 
 function splitFacts(facts: ClinicalFactOut[] = []) {
@@ -167,7 +167,7 @@ function blockHeight(block: PdfBlock) {
 function drawPageChrome(commands: string[], pageNumber: number) {
   commands.push(rect(0, 0, PAGE_WIDTH, 8, COLORS.violet));
   commands.push(rect(0, PAGE_HEIGHT - 24, PAGE_WIDTH, 24, COLORS.slateLight));
-  commands.push(text("OE3 - Reporte clinico trazable", MARGIN_X, PAGE_HEIGHT - 10, 8, COLORS.slate));
+  commands.push(text("Reporte clinico trazable", MARGIN_X, PAGE_HEIGHT - 10, 8, COLORS.slate));
   commands.push(text(`Pagina ${pageNumber}`, PAGE_WIDTH - MARGIN_X - 46, PAGE_HEIGHT - 10, 8, COLORS.slate));
 }
 
@@ -181,11 +181,9 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
   if (block.type === "hero") {
     const palette = riskPalette(block.risk);
     commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, 96, COLORS.navy));
-    commands.push(rect(MARGIN_X + 18, y + 18, 42, 42, COLORS.violet));
-    commands.push(text("OE3", MARGIN_X + 27, y + 45, 13, COLORS.white, "F2"));
-    commands.push(text(block.title, MARGIN_X + 76, y + 33, 20, COLORS.white, "F2"));
-    commands.push(text(block.subtitle, MARGIN_X + 76, y + 54, 10, COLORS.white));
-    commands.push(text(block.meta, MARGIN_X + 76, y + 73, 9, COLORS.border));
+    commands.push(text(block.title, MARGIN_X + 22, y + 33, 20, COLORS.white, "F2"));
+    commands.push(text(block.subtitle, MARGIN_X + 22, y + 54, 10, COLORS.white));
+    commands.push(text(block.meta, MARGIN_X + 22, y + 73, 9, COLORS.border));
     commands.push(rect(PAGE_WIDTH - MARGIN_X - 126, y + 30, 96, 28, palette.background));
     commands.push(text(palette.label, PAGE_WIDTH - MARGIN_X - 112, y + 49, 9, palette.foreground, "F2"));
     return y + 116;
@@ -230,11 +228,8 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
     commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, cardHeight, COLORS.white, COLORS.border));
     commands.push(rect(MARGIN_X, y, 5, cardHeight, palette.foreground));
     commands.push(text(`${block.index}. ${block.result.suggested_diagnosis}`, MARGIN_X + 18, y + 24, 12, COLORS.navy, "F2"));
-    commands.push(rect(PAGE_WIDTH - MARGIN_X - 118, y + 11, 92, 23, palette.background));
-    commands.push(text(palette.label, PAGE_WIDTH - MARGIN_X - 105, y + 27, 8, palette.foreground, "F2"));
     commands.push(text(`Probabilidad: ${probabilityLabel(block.result.probability)}`, MARGIN_X + 18, y + 46, 9, COLORS.slateDark, "F2"));
-    commands.push(text(`Puntaje: ${block.result.score}`, MARGIN_X + 190, y + 46, 9, COLORS.slate));
-    commands.push(text("Metodo: Reglas clinicas y calculo de probabilidad", MARGIN_X + 290, y + 46, 9, COLORS.slate));
+    commands.push(text("Metodo: Reglas clinicas y calculo de probabilidad", MARGIN_X + 190, y + 46, 9, COLORS.slate));
     const afterExplanation = drawWrappedText(commands, block.result.explanation ?? "Sin explicacion registrada.", MARGIN_X + 18, y + 68, 88, 9, COLORS.slate);
     commands.push(text("Reglas activadas", MARGIN_X + 18, afterExplanation + 12, 10, COLORS.navy, "F2"));
 

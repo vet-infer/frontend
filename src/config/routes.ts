@@ -19,7 +19,7 @@ export type AppRoute = {
 };
 
 export const routes: AppRoute[] = [
-  { path: "/", label: "Inicio", icon: Home },
+  { path: "/home", label: "Inicio", icon: Home },
   { path: "/owners", label: "Propietarios", icon: Users },
   { path: "/patients", label: "Pacientes", icon: PawPrint },
   { path: "/evaluations", label: "Evaluaciones", icon: ClipboardList },

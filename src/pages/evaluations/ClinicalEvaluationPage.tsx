@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertMessage } from "../../components/common/AlertMessage";
+import { Autocomplete, type AutocompleteOption } from "../../components/common/Autocomplete";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { FormTextarea } from "../../components/common/FormTextarea";
@@ -11,7 +12,9 @@ import { evaluationService } from "../../services/evaluation.service";
 import { patientService } from "../../services/patient.service";
 import type { ClinicalFactIn, Evaluation, FactDefinition, PersistedInferenceResult } from "../../types/evaluation";
 import type { Patient } from "../../types/patient";
+import { cn } from "../../utils/cn";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { stripDigits } from "../../utils/text";
 
 const tabs = ["Datos de evaluacion", "Sintomas", "Variables clinicas", "Variables complementarias"] as const;
 
@@ -43,9 +46,20 @@ const complementaryVariableKeys = new Set([
   "synergistetes",
 ]);
 
+// Solo el módulo de pacientes envía `returnTo`; si se entra directo, no hay a dónde volver.
+function readReturnTo(state: unknown) {
+  const returnTo = (state as { returnTo?: unknown } | null)?.returnTo;
+  if (typeof returnTo !== "string") return null;
+  if (returnTo === "/patients") return { to: returnTo, label: "Volver a pacientes" };
+  if (returnTo.startsWith("/patients/")) return { to: returnTo, label: "Volver al paciente" };
+  return null;
+}
+
 export function ClinicalEvaluationPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const returnTo = readReturnTo(location.state);
   const [activeTab, setActiveTab] = useState(0);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [patientId, setPatientId] = useState(searchParams.get("patientId") ?? "");
@@ -103,6 +117,9 @@ export function ClinicalEvaluationPage() {
     setEvaluation(null);
     setResults([]);
   }
+
+  // Pasos 2 a 4: la tarjeta tiene scroll propio y el encabezado queda fijo.
+  const isScrollableStep = activeTab > 0;
 
   function goToTab(nextTab: number) {
     if (nextTab > activeTab && activeTab === 0 && !patientOrReasonValid(patient, reason)) {
@@ -183,7 +200,13 @@ export function ClinicalEvaluationPage() {
         ))}
       </nav>
 
-      <Card className="p-6 sm:p-8">
+      <Card
+        className={cn(
+          "p-6 sm:p-8",
+          isScrollableStep && "max-h-[calc(100vh-21rem)] min-h-80 overflow-y-auto overscroll-contain"
+        )}
+        key={activeTab}
+      >
         {activeTab === 0 ? (
           <div className="space-y-6">
             <PatientTab
@@ -277,26 +300,48 @@ export function ClinicalEvaluationPage() {
               onChange={changeFact}
               values={values}
             />
-            <div className="border-t border-slate-100 pt-6">
-              <ProcessingTab
-                evaluation={evaluation}
-                isProcessing={isProcessing}
-                isSaving={isSaving}
-                onProcess={processEvaluation}
-                onSave={saveEvaluation}
-              />
-            </div>
+            {evaluation ? (
+              <p className="border-t border-slate-100 pt-6 text-sm font-bold text-emerald-700">
+                Evaluacion #{evaluation.id} guardada.
+              </p>
+            ) : null}
           </section>
         ) : null}
       </Card>
 
-      <div className="flex justify-between">
-        <Link className="text-sm font-bold text-teal-500" to="/patients">
-          Volver a pacientes
-        </Link>
-        <Button disabled={!evaluation || !results.length} onClick={() => navigate(`/results?evaluationId=${evaluation?.id}`)}>
-          Ir a resultados
-        </Button>
+      <div className={cn("flex items-center", returnTo ? "justify-between" : "justify-end")}>
+        {returnTo ? (
+          <Link className="text-sm font-bold text-teal-500" to={returnTo.to}>
+            {returnTo.label}
+          </Link>
+        ) : null}
+        {activeTab < 3 ? (
+          <div className="flex gap-3">
+            {activeTab > 0 ? (
+              <Button onClick={() => goToTab(activeTab - 1)} type="button" variant="secondary">
+                Atrás
+              </Button>
+            ) : null}
+            <Button onClick={() => goToTab(activeTab + 1)} type="button">
+              Siguiente
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button onClick={() => goToTab(activeTab - 1)} type="button" variant="secondary">
+              Atrás
+            </Button>
+            <Button disabled={isSaving || Boolean(evaluation)} onClick={saveEvaluation} type="button">
+              {isSaving ? "Guardando..." : "Guardar"}
+            </Button>
+            <Button disabled={!evaluation || isProcessing} onClick={processEvaluation} type="button">
+              {isProcessing ? "Procesando..." : "Procesar evaluacion"}
+            </Button>
+            <Button disabled={!evaluation || !results.length} onClick={() => navigate(`/results?evaluationId=${evaluation?.id}`)}>
+              Ir a resultados
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -315,22 +360,34 @@ function PatientTab({
   isLoading: boolean;
   onChange: (id: string) => void;
 }) {
+  const patientOptions = useMemo<AutocompleteOption[]>(
+    () =>
+      patients.map((item) => {
+        const ownerName = [item.owner.first_name, item.owner.last_name].filter(Boolean).join(" ");
+
+        return {
+          value: String(item.id),
+          label: item.name,
+          description: [item.species.name, ownerName].filter(Boolean).join(" · "),
+        };
+      }),
+    [patients]
+  );
+
   if (isLoading) return <Skeleton className="h-40" />;
 
   return (
     <div className="space-y-5">
-      <label className="block text-sm font-bold text-slate-700">
-        Paciente
-        <select className="mt-2 h-12 w-full rounded-lg border border-slate-200 px-4" onChange={(event) => onChange(event.target.value)} value={patientId}>
-          <option value="">Seleccionar paciente...</option>
-          {patients.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name} - {item.species.name}
-            </option>
-          ))}
-        </select>
-        <span className="mt-2 block text-xs font-medium leading-5 text-slate-500">Ejemplo: selecciona el paciente registrado antes de completar sintomas y variables clinicas.</span>
-      </label>
+      <Autocomplete
+        emptyMessage="No se encontraron pacientes."
+        helpText="Escribe el nombre del paciente o del propietario y selecciona una opción."
+        label="Paciente"
+        onChange={onChange}
+        options={patientOptions}
+        placeholder="Buscar paciente..."
+        sanitize={stripDigits}
+        value={patientId}
+      />
       {patient ? (
         <dl className="grid gap-4 rounded-lg bg-slate-50 p-5 sm:grid-cols-3">
           <div>
@@ -351,31 +408,6 @@ function PatientTab({
           El propietario se determina a partir del paciente seleccionado; el sistema no permite registrar un propietario independiente del paciente.
         </p>
       )}
-    </div>
-  );
-}
-
-function ProcessingTab({
-  evaluation,
-  isSaving,
-  isProcessing,
-  onSave,
-  onProcess,
-}: {
-  evaluation: Evaluation | null;
-  isSaving: boolean;
-  isProcessing: boolean;
-  onSave: () => void;
-  onProcess: () => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <p className="text-slate-600">Guarda los sintomas, variables clinicas y variables complementarias validadas antes de generar el diagnostico sugerido.</p>
-      <div className="flex flex-wrap gap-3">
-        <Button disabled={isSaving || Boolean(evaluation)} onClick={onSave}>{isSaving ? "Guardando..." : "Guardar"}</Button>
-        <Button disabled={!evaluation || isProcessing} onClick={onProcess}>{isProcessing ? "Procesando..." : "Procesar evaluacion"}</Button>
-      </div>
-      {evaluation ? <p className="text-sm font-bold text-emerald-700">Evaluacion #{evaluation.id} guardada.</p> : null}
     </div>
   );
 }

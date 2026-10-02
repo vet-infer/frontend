@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- this file only exports `router` (route config, not a component); the `lazy()` consts below are route-splitting definitions, not exported components, so Fast Refresh boundaries are unaffected */
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { App } from "./App";
 import { AppLayout } from "../components/layout/AppLayout";
 import { AdminRoute } from "../components/route/AdminRoute";
@@ -34,6 +34,10 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       {
+        index: true,
+        element: <Navigate replace to="/login" />,
+      },
+      {
         path: "/login",
         element: withSuspense(<LoginPage />),
       },
@@ -47,7 +51,7 @@ export const router = createBrowserRouter([
           {
             element: <AppLayout />,
             children: [
-              { path: "/", element: withSuspense(<DashboardPage />) },
+              { path: "home", element: withSuspense(<DashboardPage />) },
               { path: "owners", element: withSuspense(<OwnersPage />) },
               { path: "owners/new", element: withSuspense(<OwnerFormPage />) },
               { path: "owners/:ownerId/edit", element: withSuspense(<OwnerFormPage />) },
@@ -69,7 +73,7 @@ export const router = createBrowserRouter([
               ...routes
                 .filter(
                   (route) =>
-                    route.path !== "/" &&
+                    route.path !== "/home" &&
                     route.path !== "/owners" &&
                     route.path !== "/patients" &&
                     route.path !== "/evaluations" &&
@@ -86,6 +90,10 @@ export const router = createBrowserRouter([
             ],
           },
         ],
+      },
+      {
+        path: "*",
+        element: <Navigate replace to="/login" />,
       },
     ],
   },

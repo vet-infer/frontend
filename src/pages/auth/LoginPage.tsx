@@ -54,10 +54,10 @@ export function LoginPage() {
   const [errors, setErrors] = useState<LoginErrors>({});
   const [error, setError] = useState("");
 
-  const destination = (location.state as LocationState | null)?.from?.pathname ?? "/";
+  const destination = (location.state as LocationState | null)?.from?.pathname ?? "/home";
 
   if (isAuthenticated) {
-    return <Navigate replace to="/" />;
+    return <Navigate replace to="/home" />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

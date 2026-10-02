@@ -46,6 +46,7 @@ export function Topbar({ currentUser, onNextWeek, onOpenSidebar, onPreviousWeek,
   const title = roleName === "veterinario" ? "Dr." : "";
   const greetingName = [title, getFirstName(currentUser?.full_name)].filter(Boolean).join(" ");
   const isSelectedWeekCurrent = isCurrentWeek(selectedWeek);
+  const canGoNextWeek = selectedWeek.end < new Date();
 
   return (
     <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -77,8 +78,10 @@ export function Topbar({ currentUser, onNextWeek, onOpenSidebar, onPreviousWeek,
         </div>
         <button
           aria-label="Semana siguiente"
-          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-teal-700 shadow-sm transition hover:bg-teal-50"
+          className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-teal-700 shadow-sm transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+          disabled={!canGoNextWeek}
           onClick={onNextWeek}
+          title={canGoNextWeek ? undefined : "No hay semanas posteriores a la actual"}
           type="button"
         >
           <ChevronRight size={19} />

@@ -103,7 +103,7 @@ export function Sidebar({ currentUser, isOpen, onClose }: SidebarProps) {
 
             return (
               <NavLink
-                end={route.path === "/"}
+                end={route.path === "/home"}
                 key={route.path}
                 to={route.path}
                 onClick={onClose}

@@ -41,7 +41,7 @@ export function AppLayout() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<WeekRange>(() => buildWeekRange(new Date()));
   const location = useLocation();
-  const isDashboard = location.pathname === "/";
+  const isDashboard = location.pathname === "/home";
 
   useEffect(() => {
     let isMounted = true;
@@ -73,7 +73,7 @@ export function AppLayout() {
         {isDashboard ? (
           <Topbar
             currentUser={currentUser}
-            onNextWeek={() => setSelectedWeek((current) => shiftWeek(current, 1))}
+            onNextWeek={() => setSelectedWeek((current) => (current.end < new Date() ? shiftWeek(current, 1) : current))}
             onOpenSidebar={() => setIsSidebarOpen(true)}
             onPreviousWeek={() => setSelectedWeek((current) => shiftWeek(current, -1))}
             onResetWeek={() => setSelectedWeek(buildWeekRange(new Date()))}
