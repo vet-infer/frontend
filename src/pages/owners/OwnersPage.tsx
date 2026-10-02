@@ -29,7 +29,7 @@ type OwnerRow = Owner & {
   petCount: number;
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 const filters: { label: string; value: FilterMode }[] = [
   { label: "Todos", value: "all" },

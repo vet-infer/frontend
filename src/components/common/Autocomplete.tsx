@@ -19,6 +19,8 @@ type AutocompleteProps = {
   helpText?: string;
   emptyMessage?: string;
   maxResults?: number;
+  /** Transforma el texto ingresado antes de filtrar (ej. quitar digitos). */
+  sanitize?: (value: string) => string;
 };
 
 function normalize(text: string) {
@@ -38,6 +40,7 @@ export function Autocomplete({
   helpText,
   emptyMessage = "Sin coincidencias.",
   maxResults = 8,
+  sanitize,
 }: AutocompleteProps) {
   const listId = useId();
   const selected = options.find((option) => option.value === value) ?? null;
@@ -109,7 +112,7 @@ export function Autocomplete({
               setQuery(selected?.label ?? "");
             }}
             onChange={(event) => {
-              setQuery(event.target.value);
+              setQuery(sanitize ? sanitize(event.target.value) : event.target.value);
               setActiveIndex(0);
               setIsOpen(true);
               if (value) onChange("");

@@ -12,6 +12,7 @@ import { usePagination } from "../../hooks/usePagination";
 import { historyService, type PatientHistorySummary } from "../../services/history.service";
 import { calculateAge, formatDate, getOwnerName, primaryResult, riskClasses, riskLabel } from "../../utils/clinical";
 import { getErrorMessage } from "../../utils/errors";
+import { stripDigits } from "../../utils/text";
 
 type HistoryRow = PatientHistorySummary & {
   latestDate: string | null;
@@ -143,7 +144,7 @@ export function HistoryPage() {
             <Search className="pointer-events-none absolute bottom-3.5 left-4 text-slate-400" size={20} />
             <input
               className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => setQuery(stripDigits(event.target.value))}
               placeholder="Buscar por nombre del paciente..."
               value={query}
             />

@@ -18,6 +18,7 @@ import type { Breed, Patient, PatientPayload, Species } from "../../types/patien
 import { calculateAge, formatDate } from "../../utils/clinical";
 import { cn } from "../../utils/cn";
 import { getErrorMessage } from "../../utils/errors";
+import { stripDigits } from "../../utils/text";
 
 type FilterMode = "all" | "dogs" | "cats";
 
@@ -25,7 +26,7 @@ type LocationState = {
   message?: string;
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 const filters: { label: string; value: FilterMode; icon?: typeof Dog }[] = [
   { label: "Todos", value: "all" },
@@ -242,7 +243,7 @@ export function PatientsPage() {
             <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
             <input
               className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => setQuery(stripDigits(event.target.value))}
               placeholder="Buscar por paciente, propietario, especie o raza..."
               value={query}
             />

@@ -41,7 +41,7 @@ export function AppLayout() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<WeekRange>(() => buildWeekRange(new Date()));
   const location = useLocation();
-  const isDashboard = location.pathname === "/";
+  const isDashboard = location.pathname === "/home";
 
   useEffect(() => {
     let isMounted = true;

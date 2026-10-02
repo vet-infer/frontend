@@ -1,4 +1,4 @@
-import { Edit, Eye, Network, Plus, Power, Save, Trash2, X } from "lucide-react";
+import { Edit, Eye, Network, Plus, Power, Save, Search, Trash2, X } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import { Button } from "../../components/common/Button";
@@ -9,12 +9,16 @@ import { FormField } from "../../components/common/FormField";
 import { FormSelect } from "../../components/common/FormSelect";
 import { IconBadge } from "../../components/common/IconBadge";
 import { Modal } from "../../components/common/Modal";
+import { Pagination } from "../../components/common/Pagination";
 import { Skeleton } from "../../components/common/Skeleton";
+import { usePagination } from "../../hooks/usePagination";
 import { evaluationService } from "../../services/evaluation.service";
 import { knowledgeService } from "../../services/knowledge.service";
 import type { FactDefinition } from "../../types/evaluation";
 import type { Disease, RiskLevel, Rule, RuleConditionPayload, RulePayload } from "../../types/knowledge";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+
+const PAGE_SIZE = 10;
 
 const operators = ["==", "!=", ">", ">=", "<", "<=", "contains"];
 
@@ -119,6 +123,31 @@ export function RulesAdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+
+  const filteredRules = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return rules;
+    }
+
+    const diseaseNames = new Map(diseases.map((disease) => [disease.id, disease.name]));
+
+    return rules.filter((rule) =>
+      [
+        rule.code,
+        rule.name,
+        diseaseNames.get(rule.disease_id),
+        rule.risk_level,
+        rule.is_active ? "activa" : "inactiva",
+        ...rule.conditions.map((condition) => condition.variable_key),
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(normalizedQuery))
+    );
+  }, [diseases, query, rules]);
+  const { page, setPage, pageItems: pageRules } = usePagination(filteredRules, PAGE_SIZE, query);
 
   const selectedDisease = useMemo(
     () => diseases.find((disease) => disease.id === Number(form.disease_id)),
@@ -290,43 +319,58 @@ export function RulesAdminPage() {
       {error ? <AlertMessage message={error} tone="error" onClose={() => setError("")} /> : null}
 
       <Card className="p-5">
+        <label className="relative mb-6 block">
+          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={22} />
+          <input
+            className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar por codigo, nombre, enfermedad, riesgo o fact..."
+            value={query}
+          />
+        </label>
         {isLoading ? (
           <Skeleton className="h-72" />
         ) : (
-          <DataTable
-            columns={["Codigo", "Nombre", "Enfermedad", "Riesgo", "Condiciones", "Estado", "Acciones"]}
-            rows={rules}
-            renderRow={(rule) => {
-              const disease = diseases.find((item) => item.id === rule.disease_id);
-              return (
-                <tr key={rule.id}>
-                  <td className="px-5 py-4 font-bold text-slate-700">{rule.code}</td>
-                  <td className="px-5 py-4">{rule.name}</td>
-                  <td className="px-5 py-4">{disease?.name ?? `ID ${rule.disease_id}`}</td>
-                  <td className="px-5 py-4">{rule.risk_level}</td>
-                  <td className="px-5 py-4">{rule.conditions.length}</td>
-                  <td className="px-5 py-4">
-                    <span className={rule.is_active ? "rounded-md bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700" : "rounded-md bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500"}>
-                      {rule.is_active ? "Activa" : "Inactiva"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Button icon={<Eye size={16} />} onClick={() => setViewRule(rule)} type="button" variant="secondary">
-                        Ver
-                      </Button>
-                      <Button icon={<Edit size={16} />} onClick={() => openEdit(rule)} type="button" variant="secondary">
-                        Editar
-                      </Button>
-                      <Button icon={<Power size={16} />} onClick={() => setStatusRule(rule)} type="button" variant={rule.is_active ? "danger" : "secondary"}>
-                        {rule.is_active ? "Desactivar" : "Activar"}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            }}
-          />
+          <>
+            <DataTable
+              columns={["Codigo", "Nombre", "Enfermedad", "Riesgo", "Condiciones", "Estado", "Acciones"]}
+              emptyMessage={query.trim() ? "No se encontraron reglas con ese criterio." : undefined}
+              rows={pageRules}
+              renderRow={(rule) => {
+                const disease = diseases.find((item) => item.id === rule.disease_id);
+                return (
+                  <tr key={rule.id}>
+                    <td className="px-5 py-4 font-bold text-slate-700">{rule.code}</td>
+                    <td className="px-5 py-4">{rule.name}</td>
+                    <td className="px-5 py-4">{disease?.name ?? `ID ${rule.disease_id}`}</td>
+                    <td className="px-5 py-4">{rule.risk_level}</td>
+                    <td className="px-5 py-4">{rule.conditions.length}</td>
+                    <td className="px-5 py-4">
+                      <span className={rule.is_active ? "rounded-md bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700" : "rounded-md bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500"}>
+                        {rule.is_active ? "Activa" : "Inactiva"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        <Button icon={<Eye size={16} />} onClick={() => setViewRule(rule)} type="button" variant="secondary">
+                          Ver
+                        </Button>
+                        <Button icon={<Edit size={16} />} onClick={() => openEdit(rule)} type="button" variant="secondary">
+                          Editar
+                        </Button>
+                        <Button icon={<Power size={16} />} onClick={() => setStatusRule(rule)} type="button" variant={rule.is_active ? "danger" : "secondary"}>
+                          {rule.is_active ? "Desactivar" : "Activar"}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }}
+            />
+            {filteredRules.length > 0 ? (
+              <Pagination itemLabel="reglas" onPageChange={setPage} page={page} pageSize={PAGE_SIZE} total={filteredRules.length} />
+            ) : null}
+          </>
         )}
       </Card>
 

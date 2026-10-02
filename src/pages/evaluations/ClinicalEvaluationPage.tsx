@@ -14,6 +14,7 @@ import type { ClinicalFactIn, Evaluation, FactDefinition, PersistedInferenceResu
 import type { Patient } from "../../types/patient";
 import { cn } from "../../utils/cn";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
+import { stripDigits } from "../../utils/text";
 
 const tabs = ["Datos de evaluacion", "Sintomas", "Variables clinicas", "Variables complementarias"] as const;
 
@@ -299,15 +300,11 @@ export function ClinicalEvaluationPage() {
               onChange={changeFact}
               values={values}
             />
-            <div className="border-t border-slate-100 pt-6">
-              <ProcessingTab
-                evaluation={evaluation}
-                isProcessing={isProcessing}
-                isSaving={isSaving}
-                onProcess={processEvaluation}
-                onSave={saveEvaluation}
-              />
-            </div>
+            {evaluation ? (
+              <p className="border-t border-slate-100 pt-6 text-sm font-bold text-emerald-700">
+                Evaluacion #{evaluation.id} guardada.
+              </p>
+            ) : null}
           </section>
         ) : null}
       </Card>
@@ -330,9 +327,15 @@ export function ClinicalEvaluationPage() {
             </Button>
           </div>
         ) : (
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <Button onClick={() => goToTab(activeTab - 1)} type="button" variant="secondary">
               Atrás
+            </Button>
+            <Button disabled={isSaving || Boolean(evaluation)} onClick={saveEvaluation} type="button">
+              {isSaving ? "Guardando..." : "Guardar"}
+            </Button>
+            <Button disabled={!evaluation || isProcessing} onClick={processEvaluation} type="button">
+              {isProcessing ? "Procesando..." : "Procesar evaluacion"}
             </Button>
             <Button disabled={!evaluation || !results.length} onClick={() => navigate(`/results?evaluationId=${evaluation?.id}`)}>
               Ir a resultados
@@ -382,6 +385,7 @@ function PatientTab({
         onChange={onChange}
         options={patientOptions}
         placeholder="Buscar paciente..."
+        sanitize={stripDigits}
         value={patientId}
       />
       {patient ? (
@@ -404,31 +408,6 @@ function PatientTab({
           El propietario se determina a partir del paciente seleccionado; el sistema no permite registrar un propietario independiente del paciente.
         </p>
       )}
-    </div>
-  );
-}
-
-function ProcessingTab({
-  evaluation,
-  isSaving,
-  isProcessing,
-  onSave,
-  onProcess,
-}: {
-  evaluation: Evaluation | null;
-  isSaving: boolean;
-  isProcessing: boolean;
-  onSave: () => void;
-  onProcess: () => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <p className="text-slate-600">Guarda los sintomas, variables clinicas y variables complementarias validadas antes de generar el diagnostico sugerido.</p>
-      <div className="flex flex-wrap gap-3">
-        <Button disabled={isSaving || Boolean(evaluation)} onClick={onSave}>{isSaving ? "Guardando..." : "Guardar"}</Button>
-        <Button disabled={!evaluation || isProcessing} onClick={onProcess}>{isProcessing ? "Procesando..." : "Procesar evaluacion"}</Button>
-      </div>
-      {evaluation ? <p className="text-sm font-bold text-emerald-700">Evaluacion #{evaluation.id} guardada.</p> : null}
     </div>
   );
 }
