@@ -74,6 +74,8 @@ function validate(values: PatientFormValues): FormErrors {
 
   if (!values.birth_date) {
     errors.birth_date = "Ingresa la fecha de nacimiento.";
+  } else if (values.birth_date > todayISO()) {
+    errors.birth_date = "La fecha de nacimiento no puede ser futura.";
   }
 
   if (!values.weight) {
@@ -83,6 +85,14 @@ function validate(values: PatientFormValues): FormErrors {
   }
 
   return errors;
+}
+
+// Fecha local de hoy (YYYY-MM-DD); toISOString() usaria UTC y podria adelantar el dia.
+function todayISO() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 function getOwnerName(owner: Owner) {
@@ -280,6 +290,7 @@ export function PatientForm({
           <FormField
             error={errors.birth_date}
             label="Fecha de nacimiento"
+            max={todayISO()}
             onChange={(event) => updateField("birth_date", event.target.value)}
             required
             type="date"

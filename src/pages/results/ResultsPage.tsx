@@ -414,6 +414,23 @@ export function ResultsPage() {
       </section>
 
       <Card className="p-6">
+        <h2 className="mb-4 flex items-center gap-3 text-xl font-extrabold text-[#172554]">
+          <FlaskConical size={24} />
+          Antecedentes
+        </h2>
+        <dl className="grid gap-4 text-sm md:grid-cols-2">
+          <div>
+            <dt className="font-bold text-slate-700">Motivo de consulta</dt>
+            <dd className="mt-1 text-slate-600">{evaluation.reason?.trim() || "Sin motivo registrado"}</dd>
+          </div>
+          <div>
+            <dt className="font-bold text-slate-700">Observaciones</dt>
+            <dd className="mt-1 text-slate-600">{evaluation.observations?.trim() || "Sin observaciones registradas"}</dd>
+          </div>
+        </dl>
+      </Card>
+
+      <Card className="p-6">
         <div className="flex gap-5">
           <IconBadge className="h-14 w-14 shrink-0" icon={HeartHandshake} iconSize={28} />
           <div>

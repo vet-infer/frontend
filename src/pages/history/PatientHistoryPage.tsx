@@ -27,6 +27,14 @@ import {
 import { getErrorMessage } from "../../utils/errors";
 import { useEvaluationFacts } from "../../hooks/useEvaluationFacts";
 
+// Dia local (YYYY-MM-DD) de una fecha ISO, comparable con el valor de <input type="date">.
+function localDay(isoDate: string) {
+  const date = new Date(isoDate);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 export function PatientHistoryPage() {
   const { patientId } = useParams();
   const parsedPatientId = patientId ? Number(patientId) : null;
@@ -35,6 +43,8 @@ export function PatientHistoryPage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [riskFilter, setRiskFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -85,10 +95,13 @@ export function PatientHistoryPage() {
             .some((value) => value!.toLowerCase().includes(normalizedQuery))
         : true;
       const matchesRisk = riskFilter ? riskLabel(result?.risk_level) === riskFilter : true;
+      const evaluationDay = localDay(item.evaluation.created_at);
+      const matchesFrom = fromDate ? evaluationDay >= fromDate : true;
+      const matchesTo = toDate ? evaluationDay <= toDate : true;
 
-      return matchesQuery && matchesRisk;
+      return matchesQuery && matchesRisk && matchesFrom && matchesTo;
     });
-  }, [history?.evaluations, factCatalog, query, riskFilter]);
+  }, [history?.evaluations, factCatalog, query, riskFilter, fromDate, toDate]);
 
   const latest = history?.evaluations[0];
   const latestResult = latest ? primaryResult(latest.results) : null;
@@ -171,7 +184,7 @@ export function PatientHistoryPage() {
             <FileClock size={24} />
             Linea de tiempo clinica
           </h2>
-          <div className="mb-6 grid gap-3 md:grid-cols-[1fr_220px]">
+          <div className="mb-6 grid gap-3 md:grid-cols-[1fr_220px_160px_160px]">
             <input
               className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               onChange={(event) => setQuery(event.target.value)}
@@ -188,6 +201,24 @@ export function PatientHistoryPage() {
               <option value="Moderado">Moderado</option>
               <option value="Alto">Alto</option>
             </select>
+            <input
+              aria-label="Desde"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
+              max={toDate || undefined}
+              onChange={(event) => setFromDate(event.target.value)}
+              title="Fecha desde"
+              type="date"
+              value={fromDate}
+            />
+            <input
+              aria-label="Hasta"
+              className="h-12 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
+              min={fromDate || undefined}
+              onChange={(event) => setToDate(event.target.value)}
+              title="Fecha hasta"
+              type="date"
+              value={toDate}
+            />
           </div>
 
           {filteredEvaluations.length === 0 ? (

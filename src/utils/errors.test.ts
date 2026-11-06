@@ -38,4 +38,24 @@ describe("getErrorMessage", () => {
 
     expect(message).toBe("El documento ya esta registrado");
   });
+
+  it.each([400, 422])("retorna el detail curado cuando el backend responde %i", (status) => {
+    const error = { response: { status, data: { detail: "La contrasena actual no es valida" } } };
+
+    expect(getErrorMessage(error, "fallback")).toBe("La contrasena actual no es valida");
+  });
+
+  it("ignora un detail que no es string (422 en formato lista)", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const error = { response: { status: 422, data: { detail: [{ msg: "x" }] } } };
+
+    expect(getErrorMessage(error, "fallback")).toBe("fallback");
+  });
+
+  it("no expone el detail de un 500", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const error = { response: { status: 500, data: { detail: "Error interno del servidor" } } };
+
+    expect(getErrorMessage(error, "fallback")).toBe("fallback");
+  });
 });
