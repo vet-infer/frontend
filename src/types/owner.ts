@@ -14,6 +14,7 @@ export type Owner = {
   district?: string | null;
   ubigeo?: string | null;
   created_at?: string | null;
+  is_active?: boolean;
 };
 
 export type OwnerFormValues = {

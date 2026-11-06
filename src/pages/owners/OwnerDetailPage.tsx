@@ -199,7 +199,12 @@ export function OwnerDetailPage() {
             {getInitials(owner)}
           </span>
           <div>
-            <h2 className="text-3xl font-extrabold text-[#172554]">{getFullName(owner)}</h2>
+            <h2 className="flex flex-wrap items-center gap-3 text-3xl font-extrabold text-[#172554]">
+              {getFullName(owner)}
+              {owner.is_active === false ? (
+                <span className="rounded-md bg-slate-100 px-3 py-1 text-sm font-bold text-slate-500">Inactivo</span>
+              ) : null}
+            </h2>
             <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-slate-500">
               <PawPrint size={20} />
               {patients.length === 0 ? "Sin pacientes" : `${patients.length} ${patients.length === 1 ? "paciente" : "pacientes"}`}
