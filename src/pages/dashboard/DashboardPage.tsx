@@ -1,6 +1,6 @@
 import { CalendarDays, Eye, LayoutDashboard } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
@@ -219,7 +219,7 @@ export function DashboardPage() {
 
       <section className="grid gap-5 2xl:grid-cols-2">
         <Card>
-          <PanelHeader title="Ultimas evaluaciones clinicas"/>
+          <PanelHeader title="Ultimas evaluaciones clinicas" to="/results" />
           <DataTable
             compact
             columns={["Paciente", "Especie / Raza", "Fecha", "Resultado", "Riesgo", "Accion"]}
@@ -237,6 +237,7 @@ export function DashboardPage() {
                 <td className="px-3 py-3">
                   <Button
                     aria-label={`Ver resultado de ${row.patient}`}
+                    title="Ver resultado de la evaluación"
                     className="h-8 w-8 p-0"
                     onClick={() => navigate(`/results?evaluationId=${row.id}`)}
                     type="button"
@@ -251,7 +252,7 @@ export function DashboardPage() {
         </Card>
 
         <Card>
-          <PanelHeader title="Pacientes recientes" />
+          <PanelHeader title="Pacientes recientes" to="/patients" />
           <DataTable
             compact
             columns={["Paciente", "Especie / Raza", "Propietario", "Ult. evaluacion", "Accion"]}
@@ -264,7 +265,7 @@ export function DashboardPage() {
                 <td className="max-w-[140px] truncate px-3 py-3">{row.owner}</td>
                 <td className="whitespace-nowrap px-3 py-3">{row.lastEvaluation}</td>
                 <td className="px-3 py-3">
-                  <Button className="h-8 px-3 text-xs" onClick={() => navigate(`/patients/${row.id}`)} type="button" variant="secondary">
+                  <Button className="h-8 px-3 text-xs" onClick={() => navigate(`/patients/${row.id}`)} title="Ver detalle del paciente" type="button" variant="secondary">
                     Ver detalle
                   </Button>
                 </td>
@@ -285,10 +286,15 @@ function EmptyChartMessage({ message }: { message: string }) {
   );
 }
 
-function PanelHeader({ title }: { title: string }) {
+function PanelHeader({ title, to }: { title: string; to?: string }) {
   return (
     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
       <h2 className="text-base font-bold text-[#172554]">{title}</h2>
+      {to ? (
+        <Link className="text-sm font-bold text-teal-600 hover:underline" to={to}>
+          Ver todas
+        </Link>
+      ) : null}
     </div>
   );
 }
