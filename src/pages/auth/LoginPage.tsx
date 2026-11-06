@@ -31,11 +31,15 @@ function getErrorMessage(error: unknown) {
 function validateLogin(email: string, password: string): LoginErrors {
   const errors: LoginErrors = {};
 
-  if (!emailPattern.test(email.trim())) {
+  if (!email.trim()) {
+    errors.email = "El correo electronico es obligatorio.";
+  } else if (!emailPattern.test(email.trim())) {
     errors.email = "Ingresa un correo electronico valido.";
   }
 
-  if (password.length < 8) {
+  if (!password) {
+    errors.password = "La contraseña es obligatoria.";
+  } else if (password.length < 8) {
     errors.password = "La contraseña debe tener al menos 8 caracteres.";
   }
 
@@ -136,6 +140,7 @@ export function LoginPage() {
                   <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
                   <input
                     aria-invalid={Boolean(errors.email)}
+                    aria-required="true"
                     className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-4 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                     onChange={(event) => {
                       setEmail(event.target.value);
@@ -155,6 +160,7 @@ export function LoginPage() {
                   <Lock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19} />
                   <input
                     aria-invalid={Boolean(errors.password)}
+                    aria-required="true"
                     className="h-[3.25rem] w-full rounded-lg border border-slate-200 bg-white pl-12 pr-14 text-base font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                     onChange={(event) => {
                       setPassword(event.target.value);

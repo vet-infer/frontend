@@ -103,8 +103,8 @@ function validateEditUserForm(values: UserFormValues): FormErrors {
 function validatePasswordForm(values: PasswordFormValues): PasswordFormErrors {
   const errors: PasswordFormErrors = {};
 
-  if (values.current_password.length < 8) {
-    errors.current_password = "La contraseña actual debe tener al menos 8 caracteres.";
+  if (!values.current_password) {
+    errors.current_password = "La contraseña actual es obligatoria.";
   }
 
   if (values.new_password.length < 8) {
@@ -258,7 +258,13 @@ export function SettingsPage() {
       setPasswordForm(initialPasswordForm);
       setMessage(response.message);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
+      const status = (caughtError as { response?: { status?: number } }).response?.status;
+      if (status === 400 || status === 401) {
+        // Contraseña actual incorrecta: error inline y la sesion se mantiene.
+        setPasswordFormErrors({ current_password: "La contraseña actual no es válida." });
+      } else {
+        setError(getErrorMessage(caughtError, "No fue posible completar la accion."));
+      }
     } finally {
       setIsChangingPassword(false);
     }
@@ -449,7 +455,8 @@ export function SettingsPage() {
                 <p className="mt-1 text-sm font-semibold text-slate-500">{currentUser?.email ?? "Sesion autenticada"}</p>
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
+              <InfoBox label="ID" value={currentUser?.id ? `#${currentUser.id}` : "No disponible"} />
               <InfoBox label="Rol" value={roleLabel(currentUser?.role?.name ?? role)} />
               <InfoBox label="Estado" value={currentUser?.is_active === false ? "Inactivo" : "Activo"} />
               <InfoBox label="ID de sesion" value={user.id ? `#${user.id}` : "No disponible"} />

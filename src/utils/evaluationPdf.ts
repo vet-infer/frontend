@@ -31,6 +31,11 @@ const MARGIN_TOP = 38;
 const MARGIN_BOTTOM = 42;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_X * 2;
 const LINE_HEIGHT = 13;
+const SMALL_LINE_HEIGHT = 11;
+const FACT_ITEM_CHARS = 92;
+const RULE_TEXT_CHARS = 90;
+const HERO_SUBTITLE_CHARS = 60;
+const KV_VALUE_CHARS = 38;
 
 const COLORS = {
   navy: [23, 37, 84] as PdfColor,
@@ -122,7 +127,14 @@ function wrapLine(text: string, maxLength: number) {
     }
 
     if (current) lines.push(current);
-    current = word.length > maxLength ? word.slice(0, maxLength) : word;
+
+    // Una palabra mas larga que la linea se parte en trozos en vez de recortarse.
+    let rest = word;
+    while (rest.length > maxLength) {
+      lines.push(rest.slice(0, maxLength));
+      rest = rest.slice(maxLength);
+    }
+    current = rest;
   });
 
   if (current) lines.push(current);
@@ -149,19 +161,59 @@ function text(value: string, x: number, y: number, size: number, color: PdfColor
   return `BT ${colorCommand(color, "rg")} /${font} ${size} Tf ${x} ${pdfY} Td (${escapePdfText(value)}) Tj ET`;
 }
 
+// Las alturas se calculan desde las lineas ya ajustadas, para que el recuadro siempre contenga su texto.
+function heroSubtitleLines(block: Extract<PdfBlock, { type: "hero" }>) {
+  return wrapLine(block.subtitle, HERO_SUBTITLE_CHARS).length;
+}
+
+function kvRowHeights(block: Extract<PdfBlock, { type: "kv" }>) {
+  const heights: number[] = [];
+  for (let start = 0; start < block.items.length; start += 2) {
+    const lines = Math.max(
+      ...block.items.slice(start, start + 2).map((item) => wrapLine(item.value, KV_VALUE_CHARS).length)
+    );
+    heights.push(Math.max(42, 15 + lines * LINE_HEIGHT + 12));
+  }
+  return heights;
+}
+
+function factItemHeight(item: string) {
+  return wrapLine(item, FACT_ITEM_CHARS).length * SMALL_LINE_HEIGHT + 9;
+}
+
+function ruleLines(block: Extract<PdfBlock, { type: "result" }>, index: number) {
+  const rule = block.result.activated_rules[index];
+  const conditions = wrapLine(
+    `Condiciones: ${block.ruleConditions[index] ?? conditionsLabel(rule.fulfilled_conditions)}`,
+    RULE_TEXT_CHARS
+  );
+  const justification = wrapLine(
+    `Justificacion: ${rule.justification || "Regla activada por condiciones cumplidas."}`,
+    RULE_TEXT_CHARS
+  );
+  return { conditions, justification };
+}
+
+function ruleBoxHeight(block: Extract<PdfBlock, { type: "result" }>, index: number) {
+  const { conditions, justification } = ruleLines(block, index);
+  return 20 + (conditions.length + justification.length) * SMALL_LINE_HEIGHT + 6;
+}
+
 function blockHeight(block: PdfBlock) {
-  if (block.type === "hero") return 116;
+  if (block.type === "hero") return 116 + (heroSubtitleLines(block) - 1) * LINE_HEIGHT;
   if (block.type === "section") return 34;
-  if (block.type === "kv") return Math.ceil(block.items.length / 2) * 42 + 24;
+  if (block.type === "kv") return kvRowHeights(block).reduce((sum, height) => sum + height, 24);
   if (block.type === "paragraph") return wrapLine(block.text, 92).length * LINE_HEIGHT + 26;
   if (block.type === "factList") {
-    const rows = Math.max(1, block.items.length);
-    return 42 + rows * 23;
+    const items = block.items.length ? block.items : [block.emptyText];
+    return 42 + items.reduce((sum, item) => sum + factItemHeight(item) + 5, 0);
   }
 
   const explanationLines = wrapLine(block.result.explanation ?? "Sin explicacion registrada.", 88).length;
-  const rulesHeight = Math.max(1, block.result.activated_rules.length) * 50;
-  return 120 + explanationLines * LINE_HEIGHT + rulesHeight;
+  const rulesHeight = block.result.activated_rules.length
+    ? block.result.activated_rules.reduce((sum, _rule, index) => sum + ruleBoxHeight(block, index) + 8, 0)
+    : 24;
+  return 100 + explanationLines * LINE_HEIGHT + rulesHeight;
 }
 
 function drawPageChrome(commands: string[], pageNumber: number) {
@@ -180,13 +232,14 @@ function drawWrappedText(commands: string[], value: string, x: number, y: number
 function drawBlock(commands: string[], block: PdfBlock, y: number) {
   if (block.type === "hero") {
     const palette = riskPalette(block.risk);
-    commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, 96, COLORS.navy));
+    const extra = (heroSubtitleLines(block) - 1) * LINE_HEIGHT;
+    commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, 96 + extra, COLORS.navy));
     commands.push(text(block.title, MARGIN_X + 22, y + 33, 20, COLORS.white, "F2"));
-    commands.push(text(block.subtitle, MARGIN_X + 22, y + 54, 10, COLORS.white));
-    commands.push(text(block.meta, MARGIN_X + 22, y + 73, 9, COLORS.border));
+    const afterSubtitle = drawWrappedText(commands, block.subtitle, MARGIN_X + 22, y + 54, HERO_SUBTITLE_CHARS, 10, COLORS.white);
+    commands.push(text(block.meta, MARGIN_X + 22, afterSubtitle + 6, 9, COLORS.border));
     commands.push(rect(PAGE_WIDTH - MARGIN_X - 126, y + 30, 96, 28, palette.background));
     commands.push(text(palette.label, PAGE_WIDTH - MARGIN_X - 112, y + 49, 9, palette.foreground, "F2"));
-    return y + 116;
+    return y + blockHeight(block);
   }
 
   if (block.type === "section") {
@@ -197,14 +250,16 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
 
   if (block.type === "kv") {
     const height = blockHeight(block) - 10;
+    const rowHeights = kvRowHeights(block);
+    const rowOffsets = rowHeights.map((_, row) => rowHeights.slice(0, row).reduce((sum, value) => sum + value, 0));
     commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, height, COLORS.white, COLORS.border));
     block.items.forEach((item, index) => {
       const column = index % 2;
       const row = Math.floor(index / 2);
       const x = MARGIN_X + 18 + column * (CONTENT_WIDTH / 2);
-      const rowY = y + 24 + row * 42;
+      const rowY = y + 24 + rowOffsets[row];
       commands.push(text(item.label.toUpperCase(), x, rowY, 7, COLORS.slate, "F2"));
-      drawWrappedText(commands, item.value, x, rowY + 15, 38, 10, COLORS.slateDark, "F2");
+      drawWrappedText(commands, item.value, x, rowY + 15, KV_VALUE_CHARS, 10, COLORS.slateDark, "F2");
     });
     return y + blockHeight(block);
   }
@@ -214,10 +269,15 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
     const items = block.items.length ? block.items : [block.emptyText];
     commands.push(rect(MARGIN_X, y, CONTENT_WIDTH, blockHeight(block) - 10, COLORS.white, COLORS.border));
     commands.push(text(block.title, MARGIN_X + 16, y + 23, 11, COLORS.navy, "F2"));
-    items.forEach((item, index) => {
-      const itemY = y + 38 + index * 23;
-      commands.push(rect(MARGIN_X + 16, itemY - 11, CONTENT_WIDTH - 32, 18, tone.background));
-      commands.push(text(item, MARGIN_X + 25, itemY + 2, 8, tone.text, "F2"));
+    let itemTop = y + 30;
+    items.forEach((item) => {
+      const itemLines = wrapLine(item, FACT_ITEM_CHARS);
+      const itemHeight = factItemHeight(item);
+      commands.push(rect(MARGIN_X + 16, itemTop, CONTENT_WIDTH - 32, itemHeight, tone.background));
+      itemLines.forEach((line, lineIndex) =>
+        commands.push(text(line, MARGIN_X + 25, itemTop + 11 + lineIndex * SMALL_LINE_HEIGHT, 8, tone.text, "F2"))
+      );
+      itemTop += itemHeight + 5;
     });
     return y + blockHeight(block);
   }
@@ -239,12 +299,16 @@ function drawBlock(commands: string[], block: PdfBlock, y: number) {
       return y + blockHeight(block);
     }
 
+    let ruleTop = afterExplanation + 20;
     rules.forEach((rule, index) => {
-      const ruleY = afterExplanation + 29 + index * 50;
-      commands.push(rect(MARGIN_X + 18, ruleY - 12, CONTENT_WIDTH - 36, 42, COLORS.slateLight));
-      commands.push(text(rule.rule_code ?? `Regla #${rule.rule_id}`, MARGIN_X + 28, ruleY + 2, 9, COLORS.violetDark, "F2"));
-      commands.push(text(`Condiciones: ${block.ruleConditions[index] ?? conditionsLabel(rule.fulfilled_conditions)}`, MARGIN_X + 28, ruleY + 17, 8, COLORS.slate));
-      drawWrappedText(commands, `Justificacion: ${rule.justification || "Regla activada por condiciones cumplidas."}`, MARGIN_X + 28, ruleY + 31, 82, 8, COLORS.slate);
+      const { conditions, justification } = ruleLines(block, index);
+      const boxHeight = ruleBoxHeight(block, index);
+      commands.push(rect(MARGIN_X + 18, ruleTop, CONTENT_WIDTH - 36, boxHeight, COLORS.slateLight));
+      commands.push(text(rule.rule_code ?? `Regla #${rule.rule_id}`, MARGIN_X + 28, ruleTop + 14, 9, COLORS.violetDark, "F2"));
+      [...conditions, ...justification].forEach((line, lineIndex) =>
+        commands.push(text(line, MARGIN_X + 28, ruleTop + 28 + lineIndex * SMALL_LINE_HEIGHT, 8, COLORS.slate))
+      );
+      ruleTop += boxHeight + 8;
     });
 
     return y + blockHeight(block);

@@ -2,6 +2,36 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Este proyecto no sigue un esquema de versionado formal todavía; las entradas se agrupan por fecha y, cuando aplica, por el change de OpenSpec que las originó (`openspec/changes/archive/`).
 
+## [2026-11-05] — Correcciones de las observaciones de QA (proyecto P20261070)
+
+Sin change de OpenSpec asociado. Origen: observaciones reportadas por el equipo de QA entre el 29/10 y el 01/11/2026. Va junto con `backend/CHANGELOG.md` (2026-11-05).
+
+### Fixed
+
+- Cambio de contrasena con clave actual incorrecta: ya no se cierra la sesion. El interceptor de `src/services/api.ts` no limpia el token ante un `401` de `/auth/login` ni de `/auth/change-password`, y `SettingsPage.tsx` muestra "La contraseña actual no es válida." en el campo (CP181).
+- `getErrorMessage` (`src/utils/errors.ts`) muestra el `detail` curado del backend tambien para `400` y `422`, no solo `409`. Un `detail` que no sea texto, o un `500`, siguen dando el mensaje generico.
+- Login: los campos vacios muestran "El correo electronico es obligatorio." y "La contraseña es obligatoria." antes de la validacion de formato y longitud.
+- Reglas IF-THEN: el formulario enviaba los operadores como `==`, `>`, etc. y la API solo acepta `eq`, `gt`, `gte`, `lt`, `lte`, `neq`, `contains`, por lo que guardar una regla fallaba con `422`. Ahora el valor enviado es el de la API y la etiqueta visible sigue siendo `==`, `>`, etc. Un operador que no esta en la lista (`between`, `in`) se conserva al editar.
+- Evaluacion clinica: no se puede avanzar de pestana ni saltarse pasos sin seleccionar al menos un sintoma, no se puede guardar con valores negativos y no se procesa sin sintoma. Las variables numericas llevan `min=0` y avisan "No se permiten valores negativos.". El guardado se bloquea si el paciente no tiene peso registrado.
+- Pacientes: la fecha de nacimiento no admite fechas futuras (`max` del campo y validacion).
+- Exportacion PDF (`src/utils/evaluationPdf.ts`): las alturas de los bloques se calculan a partir de las lineas ajustadas, de modo que filas de datos, sintomas, condiciones y justificaciones largas ya no se desalinean ni se superponen; las palabras largas se parten en lugar de recortarse y el subtitulo del encabezado se ajusta a varias lineas.
+
+### Added
+
+- Dashboard: enlaces "Ver todas" en "Ultimas evaluaciones clinicas" (`/results`) y "Pacientes recientes" (`/patients`), y `title` en los botones de accion de ambas tablas.
+- Resultados: tarjeta "Antecedentes" con el motivo de consulta y las observaciones de la evaluacion.
+- Historial clinico del paciente: filtros de fecha "Desde" y "Hasta" sobre la fecha de la evaluacion.
+- Detalle de propietario: insignia "Inactivo" (`Owner.is_active`).
+- Configuracion > General: recuadro "ID" del usuario.
+
+### Changed
+
+- Reglas IF-THEN: el boton para crear una regla dice "Crear regla IF-THEN".
+
+---
+
+**Verificacion:** `npm test` (22 pruebas) y `tsc -b` pasan. `npm run lint` mantiene 2 errores que ya existian (`OwnerForm.tsx:180`, `PatientForm.tsx:141`). Se probaron en Chrome contra una base local: login vacio, contrasena actual incorrecta, "Ver todas", insignia de inactivo, Antecedentes, filtro de fecha y alta de regla desde la pantalla.
+
 ## [2026-09-22] — Recuperacion de contrasena sin EmailJS en el navegador y estadisticas de la base de conocimiento
 
 Sin change de OpenSpec asociado.

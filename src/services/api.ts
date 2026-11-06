@@ -23,7 +23,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Un 401 en estas rutas es un error de credenciales del formulario, no una sesion vencida.
+    const url: string = error.config?.url ?? "";
+    const isCredentialCheck = url.includes("/auth/login") || url.includes("/auth/change-password");
+
+    if (error.response?.status === 401 && !isCredentialCheck) {
       storage.clearToken();
     }
 

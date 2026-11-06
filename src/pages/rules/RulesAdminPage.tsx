@@ -18,9 +18,20 @@ import type { FactDefinition } from "../../types/evaluation";
 import type { Disease, RiskLevel, Rule, RuleConditionPayload, RulePayload } from "../../types/knowledge";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
-const PAGE_SIZE = 10;
+// El valor es el que acepta la API (RuleConditionCreate.operator); la etiqueta es solo visual.
+const operators = [
+  { value: "eq", label: "==" },
+  { value: "neq", label: "!=" },
+  { value: "gt", label: ">" },
+  { value: "gte", label: ">=" },
+  { value: "lt", label: "<" },
+  { value: "lte", label: "<=" },
+  { value: "contains", label: "contains" },
+];
 
-const operators = ["==", "!=", ">", ">=", "<", "<=", "contains"];
+function operatorLabel(operator: string) {
+  return operators.find((item) => item.value === operator)?.label ?? operator;
+}
 
 type RuleFormState = {
   code: string;
@@ -36,7 +47,7 @@ type RuleFormState = {
 
 const emptyCondition: RuleConditionPayload = {
   variable_key: "",
-  operator: "==",
+  operator: "eq",
   expected_value: true,
   logical_group: 1,
 };
@@ -106,7 +117,7 @@ function normalizeValue(value: string | number | boolean, fact?: FactDefinition)
 }
 
 function conditionText(condition: Pick<RuleConditionPayload, "variable_key" | "operator" | "expected_value">) {
-  return `${condition.variable_key} ${condition.operator} ${String(condition.expected_value)}`;
+  return `${condition.variable_key} ${operatorLabel(condition.operator)} ${String(condition.expected_value)}`;
 }
 
 export function RulesAdminPage() {
@@ -311,7 +322,7 @@ export function RulesAdminPage() {
           </p>
         </div>
         <Button icon={<Plus size={18} />} onClick={openCreate} type="button">
-          Crear regla
+          Crear regla IF-THEN
         </Button>
       </section>
 
@@ -419,8 +430,12 @@ export function RulesAdminPage() {
                     ))}
                   </FormSelect>
                   <FormSelect label="Operador" onChange={(event) => updateCondition(index, { operator: event.target.value })} required value={condition.operator}>
+                    {/* Operadores no listados (between, in) se conservan para no perderlos al editar. */}
+                    {!operators.some((item) => item.value === condition.operator) ? (
+                      <option value={condition.operator}>{condition.operator}</option>
+                    ) : null}
                     {operators.map((operator) => (
-                      <option key={operator} value={operator}>{operator}</option>
+                      <option key={operator.value} value={operator.value}>{operator.label}</option>
                     ))}
                   </FormSelect>
                   {fact?.data_type === "boolean" ? (
