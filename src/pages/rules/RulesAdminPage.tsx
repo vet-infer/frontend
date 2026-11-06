@@ -18,6 +18,8 @@ import type { FactDefinition } from "../../types/evaluation";
 import type { Disease, RiskLevel, Rule, RuleConditionPayload, RulePayload } from "../../types/knowledge";
 import { getErrorMessage as getResponseErrorMessage } from "../../utils/errors";
 
+const PAGE_SIZE = 10;
+
 // El valor es el que acepta la API (RuleConditionCreate.operator); la etiqueta es solo visual.
 const operators = [
   { value: "eq", label: "==" },
