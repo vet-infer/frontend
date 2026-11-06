@@ -65,11 +65,16 @@ function FactInput({ fact, value, onChange }: { fact: FactDefinition; value: str
         <input
           className="mt-2 h-12 w-full rounded-lg border border-slate-200 px-4"
           onChange={(event) => onNumericChange(event, fact, onChange)}
+          aria-invalid={typeof value === "number" && value < 0}
+          min={0}
           placeholder={numericPlaceholder(fact)}
           step="any"
           type="number"
           value={typeof value === "number" ? value : ""}
         />
+        {typeof value === "number" && value < 0 ? (
+          <span className="mt-2 block text-xs font-semibold leading-5 text-red-600">No se permiten valores negativos.</span>
+        ) : null}
         <span className="mt-2 block text-xs font-medium leading-5 text-slate-500">{helpText}</span>
       </label>
     );

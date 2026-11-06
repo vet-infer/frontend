@@ -121,9 +121,27 @@ export function ClinicalEvaluationPage() {
   // Pasos 2 a 4: la tarjeta tiene scroll propio y el encabezado queda fijo.
   const isScrollableStep = activeTab > 0;
 
+  const hasSymptom = payloadFacts.some((fact) => fact.source_type === "symptom" && fact.value === true);
+  const hasNegativeValue = payloadFacts.some((fact) => typeof fact.value === "number" && fact.value < 0);
+
+  // Valida cada paso que se avanza o se salta, no solo el paso actual.
+  function validateAdvance(nextTab: number): string | null {
+    if (nextTab > 0 && !patientOrReasonValid(patient, reason)) {
+      return "Completa los campos obligatorios: paciente y motivo de consulta.";
+    }
+    if (nextTab > 1 && !hasSymptom) {
+      return "Selecciona al menos un sintoma para continuar.";
+    }
+    if (nextTab > 1 && hasNegativeValue) {
+      return "Corrige los valores negativos: las variables clinicas no admiten numeros negativos.";
+    }
+    return null;
+  }
+
   function goToTab(nextTab: number) {
-    if (nextTab > activeTab && activeTab === 0 && !patientOrReasonValid(patient, reason)) {
-      setError("Completa los campos obligatorios: paciente y motivo de consulta.");
+    const problem = nextTab > activeTab ? validateAdvance(nextTab) : null;
+    if (problem) {
+      setError(problem);
       return;
     }
     setError("");
@@ -133,6 +151,15 @@ export function ClinicalEvaluationPage() {
   async function saveEvaluation() {
     if (!patient || !reason.trim() || !payloadFacts.length) {
       setError("Selecciona un paciente, registra el motivo y completa al menos un sintoma o variable clinica valida.");
+      return;
+    }
+    const problem = validateAdvance(3);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    if (!patient.weight || patient.weight <= 0) {
+      setError("El paciente no tiene peso registrado. Actualiza su ficha antes de guardar la evaluacion.");
       return;
     }
     setIsSaving(true);
@@ -156,6 +183,10 @@ export function ClinicalEvaluationPage() {
   async function processEvaluation() {
     if (!evaluation) {
       setError("Primero guarda la evaluacion clinica.");
+      return;
+    }
+    if (!hasSymptom) {
+      setError("La evaluacion debe tener al menos un sintoma registrado para procesarse.");
       return;
     }
     setIsProcessing(true);
